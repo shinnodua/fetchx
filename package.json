@@ -1,0 +1,39 @@
+{
+  "name": "call3",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@heroui/react": "3.1.0",
+    "@rainbow-me/rainbowkit": "2.2.11",
+    "@tailwindcss/vite": "4.3.0",
+    "@tanstack/react-query": "5.100.14",
+    "@tanstack/react-router": "1.170.10",
+    "@tanstack/router-devtools": "1.167.0",
+    "@tanstack/router-plugin": "1.168.13",
+    "framer-motion": "12.40.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "tailwindcss": "4.3.0",
+    "viem": "2.52.0",
+    "wagmi": "3.6.16",
+    "zustand": "5.0.14"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.16",
+    "@types/node": "24.12.3",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.1",
+    "typescript": "6.0.2",
+    "vite": "8.0.12"
+  }
+}
