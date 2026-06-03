@@ -23,7 +23,7 @@ function RootComponent() {
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <header className="flex items-center justify-between px-6 py-4 border-b border-default-200 bg-background/80 backdrop-blur-md sticky top-0 z-50">
         <div className="flex items-center gap-6">
-          <p className="font-bold text-inherit text-primary-500">FLAMINGO</p>
+          <p className="font-bold text-inherit text-primary-500">Call3.dev</p>
           <nav className="hidden sm:flex gap-4">
             <Link
               to="/"

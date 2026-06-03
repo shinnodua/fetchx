@@ -1,10 +1,9 @@
-# Flamingo
+# Call3.dev
 
-Flamingo is a premium, vibrant UI component library and design system showcase. It features interactive components, glassmorphism aesthetics, dark mode support, and an integrated Web3 connection stack to help you build stunning user interfaces.
+Call3.dev is a premium, vibrant UI component library and design system showcase. It features interactive components, glassmorphism aesthetics, dark mode support, and an integrated Web3 connection stack to help you build stunning user interfaces.
 
 ## Features
 
-- **Vibrant Flamingo Aesthetic**: Premium design tokens, custom HSL-tailored colors, and glassmorphism styling for a high-fidelity visual experience.
 - **23+ Custom Components**: Fully styled interactive elements (Dialog, Dropdown Menu, Popover, Toast, Tabs, Table, etc.) with smooth Framer Motion micro-interactions.
 - **Web3 Integration**: Pre-configured **RainbowKit** connection buttons, **Wagmi**, and **Viem** workspace integrations out of the box.
 - **Dynamic Light & Dark Theme**: Persistent global theme toggles managed via Zustand that instantly map custom CSS variables.
