@@ -81,9 +81,10 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
           tabIndex={disabled ? -1 : 0}
         >
           <span
-            className={
-              selectedOption ? 'text-foreground' : 'text-foreground/40'
-            }
+            className={cn(
+              'block truncate min-w-0 mr-2 flex-1 text-left',
+              selectedOption ? 'text-foreground' : 'text-foreground/40',
+            )}
           >
             {selectedOption ? selectedOption.label : placeholder}
           </span>

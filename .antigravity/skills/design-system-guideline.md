@@ -7,9 +7,9 @@ This skill guides AI agents to correctly write UI code conforming to the Flaming
 ## 🎨 Design System Overview
 
 Our design system is configured inside:
-- **Tailwind Config / Theme**: Under `@theme` in **[src/index.css](file:///Users/shinnodua/Projects/call3/src/index.css)**.
-- **Custom Components**: Located in **[src/components/ui/](file:///Users/shinnodua/Projects/call3/src/components/ui)**.
-- **Component Exports**: Shared globally via **[src/components/index.ts](file:///Users/shinnodua/Projects/call3/src/components/index.ts)**.
+- **Tailwind Config / Theme**: Under `@theme` in **[src/index.css](../../src/index.css)**.
+- **Custom Components**: Located in **[src/components/ui/](../../src/components/ui)**.
+- **Component Exports**: Shared globally via **[src/components/index.ts](../../src/components/index.ts)**.
 
 ---
 

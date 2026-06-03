@@ -48,6 +48,70 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 : '',
               className,
             )}
+            onKeyDown={(e) => {
+              props.onKeyDown?.(e);
+              if (e.defaultPrevented) return;
+              if (e.key === 'Enter') {
+                const inputElement = e.currentTarget;
+                const isSearch =
+                  inputElement.type === 'search' ||
+                  inputElement.placeholder.toLowerCase().includes('search') ||
+                  inputElement.id.toLowerCase().includes('search');
+                if (isSearch) return;
+
+                const form = inputElement.form;
+                if (form) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  form.requestSubmit();
+                } else {
+                  let parent = inputElement.parentElement;
+                  let submitBtn: HTMLButtonElement | null = null;
+                  while (parent) {
+                    const buttons = parent.querySelectorAll('button');
+                    if (buttons.length > 0) {
+                      const match = Array.from(buttons).find((btn) => {
+                        if (btn.disabled || btn.offsetParent === null)
+                          return false;
+                        const isSubmitType =
+                          btn.getAttribute('type') === 'submit';
+                        const isPrimary =
+                          btn.classList.contains('bg-primary-500') ||
+                          btn.classList.contains('bg-secondary-500') ||
+                          btn.classList.contains('bg-primary-600') ||
+                          btn.classList.contains('bg-secondary-600');
+                        const text = btn.textContent?.toLowerCase() || '';
+                        const isSubmitText =
+                          text.includes('send') ||
+                          text.includes('create') ||
+                          text.includes('add') ||
+                          text.includes('save') ||
+                          text.includes('submit') ||
+                          text.includes('run');
+                        return isSubmitType || isPrimary || isSubmitText;
+                      });
+                      if (match) {
+                        submitBtn = match;
+                        break;
+                      }
+                    }
+                    if (
+                      parent.getAttribute('role') === 'dialog' ||
+                      parent.classList.contains('modal') ||
+                      parent.tagName === 'BODY'
+                    ) {
+                      break;
+                    }
+                    parent = parent.parentElement;
+                  }
+                  if (submitBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    submitBtn.click();
+                  }
+                }
+              }
+            }}
             {...props}
           />
           {rightIcon && (

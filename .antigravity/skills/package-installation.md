@@ -27,7 +27,7 @@ pnpm add --save-exact <package-name>
 ## 🔍 Verification
 
 ### Step 2: Confirm in package.json
-Open **[package.json](file:///Users/shinnodua/Projects/call3/package.json)** and verify that the package has been added under `dependencies` or `devDependencies` with an exact version number without any modifiers:
+Open **[package.json](../../package.json)** and verify that the package has been added under `dependencies` or `devDependencies` with an exact version number without any modifiers:
 
 **Correct:**
 ```json
