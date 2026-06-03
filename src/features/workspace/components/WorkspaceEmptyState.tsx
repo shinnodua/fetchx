@@ -2,11 +2,11 @@ import type React from 'react';
 import { Badge, Button, Card, CardTitle } from '../../../components';
 
 interface WorkspaceEmptyStateProps {
-  onResetDemoCollections: () => void;
+  onNewRequest: () => void;
 }
 
 export const WorkspaceEmptyState: React.FC<WorkspaceEmptyStateProps> = ({
-  onResetDemoCollections,
+  onNewRequest,
 }) => (
   <div className="flex-1 flex flex-col items-center justify-center p-8 text-center max-w-2xl mx-auto space-y-6">
     <Badge variant="primary" className="mx-auto">
@@ -39,10 +39,10 @@ export const WorkspaceEmptyState: React.FC<WorkspaceEmptyStateProps> = ({
     <Button
       variant="primary"
       size="sm"
-      onClick={onResetDemoCollections}
+      onClick={onNewRequest}
       className="cursor-pointer"
     >
-      Reset Demo Collections
+      New Request
     </Button>
   </div>
 );

@@ -34,7 +34,7 @@ export const WorkspacePage: React.FC = () => {
     drafts,
     collectionsPanelCollapsed,
     setNewColOpen,
-    resetDemoCollections,
+    addNewTab,
     updateActiveRequest,
     addLog,
     saveDraft,
@@ -429,7 +429,7 @@ export const WorkspacePage: React.FC = () => {
       {/* RIGHT Workspace Details */}
       <main className="flex-grow flex flex-col min-h-0 min-w-0 bg-background">
         {validTabs.length === 0 ? (
-          <WorkspaceEmptyState onResetDemoCollections={resetDemoCollections} />
+          <WorkspaceEmptyState onNewRequest={addNewTab} />
         ) : (
           <div className="flex-1 flex flex-col min-h-0 min-w-0">
             <TabsHeader />

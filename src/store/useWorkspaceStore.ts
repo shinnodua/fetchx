@@ -114,7 +114,6 @@ interface WorkspaceState {
   setActiveTabId: (id: string) => void;
   updateActiveRequest: (fields: Partial<RequestItem>) => void;
   addLog: (reqId: string, log: string) => void;
-  resetDemoCollections: () => void;
 
   saveDraft: (reqId: string, colId: string) => void;
   discardDraft: (reqId: string) => void;
@@ -127,8 +126,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
   persist(
     (set) => ({
       collections: DEFAULT_COLLECTIONS,
-      tabs: ['r-1', 'r-4'],
-      activeTabId: 'r-1',
+      tabs: [],
+      activeTabId: '',
       searchTerm: '',
 
       newColOpen: false,
@@ -646,14 +645,6 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             drafts,
             collections: updatedCollections,
           };
-        }),
-
-      resetDemoCollections: () =>
-        set({
-          collections: DEFAULT_COLLECTIONS,
-          tabs: ['r-1', 'r-4'],
-          activeTabId: 'r-1',
-          drafts: {},
         }),
 
       saveDraft: (reqId, colId) =>
