@@ -1,3 +1,4 @@
+export * from './layout/AppShell';
 export * from './ui/Accordion';
 export * from './ui/Alert';
 export * from './ui/Avatar';
