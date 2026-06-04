@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion';
 import type React from 'react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useId, useState } from 'react';
 import { cn } from '../../utils/cn';
 
 interface TabsContextType {
   activeTab: string;
   setActiveTab: (value: string) => void;
+  indicatorId: string;
 }
 
 const TabsContext = createContext<TabsContextType | undefined>(undefined);
@@ -15,6 +16,7 @@ export interface TabsProps {
   children: React.ReactNode;
   className?: string;
   onValueChange?: (value: string) => void;
+  value?: string;
 }
 
 export const Tabs = ({
@@ -22,16 +24,29 @@ export const Tabs = ({
   children,
   className,
   onValueChange,
+  value,
 }: TabsProps) => {
+  const tabsId = useId();
   const [activeTab, setInternalActiveTab] = useState(defaultValue);
+  const selectedTab = value ?? activeTab;
 
-  const setActiveTab = (value: string) => {
-    setInternalActiveTab(value);
-    onValueChange?.(value);
+  const setActiveTab = (nextValue: string) => {
+    if (selectedTab === nextValue) return;
+
+    if (value === undefined) {
+      setInternalActiveTab(nextValue);
+    }
+    onValueChange?.(nextValue);
   };
 
   return (
-    <TabsContext.Provider value={{ activeTab, setActiveTab }}>
+    <TabsContext.Provider
+      value={{
+        activeTab: selectedTab,
+        setActiveTab,
+        indicatorId: `active-tab-${tabsId}`,
+      }}
+    >
       <div className={cn('w-full', className)}>{children}</div>
     </TabsContext.Provider>
   );
@@ -47,7 +62,7 @@ export const TabsList = ({
   return (
     <div
       className={cn(
-        'inline-flex h-12 items-center justify-center rounded-xl bg-foreground/5 p-1 text-foreground/60 backdrop-blur-sm',
+        'inline-flex h-10 items-center justify-center rounded-xl bg-foreground/5 p-1 text-foreground/60 backdrop-blur-sm',
         className,
       )}
     >
@@ -78,7 +93,7 @@ export const TabsTrigger = ({
       disabled={disabled}
       onClick={() => context.setActiveTab(value)}
       className={cn(
-        'relative inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+        'relative inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
         isActive
           ? 'text-foreground shadow-sm'
           : 'hover:bg-foreground/5 hover:text-foreground',
@@ -87,7 +102,7 @@ export const TabsTrigger = ({
     >
       {isActive && (
         <motion.div
-          layoutId="activeTab"
+          layoutId={context.indicatorId}
           className="absolute inset-0 rounded-lg bg-background shadow-sm"
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         />

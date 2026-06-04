@@ -115,7 +115,7 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
       </div>
 
       {!isCollapsed && (
-        <div className="pl-4 border-l border-foreground/10 space-y-1.5 pt-1.5 pb-2">
+        <div className="pl-4 border-l border-foreground/10 space-y-1 pt-1 pb-1.5">
           {col.requests.length === 0 ? (
             <span className="text-xs text-foreground/30 pl-2">
               Empty collection
@@ -147,7 +147,7 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
                       event,
                     )
                   }
-                  className={`flex min-w-0 items-center justify-between gap-2 p-2 rounded-xl text-xs cursor-pointer group transition-all ${
+                  className={`flex min-w-0 items-center justify-between gap-2 py-1 px-2 rounded-xl text-xs cursor-pointer group transition-all ${
                     isActive
                       ? 'bg-foreground/5 font-semibold text-foreground border border-foreground/10'
                       : 'text-foreground/75 hover:bg-foreground/5 hover:text-foreground border border-transparent'

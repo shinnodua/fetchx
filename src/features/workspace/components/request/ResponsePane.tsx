@@ -4,6 +4,7 @@ import { CopyIcon } from '../../../../assets/svgs';
 import { Badge, Button, Skeleton, useToast } from '../../../../components';
 import { useWorkspaceStore } from '../../../../store';
 import { copyResponse } from '../../utils/requestExport';
+import { ResponsePayloadViewer } from './ResponsePayloadViewer';
 
 export const ResponsePane: React.FC = () => {
   const { toast } = useToast();
@@ -55,13 +56,13 @@ export const ResponsePane: React.FC = () => {
   };
 
   return (
-    <div className="w-full lg:w-1/2 flex-1 flex flex-col min-h-0 border border-foreground/10 rounded-2xl bg-white/5 dark:bg-black/5 p-4 overflow-y-auto">
-      <div className="flex justify-between items-center mb-3">
+    <div className="w-full lg:w-1/2 flex-1 flex flex-col min-h-0 overflow-hidden border border-foreground/10 rounded-2xl bg-white/5 dark:bg-black/5">
+      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-foreground/10 bg-background/80 px-4 py-3 backdrop-blur">
         <h3 className="text-sm font-semibold text-foreground/50 uppercase tracking-wider">
           Response & Logs
         </h3>
         {activeRequest.response && (
-          <div className="flex gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <Badge
               variant={
                 activeRequest.response.status === 'Success' ||
@@ -96,80 +97,71 @@ export const ResponsePane: React.FC = () => {
         )}
       </div>
 
-      {!activeRequest.response ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-foreground/40 italic text-xs">
-          Configure path parameters and press "Send" to trigger call.
-        </div>
-      ) : (
-        <div className="flex-1 flex flex-col min-h-0 space-y-4">
-          {/* Transaction Receipt Link if WRITE Call */}
-          {activeRequest.response.txHash && (
-            <div className="p-3 bg-primary-500/5 border border-primary-500/10 rounded-xl space-y-1">
-              <span className="text-[10px] font-bold text-primary-500 uppercase tracking-wider block">
-                Transaction Sent
-              </span>
-              <a
-                href={
-                  activeRequest.network === '11155111'
-                    ? `https://sepolia.etherscan.io/tx/${activeRequest.response.txHash}`
-                    : `https://etherscan.io/tx/${activeRequest.response.txHash}`
-                }
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs font-mono text-primary-600 dark:text-primary-400 hover:underline break-all"
-              >
-                {activeRequest.response.txHash}
-              </a>
-            </div>
-          )}
-
-          {/* Response Body Code Preview */}
-          {activeRequest.response.status === 'Pending' ? (
-            <div className="space-y-2">
-              <span className="text-[10px] font-semibold text-foreground/50 uppercase tracking-wider block">
-                Payload Output
-              </span>
-              <div className="bg-foreground/5 p-4 rounded-xl space-y-2.5 border border-foreground/10 animate-pulse">
-                <Skeleton className="h-3 w-[80%] rounded-md bg-foreground/10" />
-                <Skeleton className="h-3 w-[60%] rounded-md bg-foreground/10" />
-                <Skeleton className="h-3 w-[70%] rounded-md bg-foreground/10" />
+      <div className="flex-1 min-h-0 overflow-y-auto p-4">
+        {!activeRequest.response ? (
+          <div className="flex min-h-full flex-col items-center justify-center p-8 text-center text-foreground/40 italic text-xs">
+            Configure path parameters and press "Send" to trigger call.
+          </div>
+        ) : (
+          <div className="flex min-h-full flex-col space-y-4">
+            {/* Transaction Receipt Link if WRITE Call */}
+            {activeRequest.response.txHash && (
+              <div className="p-3 bg-primary-500/5 border border-primary-500/10 rounded-xl space-y-1">
+                <span className="text-[10px] font-bold text-primary-500 uppercase tracking-wider block">
+                  Transaction Sent
+                </span>
+                <a
+                  href={
+                    activeRequest.network === '11155111'
+                      ? `https://sepolia.etherscan.io/tx/${activeRequest.response.txHash}`
+                      : `https://etherscan.io/tx/${activeRequest.response.txHash}`
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs font-mono text-primary-600 dark:text-primary-400 hover:underline break-all"
+                >
+                  {activeRequest.response.txHash}
+                </a>
               </div>
-            </div>
-          ) : (
-            activeRequest.response.data !== undefined &&
-            activeRequest.response.data !== null && (
-              <div className="space-y-1">
+            )}
+
+            {/* Response Body Code Preview */}
+            {activeRequest.response.status === 'Pending' ? (
+              <div className="space-y-2">
                 <span className="text-[10px] font-semibold text-foreground/50 uppercase tracking-wider block">
                   Payload Output
                 </span>
-                <pre className="bg-foreground/5 p-4 rounded-xl overflow-x-auto text-xs font-mono text-foreground/80 max-h-80 border border-foreground/10">
-                  <code>
-                    {typeof activeRequest.response.data === 'object'
-                      ? JSON.stringify(activeRequest.response.data, null, 2)
-                      : String(activeRequest.response.data)}
-                  </code>
-                </pre>
-              </div>
-            )
-          )}
-
-          {/* Debug Execution Logs */}
-          {activeRequest.response.logs &&
-            activeRequest.response.logs.length > 0 && (
-              <div className="space-y-1 flex-1 flex flex-col min-h-[150px]">
-                <span className="text-[10px] font-semibold text-foreground/50 uppercase tracking-wider block">
-                  Console Logs
-                </span>
-                <div className="bg-black/5 dark:bg-black/40 border border-foreground/10 text-[11px] font-mono p-3 rounded-xl flex-1 overflow-y-auto space-y-1 min-h-[120px] max-h-48 text-foreground/70">
-                  {activeRequest.response.logs.map((log, idx) => (
-                    // biome-ignore lint/suspicious/noArrayIndexKey: logs are append-only static log entries
-                    <div key={idx}>{log}</div>
-                  ))}
+                <div className="bg-foreground/5 p-4 rounded-xl space-y-2.5 border border-foreground/10 animate-pulse">
+                  <Skeleton className="h-3 w-[80%] rounded-md bg-foreground/10" />
+                  <Skeleton className="h-3 w-[60%] rounded-md bg-foreground/10" />
+                  <Skeleton className="h-3 w-[70%] rounded-md bg-foreground/10" />
                 </div>
               </div>
+            ) : (
+              activeRequest.response.data !== undefined &&
+              activeRequest.response.data !== null && (
+                <ResponsePayloadViewer data={activeRequest.response.data} />
+              )
             )}
-        </div>
-      )}
+
+            {/* Debug Execution Logs */}
+            {activeRequest.response.logs &&
+              activeRequest.response.logs.length > 0 && (
+                <div className="space-y-1 flex-1 flex flex-col min-h-[150px]">
+                  <span className="text-[10px] font-semibold text-foreground/50 uppercase tracking-wider block">
+                    Console Logs
+                  </span>
+                  <div className="bg-black/5 dark:bg-black/40 border border-foreground/10 text-[11px] font-mono p-3 rounded-xl flex-1 overflow-y-auto space-y-1 min-h-[120px] max-h-48 text-foreground/70">
+                    {activeRequest.response.logs.map((log, idx) => (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: logs are append-only static log entries
+                      <div key={idx}>{log}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

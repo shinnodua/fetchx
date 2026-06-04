@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { TrashIcon } from '../../../../assets/svgs';
 import {
   Button,
@@ -23,6 +23,9 @@ export const RequestSettings: React.FC = () => {
   const { toast } = useToast();
   const { collections, activeTabId, drafts, updateActiveRequest } =
     useWorkspaceStore();
+  const [restTabsByRequestId, setRestTabsByRequestId] = useState<
+    Record<string, string>
+  >({});
 
   // Find active request
   const activeRequest = useMemo(() => {
@@ -114,134 +117,65 @@ export const RequestSettings: React.FC = () => {
 
   if (!activeRequest) return null;
 
+  const isRestRequest =
+    activeRequest.type === 'GET' || activeRequest.type === 'POST';
+  const isWeb3Request =
+    activeRequest.type === 'READ' || activeRequest.type === 'WRITE';
+  const savedRestTab = restTabsByRequestId[activeRequest.id];
+  const activeRestTab =
+    activeRequest.type === 'POST' && savedRestTab === 'body'
+      ? savedRestTab
+      : savedRestTab === 'headers'
+        ? savedRestTab
+        : 'queryParams';
+
+  const handleRestTabChange = (value: string) => {
+    setRestTabsByRequestId((currentTabs) => ({
+      ...currentTabs,
+      [activeRequest.id]: value,
+    }));
+  };
+
   return (
-    <div className="w-full lg:w-1/2 flex-1 flex flex-col min-h-0 border border-foreground/10 rounded-2xl bg-white/5 dark:bg-black/5 p-4 overflow-y-auto">
-      <h3 className="text-sm font-semibold text-foreground/50 uppercase tracking-wider mb-3">
-        Request Settings
-      </h3>
-
-      {/* ABI Configuration (Web3) */}
-      {(activeRequest.type === 'READ' || activeRequest.type === 'WRITE') && (
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <label className="text-xs font-semibold text-foreground/75">
-                Contract ABI
-              </label>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => loadPresetAbi('ERC20')}
-                  className="h-6 px-1 text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer"
-                >
-                  Load ERC20 Preset
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => loadPresetAbi('ERC721')}
-                  className="h-6 px-1 text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer"
-                >
-                  Load ERC721 Preset
-                </Button>
-              </div>
-            </div>
-            <Textarea
-              placeholder="Paste contract ABI array (JSON format)"
-              className="font-mono text-xs h-32"
-              value={activeRequest.abi || ''}
-              onChange={(e) =>
-                updateActiveRequest({
-                  abi: e.target.value,
-                  functionName: '',
-                  args: {},
-                })
-              }
-            />
-          </div>
-
-          {/* Function Selector */}
-          {activeFunctions.length > 0 ? (
-            <div>
-              <label className="text-xs font-semibold text-foreground/75 mb-1.5 block">
-                Function Call
-              </label>
-              <Select
-                placeholder="Select ABI Function"
-                value={activeRequest.functionName || ''}
-                onChange={handleFunctionChange}
-                options={activeFunctions.map((f) => ({
-                  value: f.name,
-                  label: `${f.name}(${(f.inputs || []).map((i) => i.type).join(', ')})`,
-                }))}
-              />
-            </div>
-          ) : (
-            <div className="p-3 bg-primary-500/10 border border-primary-500/20 text-primary-600 rounded-xl text-xs">
-              Please paste a valid ABI JSON array containing{' '}
-              {activeRequest.type === 'READ'
-                ? 'read (view/pure)'
-                : 'write (payable/nonpayable)'}{' '}
-              functions.
-            </div>
-          )}
-
-          {/* Parameter Form Fields */}
-          {activeSelectedFunction && (
-            <div className="space-y-3 pt-2">
-              <label className="text-xs font-semibold text-foreground/75 block">
-                Parameters
-              </label>
-              {activeSelectedFunction.inputs?.length === 0 ? (
-                <p className="text-xs text-foreground/40 italic">
-                  No parameters required for this function call.
-                </p>
-              ) : (
-                activeSelectedFunction.inputs?.map((input, idx) => {
-                  const inputName = input.name || `arg${idx}`;
-                  return (
-                    <div key={inputName} className="space-y-1">
-                      <EnvironmentAwareInput
-                        label={`${inputName} (${input.type})`}
-                        placeholder={input.type}
-                        value={activeRequest.args?.[inputName] || ''}
-                        onChange={(e) =>
-                          updateActiveRequest({
-                            args: {
-                              ...(activeRequest.args || {}),
-                              [inputName]: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* REST Params Configuration (GET/POST) */}
-      {(activeRequest.type === 'GET' || activeRequest.type === 'POST') && (
-        <div className="space-y-4">
-          <Tabs
-            key={`${activeRequest.id}-${activeRequest.type}`}
-            defaultValue="queryParams"
-          >
-            <TabsList className="mb-2">
-              <TabsTrigger value="queryParams">Query Params</TabsTrigger>
-              <TabsTrigger value="headers">Headers</TabsTrigger>
+    <div className="w-full lg:w-1/2 flex-1 flex flex-col min-h-0 overflow-hidden border border-foreground/10 rounded-2xl bg-white/5 dark:bg-black/5">
+      {isRestRequest ? (
+        <Tabs
+          key={`${activeRequest.id}-${activeRequest.type}`}
+          defaultValue="queryParams"
+          value={activeRestTab}
+          onValueChange={handleRestTabChange}
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-foreground/10 bg-background/80 px-4 py-3 backdrop-blur">
+            <h3 className="text-sm font-semibold text-foreground/50 uppercase tracking-wider">
+              Request Settings
+            </h3>
+            <TabsList className="h-9 rounded-lg">
+              <TabsTrigger
+                value="queryParams"
+                className="h-7 rounded-md px-3 text-xs"
+              >
+                Query Params
+              </TabsTrigger>
+              <TabsTrigger
+                value="headers"
+                className="h-7 rounded-md px-3 text-xs"
+              >
+                Headers
+              </TabsTrigger>
               {activeRequest.type === 'POST' && (
-                <TabsTrigger value="body">Body</TabsTrigger>
+                <TabsTrigger
+                  value="body"
+                  className="h-7 rounded-md px-3 text-xs"
+                >
+                  Body
+                </TabsTrigger>
               )}
             </TabsList>
+          </div>
 
-            <TabsContent value="queryParams">
+          <div className="flex-1 min-h-0 overflow-y-auto p-4">
+            <TabsContent value="queryParams" className="mt-0">
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-semibold text-foreground/75">
@@ -310,7 +244,7 @@ export const RequestSettings: React.FC = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="headers">
+            <TabsContent value="headers" className="mt-0">
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-semibold text-foreground/75">
@@ -379,7 +313,7 @@ export const RequestSettings: React.FC = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="body">
+            <TabsContent value="body" className="mt-0">
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-xs font-semibold text-foreground/75 block">
@@ -404,8 +338,124 @@ export const RequestSettings: React.FC = () => {
                 />
               </div>
             </TabsContent>
-          </Tabs>
-        </div>
+          </div>
+        </Tabs>
+      ) : (
+        <>
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-foreground/10 bg-background/80 px-4 py-3 backdrop-blur">
+            <h3 className="text-sm font-semibold text-foreground/50 uppercase tracking-wider">
+              Request Settings
+            </h3>
+          </div>
+
+          <div className="flex-1 min-h-0 overflow-y-auto p-4">
+            {/* ABI Configuration (Web3) */}
+            {isWeb3Request && (
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="text-xs font-semibold text-foreground/75">
+                      Contract ABI
+                    </label>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => loadPresetAbi('ERC20')}
+                        className="h-6 px-1 text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer"
+                      >
+                        Load ERC20 Preset
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => loadPresetAbi('ERC721')}
+                        className="h-6 px-1 text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer"
+                      >
+                        Load ERC721 Preset
+                      </Button>
+                    </div>
+                  </div>
+                  <Textarea
+                    placeholder="Paste contract ABI array (JSON format)"
+                    className="font-mono text-xs h-32"
+                    value={activeRequest.abi || ''}
+                    onChange={(e) =>
+                      updateActiveRequest({
+                        abi: e.target.value,
+                        functionName: '',
+                        args: {},
+                      })
+                    }
+                  />
+                </div>
+
+                {/* Function Selector */}
+                {activeFunctions.length > 0 ? (
+                  <div>
+                    <label className="text-xs font-semibold text-foreground/75 mb-1.5 block">
+                      Function Call
+                    </label>
+                    <Select
+                      placeholder="Select ABI Function"
+                      value={activeRequest.functionName || ''}
+                      onChange={handleFunctionChange}
+                      options={activeFunctions.map((f) => ({
+                        value: f.name,
+                        label: `${f.name}(${(f.inputs || []).map((i) => i.type).join(', ')})`,
+                      }))}
+                    />
+                  </div>
+                ) : (
+                  <div className="p-3 bg-primary-500/10 border border-primary-500/20 text-primary-600 rounded-xl text-xs">
+                    Please paste a valid ABI JSON array containing{' '}
+                    {activeRequest.type === 'READ'
+                      ? 'read (view/pure)'
+                      : 'write (payable/nonpayable)'}{' '}
+                    functions.
+                  </div>
+                )}
+
+                {/* Parameter Form Fields */}
+                {activeSelectedFunction && (
+                  <div className="space-y-3 pt-2">
+                    <label className="text-xs font-semibold text-foreground/75 block">
+                      Parameters
+                    </label>
+                    {activeSelectedFunction.inputs?.length === 0 ? (
+                      <p className="text-xs text-foreground/40 italic">
+                        No parameters required for this function call.
+                      </p>
+                    ) : (
+                      activeSelectedFunction.inputs?.map((input, idx) => {
+                        const inputName = input.name || `arg${idx}`;
+                        return (
+                          <div key={inputName} className="space-y-1">
+                            <EnvironmentAwareInput
+                              label={`${inputName} (${input.type})`}
+                              placeholder={input.type}
+                              value={activeRequest.args?.[inputName] || ''}
+                              onChange={(e) =>
+                                updateActiveRequest({
+                                  args: {
+                                    ...(activeRequest.args || {}),
+                                    [inputName]: e.target.value,
+                                  },
+                                })
+                              }
+                            />
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
