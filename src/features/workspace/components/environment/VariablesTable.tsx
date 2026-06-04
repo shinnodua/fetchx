@@ -183,6 +183,7 @@ export const VariablesTable: React.FC<VariablesTableProps> = ({
                     <TrashIcon
                       title="Remove variable"
                       className="w-3.5 h-3.5 shrink-0"
+                      strokeWidth={1.5}
                     />
                   </Button>
                 </div>
@@ -201,8 +202,8 @@ export const VariablesTable: React.FC<VariablesTableProps> = ({
         >
           <PlusIcon
             title="Add variable"
-            className="w-3.5 h-3.5 shrink-0"
-            strokeWidth={2.5}
+            className="w-3.5 h-3.5 shrink-0 mr-1"
+            strokeWidth={2}
           />
           Add Variable
         </Button>

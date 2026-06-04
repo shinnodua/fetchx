@@ -1,9 +1,12 @@
 import type React from 'react';
 import { useMemo } from 'react';
-import { Badge } from '../../../../components';
+import { CopyIcon } from '../../../../assets/svgs';
+import { Badge, Button, useToast } from '../../../../components';
 import { useWorkspaceStore } from '../../../../store';
+import { copyResponse } from '../../utils/requestExport';
 
 export const ResponsePane: React.FC = () => {
+  const { toast } = useToast();
   const { collections, activeTabId, drafts } = useWorkspaceStore();
 
   // Find active request
@@ -18,6 +21,38 @@ export const ResponsePane: React.FC = () => {
   }, [collections, activeTabId, drafts]);
 
   if (!activeRequest) return null;
+
+  const hasResponsePayload =
+    activeRequest.response?.data !== undefined &&
+    activeRequest.response.data !== null;
+
+  const handleCopyResponse = async () => {
+    const responseText = copyResponse(activeRequest);
+
+    if (!responseText) {
+      toast({
+        title: 'Copy Failed',
+        description: 'No response data available to copy.',
+        type: 'warning',
+      });
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(responseText);
+      toast({
+        title: 'Copied to Clipboard',
+        description: 'Response payload copied successfully.',
+        type: 'success',
+      });
+    } catch {
+      toast({
+        title: 'Copy Failed',
+        description: 'Could not copy response payload to clipboard.',
+        type: 'error',
+      });
+    }
+  };
 
   return (
     <div className="w-full lg:w-1/2 flex flex-col min-h-0 border border-foreground/10 rounded-2xl bg-white/5 dark:bg-black/5 p-4 overflow-y-auto">
@@ -41,6 +76,22 @@ export const ResponsePane: React.FC = () => {
             <Badge variant="outline">
               {activeRequest.response.duration} ms
             </Badge>
+            {hasResponsePayload && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleCopyResponse}
+                className="h-7 w-7 rounded-lg p-0 text-primary-600 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200 cursor-pointer"
+                title="Copy response payload"
+              >
+                <CopyIcon
+                  title="Copy response payload"
+                  className="block h-6 w-6 shrink-0"
+                  strokeWidth={1.5}
+                />
+              </Button>
+            )}
           </div>
         )}
       </div>

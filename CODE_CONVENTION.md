@@ -132,6 +132,7 @@ Keep static assets organized by type:
 - Images must live in `src/assets/images/`.
 - SVG files and reusable SVG icon components must live in `src/assets/svgs/`.
 - Each reusable SVG icon component must live in its own file named after the component, such as `PlusIcon.tsx`, and be exported from `src/assets/svgs/index.ts`.
+- When fixing or generating SVG icon components, follow the existing reusable icon pattern used by `PlusIcon` and `TrashIcon`: use `SvgIconProps`, call `iconProps(title)`, include a `<title>{title}</title>`, set `fill="none"` for stroked icons, use `currentColor` for strokes, apply `strokeLinecap="round"`, `strokeLinejoin="round"`, `strokeWidth={props.strokeWidth ?? 2}`, and `vectorEffect="non-scaling-stroke"` on stroked paths. At usage sites, pass a meaningful `title` and size icons with explicit classes such as `h-4 w-4 shrink-0`.
 - Other asset files must live directly under `src/assets/` or an appropriately named subfolder when the type needs grouping.
 - Do not define SVG icon markup inline in feature, route, layout, or UI components. Import SVG icon components from `src/assets/svgs/`, and pass the icon title as a prop at the usage site.
 

@@ -299,7 +299,7 @@ export const TabsHeader: React.FC = () => {
               <PlusIcon
                 title="Add or import request"
                 className="block h-5 w-5 shrink-0"
-                strokeWidth={3}
+                strokeWidth={2}
               />
             </Button>
           }

@@ -12,7 +12,7 @@ export const CheckIcon = ({ title, ...props }: SvgIconProps) => (
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth={props.strokeWidth ?? 2}
+      strokeWidth={props.strokeWidth ?? 1.5}
       d="M5 13l4 4L19 7"
     />
   </svg>

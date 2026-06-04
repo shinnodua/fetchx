@@ -1,24 +1,17 @@
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  FolderIcon,
-  PlusIcon,
-  SearchIcon,
-} from '../../../../assets/svgs';
-import {
-  Button,
-  DropdownMenu,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  Input,
 } from '../../../../components';
 import { useWorkspaceStore } from '../../../../store';
 import type { CollectionItem } from '../../types';
 import { RequestMenuItems } from '../request/RequestMenuItems';
+import { CollectionItemView } from './CollectionItemView';
 import { CollectionPanelDialogs } from './CollectionPanelDialogs';
 import type { ContextMenuTarget, RenameTarget } from './collectionPanelTypes';
+import { SidebarContextMenu } from './SidebarContextMenu';
+import { SidebarHeader } from './SidebarHeader';
 
 export const CollectionsPanel: React.FC = () => {
   const {
@@ -230,7 +223,6 @@ export const CollectionsPanel: React.FC = () => {
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
-      // Constrain panel width between 200px and 500px
       const newWidth = Math.max(200, Math.min(500, startWidth + deltaX));
       setCollectionsPanelWidth(newWidth);
     };
@@ -239,10 +231,8 @@ export const CollectionsPanel: React.FC = () => {
       setIsDragging(false);
       const finalX = upEvent.clientX;
       const deltaX = finalX - startX;
-      // If drag width is below 160px, collapse the panel completely
       if (startWidth + deltaX < 160) {
         setCollectionsPanelCollapsed(true);
-        // Reset to default width so that when they re-open, it is a healthy size
         setCollectionsPanelWidth(320);
       }
       window.removeEventListener('mousemove', handleMouseMove);
@@ -265,48 +255,13 @@ export const CollectionsPanel: React.FC = () => {
       }`}
       style={{ width: collectionsPanelWidth }}
     >
-      <div className="p-4 border-b border-foreground/10 flex flex-col gap-3 select-none">
-        <div className="flex items-center justify-between gap-2 min-w-0 mt-[-8px]">
-          <div className="flex items-center gap-1.5 min-w-0 shrink-0">
-            <h2 className="text-lg font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500 truncate">
-              {collectionsPanelWidth >= 220 ? 'Collections' : 'Cols'}
-            </h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCollectionsPanelCollapsed(true)}
-              className="h-7 w-7 rounded-lg p-0 text-foreground/40 hover:text-foreground cursor-pointer shrink-0"
-              title="Collapse Sidebar"
-            >
-              <ChevronLeftIcon title="Collapse sidebar" className="w-4 h-4" />
-            </Button>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 px-2.5 rounded-lg text-xs shrink-0 gap-1.5"
-            onClick={() => setNewColOpen(true)}
-          >
-            <PlusIcon
-              title="Add collection"
-              className="h-3.5 w-3.5 shrink-0"
-              strokeWidth={2.5}
-            />
-            {collectionsPanelWidth >= 240 && <span>Collection</span>}
-          </Button>
-        </div>
-        <Input
-          placeholder="Search request or path..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          leftIcon={
-            <SearchIcon
-              title="Search collections"
-              className="w-4 h-4 text-foreground/40"
-            />
-          }
-        />
-      </div>
+      <SidebarHeader
+        collectionsPanelWidth={collectionsPanelWidth}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        setNewColOpen={setNewColOpen}
+        setCollectionsPanelCollapsed={setCollectionsPanelCollapsed}
+      />
 
       {/* Collections List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -315,163 +270,22 @@ export const CollectionsPanel: React.FC = () => {
             No collections found.
           </p>
         ) : (
-          filteredCollections.map((col) => {
-            const isCollapsed = collapsedCollectionIds.includes(col.id);
-            return (
-              <div key={col.id} className="space-y-1">
-                <div
-                  onClick={() => toggleCollectionCollapsed(col.id)}
-                  onContextMenu={(event) =>
-                    handleContextMenu(
-                      { type: 'collection', id: col.id, name: col.name },
-                      event,
-                    )
-                  }
-                  className="flex items-center justify-between group cursor-pointer hover:bg-foreground/5 p-1 -mx-1 rounded-lg select-none transition-colors"
-                >
-                  <div className="flex items-center gap-1.5 text-sm font-semibold truncate text-foreground/90">
-                    <ChevronDownIcon
-                      title="Toggle collection"
-                      className={`w-3.5 h-3.5 text-foreground/45 transition-transform shrink-0 ${
-                        isCollapsed ? '-rotate-90' : ''
-                      }`}
-                      strokeWidth={2.5}
-                    />
-                    <FolderIcon
-                      title="Collection"
-                      className="w-4 h-4 text-primary-400 shrink-0"
-                    />
-                    <span className="truncate">{col.name}</span>
-                  </div>
-                  <div className="flex items-center gap-1 transition-opacity">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setTargetColId(col.id);
-                        setNewReqOpen(true);
-                      }}
-                      className="h-6 w-6 rounded p-0 text-foreground/60 hover:text-foreground"
-                      title="Add Request"
-                    >
-                      <PlusIcon
-                        title="Add request"
-                        className="w-3.5 h-3.5 shrink-0"
-                      />
-                    </Button>
-                    <div onClick={(event) => event.stopPropagation()}>
-                      <DropdownMenu
-                        align="right"
-                        className="w-40"
-                        trigger={
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 rounded-md p-0 text-foreground/70 hover:text-foreground"
-                            title="Collection options"
-                          >
-                            <span
-                              aria-hidden="true"
-                              className="flex items-center gap-0.5"
-                            >
-                              <span className="h-1 w-1 rounded-full bg-current" />
-                              <span className="h-1 w-1 rounded-full bg-current" />
-                              <span className="h-1 w-1 rounded-full bg-current" />
-                            </span>
-                          </Button>
-                        }
-                      >
-                        {renderCollectionMenuItems(col)}
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                </div>
-
-                {!isCollapsed && (
-                  <div className="pl-4 border-l border-foreground/10 space-y-1.5 pt-1.5 pb-2">
-                    {col.requests.length === 0 ? (
-                      <span className="text-xs text-foreground/30 pl-2">
-                        Empty collection
-                      </span>
-                    ) : (
-                      col.requests.map((req) => {
-                        const isActive = req.id === activeTabId;
-                        const typeColors: Record<string, string> = {
-                          READ: 'bg-secondary-500/10 text-secondary-600 border-secondary-500/20',
-                          WRITE:
-                            'bg-primary-500/10 text-primary-500 border-primary-500/20',
-                          GET: 'bg-secondary-500/10 text-secondary-600 border-secondary-500/20',
-                          POST: 'bg-primary-500/10 text-primary-500 border-primary-500/20',
-                        };
-                        return (
-                          <div
-                            key={req.id}
-                            ref={(element) => {
-                              requestRefs.current[req.id] = element;
-                            }}
-                            onClick={() => openTab(req.id)}
-                            onContextMenu={(event) =>
-                              handleContextMenu(
-                                {
-                                  type: 'request',
-                                  id: req.id,
-                                  name: req.name,
-                                },
-                                event,
-                              )
-                            }
-                            className={`flex items-center justify-between gap-2 p-2 rounded-xl text-xs cursor-pointer group transition-all ${
-                              isActive
-                                ? 'bg-foreground/5 font-semibold text-foreground border border-foreground/10'
-                                : 'text-foreground/75 hover:bg-foreground/5 hover:text-foreground border border-transparent'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 truncate">
-                              <span
-                                className={`px-1.5 py-0.5 rounded text-[9px] font-bold border ${typeColors[req.type]}`}
-                              >
-                                {req.type}
-                              </span>
-                              <span className="truncate">{req.name}</span>
-                            </div>
-                            <div
-                              className="opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              <DropdownMenu
-                                align="right"
-                                className="w-40"
-                                trigger={
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 rounded-md p-0 text-foreground/70 hover:text-foreground"
-                                    title="Request options"
-                                  >
-                                    <span
-                                      aria-hidden="true"
-                                      className="flex items-center gap-0.5"
-                                    >
-                                      <span className="h-1 w-1 rounded-full bg-current" />
-                                      <span className="h-1 w-1 rounded-full bg-current" />
-                                      <span className="h-1 w-1 rounded-full bg-current" />
-                                    </span>
-                                  </Button>
-                                }
-                              >
-                                {renderRequestMenuItems(req)}
-                              </DropdownMenu>
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })
+          filteredCollections.map((col) => (
+            <CollectionItemView
+              key={col.id}
+              col={col}
+              activeTabId={activeTabId}
+              collapsedCollectionIds={collapsedCollectionIds}
+              toggleCollectionCollapsed={toggleCollectionCollapsed}
+              setTargetColId={setTargetColId}
+              setNewReqOpen={setNewReqOpen}
+              openTab={openTab}
+              handleContextMenu={handleContextMenu}
+              renderCollectionMenuItems={renderCollectionMenuItems}
+              renderRequestMenuItems={renderRequestMenuItems}
+              requestRefs={requestRefs}
+            />
+          ))
         )}
       </div>
 
@@ -485,29 +299,13 @@ export const CollectionsPanel: React.FC = () => {
       />
 
       {contextMenuTarget && (
-        <div
-          className="absolute inset-0 z-[60]"
-          onClick={() => setContextMenuTarget(null)}
-          onContextMenu={(event) => {
-            event.preventDefault();
-            setContextMenuTarget(null);
-          }}
-        >
-          <div
-            ref={contextMenuRef}
-            className="absolute z-[61] w-40 overflow-hidden rounded-xl border border-foreground/10 bg-background/95 p-1 shadow-xl backdrop-blur-xl"
-            style={{
-              left: contextMenuTarget.x,
-              top: contextMenuTarget.y,
-            }}
-            onClick={(event) => event.stopPropagation()}
-            onContextMenu={(event) => event.preventDefault()}
-          >
-            {contextMenuTarget.type === 'collection'
-              ? renderCollectionMenuItems(contextMenuTarget)
-              : renderRequestMenuItems(contextMenuTarget)}
-          </div>
-        </div>
+        <SidebarContextMenu
+          target={contextMenuTarget}
+          contextMenuRef={contextMenuRef}
+          onClose={() => setContextMenuTarget(null)}
+          renderCollectionMenuItems={renderCollectionMenuItems}
+          renderRequestMenuItems={renderRequestMenuItems}
+        />
       )}
 
       <CollectionPanelDialogs

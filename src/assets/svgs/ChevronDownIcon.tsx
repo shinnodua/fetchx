@@ -12,7 +12,7 @@ export const ChevronDownIcon = ({ title, ...props }: SvgIconProps) => (
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth={props.strokeWidth ?? 2}
+      strokeWidth={props.strokeWidth ?? 1.5}
       d="M19 9l-7 7-7-7"
     />
   </svg>

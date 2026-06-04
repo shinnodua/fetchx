@@ -53,6 +53,7 @@ export const EnvironmentList: React.FC<EnvironmentListProps> = ({
                     <TrashIcon
                       title="Delete environment"
                       className="w-3 h-3 shrink-0"
+                      strokeWidth={1.5}
                     />
                   </Button>
                 </div>
@@ -70,7 +71,7 @@ export const EnvironmentList: React.FC<EnvironmentListProps> = ({
         <PlusIcon
           title="Add environment"
           className="w-3.5 h-3.5 shrink-0"
-          strokeWidth={2.5}
+          strokeWidth={2}
         />
         Add Environment
       </Button>

@@ -7,7 +7,7 @@ export const PlusIcon = ({ title, stroke, ...props }: SvgIconProps) => (
       stroke={stroke ?? 'currentColor'}
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth={props.strokeWidth ?? 2}
+      strokeWidth={props.strokeWidth ?? 1.5}
       vectorEffect="non-scaling-stroke"
       d="M12 4v16m8-8H4"
     />
