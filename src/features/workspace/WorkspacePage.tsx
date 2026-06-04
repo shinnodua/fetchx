@@ -50,6 +50,7 @@ export const WorkspacePage: React.FC = () => {
     addLog,
     saveDraft,
     initializeDraft,
+    setCollectionsPanelCollapsed,
   } = useWorkspaceStore();
 
   const [selectedColId, setSelectedColId] = useState('');
@@ -88,6 +89,31 @@ export const WorkspacePage: React.FC = () => {
       initializeDraft(activeTabId);
     }
   }, [activeTabId, drafts, initializeDraft]);
+
+  // Auto-collapse / auto-expand sidebar based on screen width
+  useEffect(() => {
+    // On mount, set collapse state based on window width
+    if (window.innerWidth < 768) {
+      setCollectionsPanelCollapsed(true);
+    } else {
+      setCollectionsPanelCollapsed(false);
+    }
+
+    // On resize, track width transitions
+    let prevWidth = window.innerWidth;
+    const handleResize = () => {
+      const currentWidth = window.innerWidth;
+      if (currentWidth < 768 && prevWidth >= 768) {
+        setCollectionsPanelCollapsed(true);
+      } else if (currentWidth >= 768 && prevWidth < 768) {
+        setCollectionsPanelCollapsed(false);
+      }
+      prevWidth = currentWidth;
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [setCollectionsPanelCollapsed]);
 
   // Find active request (prioritize drafts)
   const activeRequest = useMemo(() => {
@@ -559,9 +585,17 @@ export const WorkspacePage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-1 w-full min-h-0 h-full overflow-hidden bg-background text-foreground">
+    <div className="flex flex-1 w-full min-h-0 h-full overflow-hidden bg-background text-foreground relative">
       {/* LEFT Sidebar Panel */}
-      {!collectionsPanelCollapsed && <CollectionsPanel />}
+      {!collectionsPanelCollapsed && (
+        <>
+          <div
+            className="md:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-30 transition-opacity"
+            onClick={() => setCollectionsPanelCollapsed(true)}
+          />
+          <CollectionsPanel />
+        </>
+      )}
 
       {/* RIGHT Workspace Details */}
       <main className="flex-grow flex flex-col min-h-0 min-w-0 bg-background">

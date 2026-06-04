@@ -142,7 +142,11 @@ export const TabContextMenu: React.FC<TabContextMenuProps> = ({
             }}
             className="font-medium text-foreground/60"
           >
-            <ChevronLeftIcon title="Back icon" className="w-3.5 h-3.5 mr-2" />
+            <ChevronLeftIcon
+              title="Back icon"
+              className="mr-2 block h-3.5 w-3.5 shrink-0"
+              strokeWidth={2.5}
+            />
             Back
           </DropdownMenuItem>
           <DropdownMenuSeparator />

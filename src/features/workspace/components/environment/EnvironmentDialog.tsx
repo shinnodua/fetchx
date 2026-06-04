@@ -88,7 +88,7 @@ export const EnvironmentDialog: React.FC = () => {
         description="Define environment-specific variables. Use them in your request target URLs, contract addresses, query parameters, body, headers, or arguments as {{variable_name}}."
         className="w-[min(calc(100vw-2rem),1180px)] max-w-none"
       >
-        <div className="flex flex-col md:flex-row gap-6 h-[min(640px,calc(100vh-10rem))] mt-4 min-h-0 select-none">
+        <div className="flex flex-col md:flex-row gap-6 h-auto md:h-[min(640px,calc(100vh-10rem))] max-h-[calc(100vh-12rem)] md:max-h-none overflow-y-auto md:overflow-visible mt-4 min-h-0 select-none">
           {/* Left pane: Environments List */}
           <EnvironmentList
             environments={environments}

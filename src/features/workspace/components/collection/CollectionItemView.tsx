@@ -54,7 +54,7 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
         }
         className="flex items-center justify-between group cursor-pointer hover:bg-foreground/5 p-1 -mx-1 rounded-lg select-none transition-colors"
       >
-        <div className="flex items-center gap-1.5 text-sm font-semibold truncate text-foreground/90">
+        <div className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-foreground/90">
           <ChevronDownIcon
             title="Toggle collection"
             className={`w-3.5 h-3.5 text-foreground/45 transition-transform shrink-0 ${
@@ -66,9 +66,9 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
             title="Collection"
             className="w-4 h-4 text-primary-400 shrink-0"
           />
-          <span className="truncate">{col.name}</span>
+          <span className="min-w-0 truncate">{col.name}</span>
         </div>
-        <div className="flex items-center gap-1 transition-opacity">
+        <div className="flex shrink-0 items-center gap-1 transition-opacity">
           <Button
             variant="ghost"
             size="sm"
@@ -147,22 +147,24 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
                       event,
                     )
                   }
-                  className={`flex items-center justify-between gap-2 p-2 rounded-xl text-xs cursor-pointer group transition-all ${
+                  className={`flex min-w-0 items-center justify-between gap-2 p-2 rounded-xl text-xs cursor-pointer group transition-all ${
                     isActive
                       ? 'bg-foreground/5 font-semibold text-foreground border border-foreground/10'
                       : 'text-foreground/75 hover:bg-foreground/5 hover:text-foreground border border-transparent'
                   }`}
                 >
-                  <div className="flex items-center gap-2 truncate">
+                  <div className="flex min-w-0 flex-1 items-center gap-2">
                     <span
-                      className={`px-1.5 py-0.5 rounded text-[9px] font-bold border ${typeColors[req.type]}`}
+                      className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold border ${typeColors[req.type]}`}
                     >
                       {req.type}
                     </span>
-                    <span className="truncate">{req.name}</span>
+                    <span className="min-w-0 truncate" title={req.name}>
+                      {req.name}
+                    </span>
                   </div>
                   <div
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(event) => event.stopPropagation()}
                   >
                     <DropdownMenu

@@ -36,7 +36,7 @@ export const EnvironmentSelector: React.FC = () => {
             title="Environment"
             className="w-3.5 h-3.5 text-foreground/45 shrink-0"
           />
-          <span className="truncate max-w-[110px]">
+          <span className="truncate max-w-[60px] sm:max-w-[110px]">
             {activeEnv ? activeEnv.name : 'No Environment'}
           </span>
           <ChevronDownIcon

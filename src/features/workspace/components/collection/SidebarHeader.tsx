@@ -31,7 +31,11 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
             className="h-7 w-7 rounded-lg p-0 text-foreground/40 hover:text-foreground cursor-pointer shrink-0"
             title="Collapse Sidebar"
           >
-            <ChevronLeftIcon title="Collapse sidebar" className="w-4 h-4" />
+            <ChevronLeftIcon
+              title="Collapse sidebar"
+              className="block h-4 w-4 shrink-0"
+              strokeWidth={2.5}
+            />
           </Button>
         </div>
         <Button

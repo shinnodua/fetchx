@@ -55,7 +55,7 @@ export const ResponsePane: React.FC = () => {
   };
 
   return (
-    <div className="w-full lg:w-1/2 flex flex-col min-h-0 border border-foreground/10 rounded-2xl bg-white/5 dark:bg-black/5 p-4 overflow-y-auto">
+    <div className="w-full lg:w-1/2 flex-1 flex flex-col min-h-0 border border-foreground/10 rounded-2xl bg-white/5 dark:bg-black/5 p-4 overflow-y-auto">
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-sm font-semibold text-foreground/50 uppercase tracking-wider">
           Response & Logs

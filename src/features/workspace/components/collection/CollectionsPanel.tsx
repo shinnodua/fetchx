@@ -41,6 +41,10 @@ export const CollectionsPanel: React.FC = () => {
   const panelRef = useRef<HTMLElement>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const requestRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const safeCollectionsPanelWidth =
+    Number.isFinite(collectionsPanelWidth) && collectionsPanelWidth > 0
+      ? Math.max(200, Math.min(500, collectionsPanelWidth))
+      : 320;
 
   const filteredCollections = useMemo<CollectionItem[]>(() => {
     if (!searchTerm.trim()) return collections;
@@ -163,7 +167,7 @@ export const CollectionsPanel: React.FC = () => {
 
     setContextMenuTarget({
       ...target,
-      x: Math.max(8, Math.min(relativeX, collectionsPanelWidth - 168)),
+      x: Math.max(8, Math.min(relativeX, safeCollectionsPanelWidth - 168)),
       y: panelRect
         ? Math.max(8, Math.min(relativeY, panelRect.height - 144))
         : relativeY,
@@ -219,7 +223,7 @@ export const CollectionsPanel: React.FC = () => {
     setIsDragging(true);
 
     const startX = e.clientX;
-    const startWidth = collectionsPanelWidth;
+    const startWidth = safeCollectionsPanelWidth;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
@@ -250,13 +254,17 @@ export const CollectionsPanel: React.FC = () => {
   return (
     <aside
       ref={panelRef}
-      className={`relative flex-shrink-0 border-r border-foreground/10 flex flex-col min-h-0 bg-white/5 dark:bg-black/10 backdrop-blur-md overflow-hidden ${
+      style={
+        {
+          '--panel-width': `${safeCollectionsPanelWidth}px`,
+        } as React.CSSProperties
+      }
+      className={`fixed md:relative left-0 top-0 h-full z-40 border-r border-foreground/10 flex flex-col min-h-0 shrink-0 bg-background/95 md:bg-white/5 dark:md:bg-black/10 backdrop-blur-md overflow-hidden shadow-2xl md:shadow-none w-[280px] md:w-[var(--panel-width)] ${
         isDragging ? '' : 'transition-all duration-300'
       }`}
-      style={{ width: collectionsPanelWidth }}
     >
       <SidebarHeader
-        collectionsPanelWidth={collectionsPanelWidth}
+        collectionsPanelWidth={safeCollectionsPanelWidth}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         setNewColOpen={setNewColOpen}
@@ -293,7 +301,7 @@ export const CollectionsPanel: React.FC = () => {
       <div
         onMouseDown={handleMouseDown}
         onDoubleClick={handleDoubleClick}
-        className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-primary-500/40 active:bg-primary-500/70 transition-colors z-50 ${
+        className={`hidden md:block absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-primary-500/40 active:bg-primary-500/70 transition-colors z-50 ${
           isDragging ? 'bg-primary-500/50' : ''
         }`}
       />

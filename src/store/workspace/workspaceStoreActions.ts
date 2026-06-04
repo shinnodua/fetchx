@@ -18,6 +18,9 @@ import {
 
 type WorkspaceSet = Parameters<StateCreator<WorkspaceState>>[0];
 
+const clampCollectionsPanelWidth = (width: number) =>
+  Math.max(200, Math.min(500, width));
+
 export const createWorkspaceActions = (set: WorkspaceSet) => ({
   setSearchTerm: (searchTerm: string) => set({ searchTerm }),
   setCollections: (collections: CollectionItem[]) => set({ collections }),
@@ -30,7 +33,12 @@ export const createWorkspaceActions = (set: WorkspaceSet) => ({
   setNewReqName: (newReqName: string) => set({ newReqName }),
   setNewReqType: (newReqType: string) => set({ newReqType }),
   setCollectionsPanelWidth: (collectionsPanelWidth: number) =>
-    set({ collectionsPanelWidth }),
+    set({
+      collectionsPanelWidth:
+        Number.isFinite(collectionsPanelWidth) && collectionsPanelWidth > 0
+          ? clampCollectionsPanelWidth(collectionsPanelWidth)
+          : 320,
+    }),
   setCollectionsPanelCollapsed: (collectionsPanelCollapsed: boolean) =>
     set({ collectionsPanelCollapsed }),
   setRequestToRevealId: (requestToRevealId: string | null) =>

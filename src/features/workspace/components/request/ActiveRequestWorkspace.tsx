@@ -36,9 +36,9 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
   onTargetPaste,
   onUpdateActiveRequest,
 }) => (
-  <div className="flex-grow flex flex-col min-h-0 p-6 space-y-4">
+  <div className="flex-grow flex flex-col min-h-0 min-w-0 p-6 space-y-4">
     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between border-b border-foreground/5 pb-4">
-      <div className="flex-grow w-full max-w-lg">
+      <div className="min-w-0 flex-grow w-full max-w-lg">
         <Input
           value={activeRequest.name}
           onChange={(event) =>
