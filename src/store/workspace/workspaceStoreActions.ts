@@ -33,6 +33,8 @@ export const createWorkspaceActions = (
   setNewColName: (newColName: string) => set({ newColName }),
   setNewReqOpen: (newReqOpen: boolean) => set({ newReqOpen }),
   setImportReqOpen: (importReqOpen: boolean) => set({ importReqOpen }),
+  setImportContractOpen: (importContractOpen: boolean) =>
+    set({ importContractOpen }),
   setTabToClose: (tabToClose: string | null) => set({ tabToClose }),
   setTargetColId: (targetColId: string) => set({ targetColId }),
   setNewReqName: (newReqName: string) => set({ newReqName }),

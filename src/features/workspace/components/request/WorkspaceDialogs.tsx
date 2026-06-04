@@ -6,9 +6,11 @@ import {
   Input,
   Select,
   Textarea,
+  useToast,
 } from '../../../../components';
+import { fetchContractInfo } from '../../../../services/contractImporter';
 import { useWorkspaceStore } from '../../../../store';
-import { METHOD_OPTIONS } from '../../constants';
+import { METHOD_OPTIONS, NETWORK_OPTIONS } from '../../constants';
 import type { RequestItem } from '../../types';
 import { parseRequestImportContent } from '../../utils/requestImport';
 
@@ -18,6 +20,7 @@ export const WorkspaceDialogs: React.FC = () => {
     newColName,
     newReqOpen,
     importReqOpen,
+    importContractOpen,
     targetColId,
     newReqName,
     newReqType,
@@ -26,6 +29,7 @@ export const WorkspaceDialogs: React.FC = () => {
     setNewColName,
     setNewReqOpen,
     setImportReqOpen,
+    setImportContractOpen,
     setNewReqName,
     setNewReqType,
     setTabToClose,
@@ -35,13 +39,79 @@ export const WorkspaceDialogs: React.FC = () => {
     closeTab,
   } = useWorkspaceStore();
 
+  const { toast } = useToast();
   const [importContent, setImportContent] = useState('');
   const [importError, setImportError] = useState('');
+
+  const [contractAddress, setContractAddress] = useState('');
+  const [contractNetwork, setContractNetwork] = useState('1');
+  const [contractImportError, setContractImportError] = useState('');
+  const [isImportLoading, setIsImportLoading] = useState(false);
 
   const closeImportDialog = () => {
     setImportReqOpen(false);
     setImportContent('');
     setImportError('');
+  };
+
+  const closeContractDialog = () => {
+    setImportContractOpen(false);
+    setContractAddress('');
+    setContractNetwork('1');
+    setContractImportError('');
+    setIsImportLoading(false);
+  };
+
+  const handleImportContractSubmit = async () => {
+    const address = contractAddress.trim();
+    if (!address) {
+      setContractImportError('Please enter a contract address.');
+      return;
+    }
+
+    if (!address.startsWith('0x') || address.length !== 42) {
+      setContractImportError('Please enter a valid Ethereum address (0x...).');
+      return;
+    }
+
+    setIsImportLoading(true);
+    setContractImportError('');
+
+    try {
+      const info = await fetchContractInfo(address, contractNetwork);
+
+      addCustomRequest({
+        name: info.name,
+        type: 'READ',
+        target: info.address,
+        network: info.network,
+        abi: info.abi,
+        functionName: '',
+        args: {},
+      });
+
+      if (!info.abi) {
+        toast({
+          title: 'Unverified ABI',
+          description:
+            'Contract imported but ABI is unverified. You can paste it manually in Request Settings.',
+          type: 'warning',
+        });
+      } else {
+        toast({
+          title: 'Contract Imported',
+          description: `Contract "${info.name}" imported with ABI successfully.`,
+          type: 'success',
+        });
+      }
+
+      closeContractDialog();
+    } catch (err) {
+      const error = err as Error;
+      setContractImportError(error.message || 'Failed to import contract.');
+    } finally {
+      setIsImportLoading(false);
+    }
   };
 
   const handleImportRequestSubmit = () => {
@@ -188,6 +258,58 @@ export const WorkspaceDialogs: React.FC = () => {
             }}
           >
             Discard & Close
+          </Button>
+        </div>
+      </Dialog>
+
+      <Dialog
+        isOpen={importContractOpen}
+        onClose={closeContractDialog}
+        title="Import Contract/Program"
+        description="Fetch contract info and ABI directly from block explorer by entering its address and network."
+      >
+        <div className="py-4 space-y-4">
+          <Input
+            label="Contract Address"
+            placeholder="0x..."
+            value={contractAddress}
+            onChange={(event) => {
+              setContractAddress(event.target.value);
+              setContractImportError('');
+            }}
+            disabled={isImportLoading}
+          />
+          <div>
+            <label className="text-sm font-medium text-foreground/80 ml-1 mb-1.5 block">
+              Network
+            </label>
+            <Select
+              options={NETWORK_OPTIONS}
+              value={contractNetwork}
+              onChange={setContractNetwork}
+              disabled={isImportLoading}
+            />
+          </div>
+          {contractImportError && (
+            <span className="text-xs text-primary-600 ml-1 font-medium block">
+              {contractImportError}
+            </span>
+          )}
+        </div>
+        <div className="flex justify-end gap-3 pt-2">
+          <Button
+            variant="ghost"
+            onClick={closeContractDialog}
+            disabled={isImportLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleImportContractSubmit}
+            isLoading={isImportLoading}
+          >
+            Import
           </Button>
         </div>
       </Dialog>

@@ -13,6 +13,7 @@ export interface WorkspaceState {
   newColName: string;
   newReqOpen: boolean;
   importReqOpen: boolean;
+  importContractOpen: boolean;
   targetColId: string;
   newReqName: string;
   newReqType: string;
@@ -32,6 +33,7 @@ export interface WorkspaceState {
   setNewColName: (name: string) => void;
   setNewReqOpen: (open: boolean) => void;
   setImportReqOpen: (open: boolean) => void;
+  setImportContractOpen: (open: boolean) => void;
   setTargetColId: (id: string) => void;
   setNewReqName: (name: string) => void;
   setNewReqType: (type: string) => void;

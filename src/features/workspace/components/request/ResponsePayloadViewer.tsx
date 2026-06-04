@@ -1,6 +1,10 @@
 import type React from 'react';
 import { useState } from 'react';
-import { ChevronDownIcon, ChevronRightIcon } from '../../../../assets/svgs';
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  CopyIcon,
+} from '../../../../assets/svgs';
 import {
   Button,
   Dialog,
@@ -9,6 +13,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  useToast,
 } from '../../../../components';
 
 interface ResponsePayloadViewerProps {
@@ -338,17 +343,57 @@ export const ResponsePayloadDialog: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   title?: React.ReactNode;
-}> = ({ data, isOpen, onClose, title = 'Payload Output' }) => (
-  <Dialog
-    isOpen={isOpen}
-    onClose={onClose}
-    title={title}
-    description={getTypeLabel(data)}
-    className="flex h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-none flex-col overflow-hidden"
-  >
-    <PayloadTabs data={data} viewport="dialog" />
-  </Dialog>
-);
+}> = ({ data, isOpen, onClose, title = 'Payload Output' }) => {
+  const { toast } = useToast();
+
+  const handleCopyPayload = async () => {
+    try {
+      await navigator.clipboard.writeText(getPayloadText(data));
+      toast({
+        title: 'Copied to Clipboard',
+        description: 'Response payload copied successfully.',
+        type: 'success',
+      });
+    } catch {
+      toast({
+        title: 'Copy Failed',
+        description: 'Could not copy response payload to clipboard.',
+        type: 'error',
+      });
+    }
+  };
+
+  return (
+    <Dialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      description={getTypeLabel(data)}
+      className="flex h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-none flex-col overflow-hidden"
+    >
+      <PayloadTabs
+        data={data}
+        viewport="dialog"
+        actions={
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleCopyPayload}
+            className="h-7 gap-1.5 rounded-lg px-2 text-[10px] font-semibold uppercase tracking-wider text-primary-600 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200"
+          >
+            <CopyIcon
+              title="Copy response payload"
+              className="h-3.5 w-3.5 shrink-0"
+              strokeWidth={1.5}
+            />
+            Copy
+          </Button>
+        }
+      />
+    </Dialog>
+  );
+};
 
 export const ResponsePayloadViewer: React.FC<ResponsePayloadViewerProps> = ({
   data,

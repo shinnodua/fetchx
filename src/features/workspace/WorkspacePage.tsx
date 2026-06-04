@@ -2,6 +2,7 @@ import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAccount, usePublicClient, useWriteContract } from 'wagmi';
 import { useToast } from '../../components';
+import { fetchContractInfo } from '../../services/contractImporter';
 import {
   executeReadCall,
   executeRestCall,
@@ -53,6 +54,8 @@ export const WorkspacePage: React.FC = () => {
     setCollectionsPanelCollapsed,
   } = useWorkspaceStore();
 
+  const { activeEnvironmentId } = useEnvironmentStore();
+
   const [selectedColId, setSelectedColId] = useState('');
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
 
@@ -89,6 +92,34 @@ export const WorkspacePage: React.FC = () => {
       initializeDraft(activeTabId);
     }
   }, [activeTabId, drafts, initializeDraft]);
+
+  // Warn user on page reload/close if there are unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      const hasUnsaved = tabs.some((tabId) => {
+        const draft = drafts[tabId];
+        let original: RequestItem | undefined;
+        for (const col of collections) {
+          const found = col.requests.find((r) => r.id === tabId);
+          if (found) {
+            original = found;
+            break;
+          }
+        }
+        return getRequestIsDirty(draft, original);
+      });
+
+      if (hasUnsaved) {
+        event.preventDefault();
+        event.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [collections, tabs, drafts]);
 
   // Auto-collapse / auto-expand sidebar based on screen width
   useEffect(() => {
@@ -139,6 +170,94 @@ export const WorkspacePage: React.FC = () => {
     }
     return getRequestIsDirty(draft, original);
   }, [collections, activeTabId, drafts]);
+
+  // Ref to track last fetched address per request tab to avoid duplicate/loop fetches
+  const lastFetchedRef = useRef<Record<string, string>>({});
+
+  const activeRequestTarget = activeRequest?.target;
+  const activeRequestNetwork = activeRequest?.network;
+  const activeRequestType = activeRequest?.type;
+  const activeRequestName = activeRequest?.name;
+
+  // Auto-load contract ABI when a valid address is entered in contract target field
+  useEffect(() => {
+    if (
+      !activeRequestTarget ||
+      (activeRequestType !== 'READ' && activeRequestType !== 'WRITE')
+    ) {
+      return;
+    }
+
+    const network = activeRequestNetwork || '1';
+
+    // Get current active variables
+    const envStore = useEnvironmentStore.getState();
+    const activeEnv = envStore.environments.find(
+      (e) => e.id === activeEnvironmentId,
+    );
+    const activeVariables = activeEnv ? activeEnv.variables : [];
+
+    // Resolve target in case it contains environment variables
+    const resolvedTarget = resolveVariables(
+      activeRequestTarget,
+      activeVariables,
+    ).value.trim();
+
+    // Check if resolved target is a valid hex address
+    const isValidAddress = /^0x[a-fA-F0-9]{40}$/.test(resolvedTarget);
+    if (!isValidAddress) {
+      return;
+    }
+
+    const fetchKey = `${activeTabId}-${resolvedTarget}-${network}`;
+    if (lastFetchedRef.current[activeTabId] === fetchKey) {
+      return;
+    }
+
+    // Mark as fetched/attempted
+    lastFetchedRef.current[activeTabId] = fetchKey;
+
+    // Fetch the contract info
+    const loadAbi = async () => {
+      try {
+        const info = await fetchContractInfo(resolvedTarget, network);
+        if (info.abi) {
+          updateActiveRequest({
+            abi: info.abi,
+            name:
+              activeRequestName === 'Untitled Request'
+                ? info.name
+                : activeRequestName,
+          });
+          toast({
+            title: 'ABI Auto-Loaded',
+            description: `Successfully loaded ABI for "${info.name}".`,
+            type: 'success',
+          });
+        } else {
+          toast({
+            title: 'ABI Not Found',
+            description:
+              'Contract is not verified on this network. You can paste the ABI manually.',
+            type: 'warning',
+          });
+        }
+      } catch (err) {
+        console.warn('Failed to auto-load ABI:', err);
+      }
+    };
+
+    void loadAbi();
+  }, [
+    activeTabId,
+    activeRequestTarget,
+    activeRequestNetwork,
+    activeRequestType,
+    activeRequestName,
+    activeEnvironmentId,
+    updateActiveRequest,
+    toast,
+  ]);
 
   // Public client lookup based on active request chain ID
   const activeNetworkId = activeRequest?.network

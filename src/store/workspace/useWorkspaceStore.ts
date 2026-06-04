@@ -16,6 +16,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       newColName: '',
       newReqOpen: false,
       importReqOpen: false,
+      importContractOpen: false,
       targetColId: '',
       newReqName: '',
       newReqType: 'READ',

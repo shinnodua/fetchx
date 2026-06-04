@@ -3,6 +3,8 @@ import { useMemo, useState } from 'react';
 import { TrashIcon } from '../../../../assets/svgs';
 import {
   Button,
+  DropdownMenu,
+  DropdownMenuItem,
   Select,
   Tabs,
   TabsContent,
@@ -12,7 +14,7 @@ import {
   useToast,
 } from '../../../../components';
 import { useWorkspaceStore } from '../../../../store';
-import { ERC20_ABI, ERC721_ABI } from '../../constants';
+import { ERC20_ABI, ERC721_ABI, ERC1155_ABI } from '../../constants';
 import type { AbiItem } from '../../types';
 import {
   EnvironmentAwareInput,
@@ -74,8 +76,13 @@ export const RequestSettings: React.FC = () => {
   };
 
   // Preset ABI load
-  const loadPresetAbi = (preset: 'ERC20' | 'ERC721') => {
-    const selectedAbi = preset === 'ERC20' ? ERC20_ABI : ERC721_ABI;
+  const loadPresetAbi = (preset: 'ERC20' | 'ERC721' | 'ERC1155') => {
+    const selectedAbi =
+      preset === 'ERC20'
+        ? ERC20_ABI
+        : preset === 'ERC721'
+          ? ERC721_ABI
+          : ERC1155_ABI;
     updateActiveRequest({
       abi: JSON.stringify(selectedAbi, null, 2),
       functionName: '',
@@ -357,26 +364,32 @@ export const RequestSettings: React.FC = () => {
                     <label className="text-xs font-semibold text-foreground/75">
                       Contract ABI
                     </label>
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => loadPresetAbi('ERC20')}
-                        className="h-6 px-1 text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer"
+                    <DropdownMenu
+                      align="right"
+                      className="w-40"
+                      trigger={
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-1.5 text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer"
+                        >
+                          Load Preset ABI
+                        </Button>
+                      }
+                    >
+                      <DropdownMenuItem onClick={() => loadPresetAbi('ERC20')}>
+                        ERC20 Preset
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => loadPresetAbi('ERC721')}>
+                        ERC721 Preset
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => loadPresetAbi('ERC1155')}
                       >
-                        Load ERC20 Preset
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => loadPresetAbi('ERC721')}
-                        className="h-6 px-1 text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer"
-                      >
-                        Load ERC721 Preset
-                      </Button>
-                    </div>
+                        ERC1155 Preset
+                      </DropdownMenuItem>
+                    </DropdownMenu>
                   </div>
                   <Textarea
                     placeholder="Paste contract ABI array (JSON format)"

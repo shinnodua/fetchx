@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ChevronRightIcon,
   CloseIcon,
+  EnvironmentIcon,
   ImportIcon,
   PlusIcon,
 } from '../../../../assets/svgs';
@@ -27,6 +28,7 @@ export const TabsHeader: React.FC = () => {
     revealRequestInSidebar,
     setTargetColId,
     setImportReqOpen,
+    setImportContractOpen,
     addCollection,
     addNewTab,
     setTabToClose,
@@ -140,6 +142,19 @@ export const TabsHeader: React.FC = () => {
     if (colId) {
       setTargetColId(colId);
       setImportReqOpen(true);
+    }
+  };
+
+  const handleOpenImportContractDialog = () => {
+    let colId = targetColId || collections[0]?.id;
+    if (!colId && collections.length === 0) {
+      addCollection('Default Collection');
+      const updatedCols = useWorkspaceStore.getState().collections;
+      colId = updatedCols[updatedCols.length - 1]?.id;
+    }
+    if (colId) {
+      setTargetColId(colId);
+      setImportContractOpen(true);
     }
   };
 
@@ -289,6 +304,7 @@ export const TabsHeader: React.FC = () => {
       <div className="flex shrink-0 items-center border-l border-foreground/10 px-2">
         <DropdownMenu
           align="right"
+          className="w-56"
           trigger={
             <Button
               type="button"
@@ -311,6 +327,16 @@ export const TabsHeader: React.FC = () => {
           <DropdownMenuItem onClick={handleOpenImportDialog} className="gap-2">
             <ImportIcon title="Import request" className="w-4 h-4" />
             <span>Import Request</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={handleOpenImportContractDialog}
+            className="gap-2"
+          >
+            <EnvironmentIcon
+              title="Import contract"
+              className="w-4 h-4 shrink-0"
+            />
+            <span>Import Contract/Program</span>
           </DropdownMenuItem>
         </DropdownMenu>
       </div>
