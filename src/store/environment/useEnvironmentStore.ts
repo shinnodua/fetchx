@@ -4,15 +4,15 @@ import type {
   Environment,
   EnvironmentVariable,
   SensitiveCryptoConfig,
-} from '../features/workspace/types';
+} from '../../features/workspace/types';
 import {
   createSensitiveCryptoConfig,
   decryptSensitiveValue,
   deriveSensitiveCryptoKey,
   encryptSensitiveValue,
   validateSensitivePin,
-} from '../features/workspace/utils/sensitiveCrypto';
-import { createId } from './workspaceStoreUtils';
+} from '../../features/workspace/utils/sensitiveCrypto';
+import { createId } from '../workspace/workspaceStoreUtils';
 
 interface EnvironmentState {
   environments: Environment[];
@@ -229,7 +229,8 @@ export const useEnvironmentStore = create<EnvironmentState>()(
         } catch {
           sensitiveCryptoKey = null;
           set({
-            sensitiveCryptoError: 'Could not unlock sensitive values.',
+            sensitiveCryptoError:
+              'Incorrect Pincode. Could not unlock sensitive values.',
             sensitiveUnlocked: false,
           });
           return false;

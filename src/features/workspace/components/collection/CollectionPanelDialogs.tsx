@@ -1,5 +1,5 @@
 import type React from 'react';
-import { Button, Dialog, Input } from '../../../components';
+import { Button, Dialog, Input } from '../../../../components';
 import type { RenameTarget } from './collectionPanelTypes';
 
 interface CollectionPanelDialogsProps {

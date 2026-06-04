@@ -1,6 +1,6 @@
 import type React from 'react';
 import { useMemo } from 'react';
-import { TrashIcon } from '../../../assets/svgs';
+import { TrashIcon } from '../../../../assets/svgs';
 import {
   Button,
   Select,
@@ -10,14 +10,14 @@ import {
   TabsTrigger,
   Textarea,
   useToast,
-} from '../../../components';
-import { useWorkspaceStore } from '../../../store/useWorkspaceStore';
-import { ERC20_ABI, ERC721_ABI } from '../constants';
-import type { AbiItem } from '../types';
+} from '../../../../components';
+import { useWorkspaceStore } from '../../../../store';
+import { ERC20_ABI, ERC721_ABI } from '../../constants';
+import type { AbiItem } from '../../types';
 import {
   EnvironmentAwareInput,
   EnvironmentAwareTextarea,
-} from './EnvironmentAwareField';
+} from '../environment/EnvironmentAwareField';
 
 export const RequestSettings: React.FC = () => {
   const { toast } = useToast();

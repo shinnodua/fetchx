@@ -7,14 +7,16 @@ import {
   executeRestCall,
   executeWriteCall,
 } from '../../services/requestExecutor';
-import { useEnvironmentStore } from '../../store/useEnvironmentStore';
-import { useWorkspaceStore } from '../../store/useWorkspaceStore';
-import { ActiveRequestWorkspace } from './components/ActiveRequestWorkspace';
-import { CollectionsPanel } from './components/CollectionsPanel';
-import { EnvironmentDialog } from './components/EnvironmentDialog';
-import { TabsHeader } from './components/TabsHeader';
-import { WorkspaceDialogs } from './components/WorkspaceDialogs';
-import { WorkspaceEmptyState } from './components/WorkspaceEmptyState';
+import { useEnvironmentStore, useWorkspaceStore } from '../../store';
+import {
+  ActiveRequestWorkspace,
+  CollectionsPanel,
+  EnvironmentDialog,
+  TabsHeader,
+  UnlockSensitiveDialog,
+  WorkspaceDialogs,
+  WorkspaceEmptyState,
+} from './components';
 import type { AbiItem, RequestItem } from './types';
 import {
   getLockedSensitiveVariableNames,
@@ -50,9 +52,8 @@ export const WorkspacePage: React.FC = () => {
     initializeDraft,
   } = useWorkspaceStore();
 
-  const { environments, activeEnvironmentId } = useEnvironmentStore();
-
   const [selectedColId, setSelectedColId] = useState('');
+  const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
 
   const prevLengthRef = useRef(collections.length);
   useEffect(() => {
@@ -218,6 +219,30 @@ export const WorkspacePage: React.FC = () => {
   // Execute request
   const handleRunRequest = async () => {
     if (!activeRequest) return;
+
+    // Get current active environment variables from the freshest state to avoid stale closures
+    const envStore = useEnvironmentStore.getState();
+    const activeEnv = envStore.environments.find(
+      (e) => e.id === envStore.activeEnvironmentId,
+    );
+    const activeVariables = activeEnv ? activeEnv.variables : [];
+    const requestTexts = [
+      activeRequest.target,
+      activeRequest.body || '',
+      ...(activeRequest.headers || []).flatMap((h) => [h.key, h.value]),
+      ...(activeRequest.queryParams || []).flatMap((qp) => [qp.key, qp.value]),
+      ...Object.values(activeRequest.args || {}),
+    ];
+    const lockedSensitiveNames = getLockedSensitiveVariableNames(
+      requestTexts,
+      activeVariables,
+    );
+
+    if (lockedSensitiveNames.length > 0) {
+      setUnlockDialogOpen(true);
+      return;
+    }
+
     setIsLoading(true);
 
     // Reset response status
@@ -231,21 +256,6 @@ export const WorkspacePage: React.FC = () => {
     });
 
     const start = Date.now();
-
-    // Get current active environment variables
-    const activeEnv = environments.find((e) => e.id === activeEnvironmentId);
-    const activeVariables = activeEnv ? activeEnv.variables : [];
-    const requestTexts = [
-      activeRequest.target,
-      activeRequest.body || '',
-      ...(activeRequest.headers || []).flatMap((h) => [h.key, h.value]),
-      ...(activeRequest.queryParams || []).flatMap((qp) => [qp.key, qp.value]),
-      ...Object.values(activeRequest.args || {}),
-    ];
-    const lockedSensitiveNames = getLockedSensitiveVariableNames(
-      requestTexts,
-      activeVariables,
-    );
 
     // Resolve variables in request fields before execution
     const resolvedTarget = resolveVariables(
@@ -583,6 +593,16 @@ export const WorkspacePage: React.FC = () => {
 
       <WorkspaceDialogs />
       <EnvironmentDialog />
+
+      <UnlockSensitiveDialog
+        isOpen={unlockDialogOpen}
+        onClose={() => setUnlockDialogOpen(false)}
+        onUnlockSuccess={() => {
+          setTimeout(() => {
+            void handleRunRequest();
+          }, 100);
+        }}
+      />
     </div>
   );
 };

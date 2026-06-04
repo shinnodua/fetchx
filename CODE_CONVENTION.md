@@ -17,6 +17,10 @@ src/
 ├── features/                # Domain-specific code
 │   ├── workspace/           # Workspace & client request feature
 │   │   ├── components/      # Reusable feature UI pieces and composed views
+│   │   │   ├── environment/ # Environment selector, dialog, and encryption panel
+│   │   │   ├── collection/  # Collection sidebar panel and export/import tools
+│   │   │   ├── request/     # Active request editor, response pane, and tabs header
+│   │   │   └── index.ts     # Component barrel export file
 │   │   ├── hooks/           # Workspace-only React hooks
 │   │   ├── utils/           # Workspace-only pure helpers (parsing, naming, transforms)
 │   │   ├── types.ts         # Domain models (RequestItem, AbiItem, etc.)
@@ -26,8 +30,14 @@ src/
 │       ├── components/      # Colors, typography, component groups
 │       └── DesignSystemPage.tsx
 ├── store/                   # Global shared Zustand stores
-│   ├── index.ts             # Global theme config
-│   └── useWorkspaceStore.ts # Workspace collections and tabs state
+│   ├── index.ts             # Global exports & theme config
+│   ├── environment/         # Environment state management
+│   │   └── useEnvironmentStore.ts
+│   └── workspace/           # Workspace state management
+│       ├── useWorkspaceStore.ts
+│       ├── workspaceStoreActions.ts
+│       ├── workspaceStoreTypes.ts
+│       └── workspaceStoreUtils.ts
 ├── services/                # Shared application services
 │   └── requestExecutor.ts   # On-chain queries & HTTP REST logic
 ├── components/              # Shared Flamingo UI Library
@@ -57,6 +67,8 @@ Route files under `src/routes/` must be thin entry points. They should **only** 
 
 ### 2. Feature Modularity
 Each folder inside `src/features/` should contain self-contained types, constants, components, and hooks. Components that are only used within a single feature must live in `src/features/<feature-name>/components/`.
+
+When a feature contains many components, group them inside `components/` into named subdirectories representing distinct sub-features (e.g., `environment/`, `collection/`, `request/`). Create a barrel `index.ts` file in the root of `components/` to export all components, which keeps external page imports clean and avoids deep nested directory import paths.
 
 Keep files small and purpose-specific. If a file starts mixing unrelated responsibilities, split it before adding more logic. A practical target is:
 - **Page files** (`WorkspacePage.tsx`, `DesignSystemPage.tsx`): orchestration only. They may wire stores, top-level hooks, URL/page state, and pass callbacks to child components.

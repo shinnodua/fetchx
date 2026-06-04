@@ -1,9 +1,9 @@
 import type React from 'react';
-import { Button, Input, Select } from '../../../components';
-import { cn } from '../../../utils/cn';
-import { METHOD_OPTIONS, NETWORK_OPTIONS } from '../constants';
-import type { CollectionItem, RequestItem } from '../types';
-import { EnvironmentAwareInput } from './EnvironmentAwareField';
+import { Button, Input, Select } from '../../../../components';
+import { cn } from '../../../../utils/cn';
+import { METHOD_OPTIONS, NETWORK_OPTIONS } from '../../constants';
+import type { CollectionItem, RequestItem } from '../../types';
+import { EnvironmentAwareInput } from '../environment/EnvironmentAwareField';
 import { RequestSettings } from './RequestSettings';
 import { ResponsePane } from './ResponsePane';
 

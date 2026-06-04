@@ -1,5 +1,8 @@
-import { ERC20_ABI } from '../features/workspace/constants';
-import type { CollectionItem, RequestItem } from '../features/workspace/types';
+import { ERC20_ABI } from '../../features/workspace/constants';
+import type {
+  CollectionItem,
+  RequestItem,
+} from '../../features/workspace/types';
 
 export const createId = (prefix: 'c' | 'r' | 'env' | 'v') =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;

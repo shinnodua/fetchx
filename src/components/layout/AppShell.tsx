@@ -1,8 +1,10 @@
 import { useLocation } from '@tanstack/react-router';
 import type React from 'react';
 import { useEffect } from 'react';
-import { CollectionTransferButtons } from '../../features/workspace/components/CollectionTransferButtons';
-import { EnvironmentSelector } from '../../features/workspace/components/EnvironmentSelector';
+import {
+  CollectionTransferButtons,
+  EnvironmentSelector,
+} from '../../features/workspace/components';
 import { useStore } from '../../store';
 import { AppFooter } from './AppFooter';
 import { AppHeader } from './AppHeader';

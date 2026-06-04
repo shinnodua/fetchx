@@ -4,9 +4,9 @@ import {
   type InputProps,
   Textarea,
   type TextareaProps,
-} from '../../../components';
-import { useEnvironmentStore } from '../../../store/useEnvironmentStore';
-import type { EnvironmentVariable } from '../types';
+} from '../../../../components';
+import { useEnvironmentStore } from '../../../../store';
+import type { EnvironmentVariable } from '../../types';
 
 const VARIABLE_TOKEN_REGEX = /{{\s*([^{}\s]+)\s*}}/g;
 
@@ -36,6 +36,43 @@ function getEnvironmentValue(
   return variableLookup.get(variableName.trim());
 }
 
+function getTokenColorClass(
+  resolvedVariable: EnvironmentVariablePreview | undefined,
+) {
+  if (resolvedVariable?.sensitive) {
+    return 'text-primary-700 decoration-primary-500 dark:text-primary-200';
+  }
+
+  if (resolvedVariable === undefined) {
+    return 'text-foreground/55 decoration-foreground/40';
+  }
+
+  return 'text-secondary-800 decoration-secondary-500 dark:text-secondary-200';
+}
+
+function renderEnvironmentTooltip(
+  token: string,
+  resolvedVariable: EnvironmentVariablePreview | undefined,
+) {
+  return (
+    <>
+      <span className="text-secondary-300 dark:text-secondary-700">
+        {token}
+      </span>
+      <span className="text-background/60"> = </span>
+      {resolvedVariable === undefined ? (
+        <span className="text-background">Not set in active environment</span>
+      ) : resolvedVariable.sensitive ? (
+        <span className="text-primary-300 dark:text-primary-600">
+          Sensitive value. View in Manage Environments
+        </span>
+      ) : (
+        <span className="text-background">{resolvedVariable.value}</span>
+      )}
+    </>
+  );
+}
+
 function renderEnvironmentHighlights(
   value: string,
   variableLookup: Map<string, EnvironmentVariablePreview>,
@@ -54,26 +91,16 @@ function renderEnvironmentHighlights(
     }
 
     const resolvedVariable = getEnvironmentValue(variableName, variableLookup);
-    const tooltipText =
-      resolvedVariable === undefined
-        ? `${token} = Not set in active environment`
-        : `${token} = ${
-            resolvedVariable.sensitive
-              ? 'Sensitive value'
-              : resolvedVariable.value
-          }`;
     parts.push(
       <span
         key={`${matchIndex}-${token}`}
-        className={`pointer-events-auto relative inline cursor-help underline decoration-dotted underline-offset-4 ${
-          resolvedVariable === undefined
-            ? 'text-primary-700 decoration-primary-500 dark:text-primary-200'
-            : 'text-secondary-800 decoration-secondary-500 dark:text-secondary-200'
-        } group/env-token`}
+        className={`pointer-events-auto relative inline cursor-help underline decoration-dotted underline-offset-4 ${getTokenColorClass(
+          resolvedVariable,
+        )} group/env-token`}
       >
         {token}
         <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 hidden w-max min-w-max max-w-[calc(100vw-4rem)] -translate-x-1/2 whitespace-pre rounded-lg bg-foreground px-3 py-2 text-xs font-medium text-background shadow-lg group-hover/env-token:block">
-          {tooltipText}
+          {renderEnvironmentTooltip(token, resolvedVariable)}
         </span>
       </span>,
     );

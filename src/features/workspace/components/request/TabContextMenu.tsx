@@ -1,12 +1,12 @@
 import type React from 'react';
 import { useState } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from '../../../assets/svgs';
+import { ChevronLeftIcon, ChevronRightIcon } from '../../../../assets/svgs';
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   useToast,
-} from '../../../components';
-import type { RequestItem } from '../types';
+} from '../../../../components';
+import type { RequestItem } from '../../types';
 import {
   copyAsCurlBash,
   copyAsCurlCmd,
@@ -15,7 +15,7 @@ import {
   copyLinkAddress,
   copyRequestHeaders,
   copyResponse,
-} from '../utils/requestExport';
+} from '../../utils/requestExport';
 
 interface TabContextMenuProps {
   tabId: string;

@@ -1,5 +1,8 @@
 import type { StateCreator } from 'zustand';
-import type { CollectionItem, RequestItem } from '../features/workspace/types';
+import type {
+  CollectionItem,
+  RequestItem,
+} from '../../features/workspace/types';
 import type { WorkspaceState } from './workspaceStoreTypes';
 import {
   cloneRequest,

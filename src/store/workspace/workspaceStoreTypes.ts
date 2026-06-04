@@ -1,4 +1,7 @@
-import type { CollectionItem, RequestItem } from '../features/workspace/types';
+import type {
+  CollectionItem,
+  RequestItem,
+} from '../../features/workspace/types';
 
 export interface WorkspaceState {
   collections: CollectionItem[];

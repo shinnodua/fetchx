@@ -20,3 +20,6 @@ export const useStore = create<AppState>()(
     },
   ),
 );
+
+export * from './environment/useEnvironmentStore';
+export * from './workspace/useWorkspaceStore';

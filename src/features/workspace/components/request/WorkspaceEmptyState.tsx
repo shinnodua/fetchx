@@ -1,5 +1,5 @@
 import type React from 'react';
-import { Badge, Button, Card, CardTitle } from '../../../components';
+import { Badge, Button, Card, CardTitle } from '../../../../components';
 
 interface WorkspaceEmptyStateProps {
   onNewRequest: () => void;

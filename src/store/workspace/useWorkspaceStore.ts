@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { DEFAULT_COLLECTIONS } from '../features/workspace/constants';
+import { DEFAULT_COLLECTIONS } from '../../features/workspace/constants';
 import { createWorkspaceActions } from './workspaceStoreActions';
 import type { WorkspaceState } from './workspaceStoreTypes';
 

@@ -26,6 +26,7 @@ This project uses Biome for linting and formatting.
 
 ### 4. Adhere to the Feature-Based Architecture
 We organize source files around capabilities under `src/features/`. Route files under `src/routes/` are thin wrapper modules. Global stores and services go to `src/store/` and `src/services/`.
+- Before implementing or modifying code, read and follow **[CODE_CONVENTION.md](./CODE_CONVENTION.md)**. Code changes must comply with its architecture, file placement, component, styling, TypeScript, and Biome rules.
 - Detailed code convention guide: [CODE_CONVENTION.md](./CODE_CONVENTION.md)
 
 ### 5. Skip Manual Verification unless Requested

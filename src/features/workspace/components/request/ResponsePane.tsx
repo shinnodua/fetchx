@@ -1,7 +1,7 @@
 import type React from 'react';
 import { useMemo } from 'react';
-import { Badge } from '../../../components';
-import { useWorkspaceStore } from '../../../store/useWorkspaceStore';
+import { Badge } from '../../../../components';
+import { useWorkspaceStore } from '../../../../store';
 
 export const ResponsePane: React.FC = () => {
   const { collections, activeTabId, drafts } = useWorkspaceStore();

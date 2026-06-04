@@ -1,10 +1,16 @@
 import type React from 'react';
 import { useState } from 'react';
-import { Button, Dialog, Input, Select, Textarea } from '../../../components';
-import { useWorkspaceStore } from '../../../store/useWorkspaceStore';
-import { METHOD_OPTIONS } from '../constants';
-import type { RequestItem } from '../types';
-import { parseRequestImportContent } from '../utils/requestImport';
+import {
+  Button,
+  Dialog,
+  Input,
+  Select,
+  Textarea,
+} from '../../../../components';
+import { useWorkspaceStore } from '../../../../store';
+import { METHOD_OPTIONS } from '../../constants';
+import type { RequestItem } from '../../types';
+import { parseRequestImportContent } from '../../utils/requestImport';
 
 export const WorkspaceDialogs: React.FC = () => {
   const {

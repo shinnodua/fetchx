@@ -6,19 +6,19 @@ import {
   FolderIcon,
   PlusIcon,
   SearchIcon,
-} from '../../../assets/svgs';
+} from '../../../../assets/svgs';
 import {
   Button,
   DropdownMenu,
   DropdownMenuItem,
   DropdownMenuSeparator,
   Input,
-} from '../../../components';
-import { useWorkspaceStore } from '../../../store/useWorkspaceStore';
-import type { CollectionItem } from '../types';
+} from '../../../../components';
+import { useWorkspaceStore } from '../../../../store';
+import type { CollectionItem } from '../../types';
+import { RequestMenuItems } from '../request/RequestMenuItems';
 import { CollectionPanelDialogs } from './CollectionPanelDialogs';
 import type { ContextMenuTarget, RenameTarget } from './collectionPanelTypes';
-import { RequestMenuItems } from './RequestMenuItems';
 
 export const CollectionsPanel: React.FC = () => {
   const {

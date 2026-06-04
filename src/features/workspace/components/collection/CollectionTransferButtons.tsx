@@ -1,15 +1,15 @@
 import type React from 'react';
 import { useRef, useState } from 'react';
-import { Button } from '../../../components/ui/Button';
-import { Checkbox } from '../../../components/ui/Checkbox';
-import { Dialog } from '../../../components/ui/Dialog';
-import { useToast } from '../../../components/ui/Toast';
-import { useWorkspaceStore } from '../../../store/useWorkspaceStore';
-import type { CollectionItem } from '../types';
+import { Button } from '../../../../components/ui/Button';
+import { Checkbox } from '../../../../components/ui/Checkbox';
+import { Dialog } from '../../../../components/ui/Dialog';
+import { useToast } from '../../../../components/ui/Toast';
+import { useWorkspaceStore } from '../../../../store';
+import type { CollectionItem } from '../../types';
 import {
   createCollectionsExportPayload,
   parseCollectionsImportPayload,
-} from '../utils/collectionTransfer';
+} from '../../utils/collectionTransfer';
 
 export const CollectionTransferButtons: React.FC = () => {
   const { toast } = useToast();

@@ -1,12 +1,12 @@
 import type React from 'react';
 import { useState } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from '../../../assets/svgs';
+import { ChevronLeftIcon, ChevronRightIcon } from '../../../../assets/svgs';
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   useToast,
-} from '../../../components';
-import { useWorkspaceStore } from '../../../store/useWorkspaceStore';
+} from '../../../../components';
+import { useWorkspaceStore } from '../../../../store';
 import {
   copyAsCurlBash,
   copyAsCurlCmd,
@@ -15,8 +15,8 @@ import {
   copyLinkAddress,
   copyRequestHeaders,
   copyResponse,
-} from '../utils/requestExport';
-import type { RenameTarget } from './collectionPanelTypes';
+} from '../../utils/requestExport';
+import type { RenameTarget } from '../collection/collectionPanelTypes';
 
 interface RequestMenuItemsProps {
   req: { id: string; name: string };

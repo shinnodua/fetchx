@@ -3,14 +3,14 @@ import {
   CheckIcon,
   ChevronDownIcon,
   EnvironmentIcon,
-} from '../../../assets/svgs';
+} from '../../../../assets/svgs';
 import {
   Button,
   DropdownMenu,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from '../../../components';
-import { useEnvironmentStore } from '../../../store/useEnvironmentStore';
+} from '../../../../components';
+import { useEnvironmentStore } from '../../../../store';
 
 export const EnvironmentSelector: React.FC = () => {
   const {
