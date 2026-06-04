@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ChevronDownIcon, ChevronRightIcon } from '../../../../assets/svgs';
 import {
   Button,
+  Dialog,
   Tabs,
   TabsContent,
   TabsList,
@@ -14,9 +15,13 @@ interface ResponsePayloadViewerProps {
 }
 
 type JsonPrimitive = string | number | boolean | null;
+type PayloadViewport = 'panel' | 'dialog';
 
 const inspectorRowClassName =
   'grid grid-cols-[minmax(8rem,0.45fr)_minmax(10rem,1fr)_auto] items-start gap-3 border-b border-foreground/10 px-3 py-2 font-mono text-xs last:border-b-0';
+
+const getScrollHeightClassName = (viewport: PayloadViewport) =>
+  viewport === 'dialog' ? 'max-h-[calc(100vh-14rem)]' : 'max-h-80';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -47,12 +52,17 @@ const getTypeLabel = (value: unknown) => {
   return typeof value;
 };
 
-const RawPayload: React.FC<{ data: unknown }> = ({ data }) => {
+const RawPayload: React.FC<{
+  data: unknown;
+  viewport?: PayloadViewport;
+}> = ({ data, viewport = 'panel' }) => {
   const lines = getPayloadText(data).split('\n');
 
   return (
     <div className="isolate overflow-hidden rounded-xl border border-foreground/10 bg-foreground/5 [clip-path:inset(0_round_0.75rem)]">
-      <div className="max-h-80 overflow-auto rounded-[inherit]">
+      <div
+        className={`${getScrollHeightClassName(viewport)} overflow-auto rounded-[inherit]`}
+      >
         <pre className="grid min-w-full grid-cols-[auto_1fr] text-xs leading-5 text-foreground/80">
           {lines.map((line, index) => {
             const lineNumber = index + 1;
@@ -232,7 +242,10 @@ const InspectorNode: React.FC<{
   );
 };
 
-const PayloadPreview: React.FC<{ data: unknown }> = ({ data }) => {
+const PayloadPreview: React.FC<{
+  data: unknown;
+  viewport?: PayloadViewport;
+}> = ({ data, viewport = 'panel' }) => {
   const [collapsedPaths, setCollapsedPaths] = useState<Set<string>>(
     () => new Set(),
   );
@@ -252,12 +265,14 @@ const PayloadPreview: React.FC<{ data: unknown }> = ({ data }) => {
   };
 
   if (typeof data === 'string') {
-    return <RawPayload data={data} />;
+    return <RawPayload data={data} viewport={viewport} />;
   }
 
   return (
     <div className="isolate overflow-hidden rounded-xl border border-foreground/10 bg-foreground/5 [clip-path:inset(0_round_0.75rem)]">
-      <div className="max-h-80 overflow-auto rounded-[inherit]">
+      <div
+        className={`${getScrollHeightClassName(viewport)} overflow-auto rounded-[inherit]`}
+      >
         <div className="sticky top-0 z-10 grid grid-cols-[minmax(8rem,0.45fr)_minmax(10rem,1fr)_auto] gap-3 rounded-t-[inherit] border-b border-foreground/10 bg-background/95 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-foreground/45 backdrop-blur">
           <span>Key</span>
           <span>Value</span>
@@ -274,36 +289,66 @@ const PayloadPreview: React.FC<{ data: unknown }> = ({ data }) => {
   );
 };
 
+const PayloadTabs: React.FC<{
+  data: unknown;
+  viewport?: PayloadViewport;
+}> = ({ data, viewport = 'panel' }) => (
+  <Tabs defaultValue="preview">
+    <TabsList className="h-9 rounded-lg">
+      <TabsTrigger value="preview" className="h-7 rounded-md px-3 text-xs">
+        Preview
+      </TabsTrigger>
+      <TabsTrigger value="raw" className="h-7 rounded-md px-3 text-xs">
+        Raw
+      </TabsTrigger>
+    </TabsList>
+    <TabsContent value="preview" className="mt-2">
+      <PayloadPreview data={data} viewport={viewport} />
+    </TabsContent>
+    <TabsContent value="raw" className="mt-2">
+      <RawPayload data={data} viewport={viewport} />
+    </TabsContent>
+  </Tabs>
+);
+
 export const ResponsePayloadViewer: React.FC<ResponsePayloadViewerProps> = ({
   data,
 }) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-[10px] font-semibold text-foreground/50 uppercase tracking-wider">
           Payload Output
         </span>
-        <span className="rounded-full border border-foreground/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-foreground/40">
-          {getTypeLabel(data)}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full border border-foreground/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-foreground/40">
+            {getTypeLabel(data)}
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsDialogOpen(true)}
+            className="h-7 rounded-lg px-2 text-[10px] font-semibold uppercase tracking-wider text-primary-600 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200"
+          >
+            Expand
+          </Button>
+        </div>
       </div>
 
-      <Tabs defaultValue="preview">
-        <TabsList className="h-9 rounded-lg">
-          <TabsTrigger value="preview" className="h-7 rounded-md px-3 text-xs">
-            Preview
-          </TabsTrigger>
-          <TabsTrigger value="raw" className="h-7 rounded-md px-3 text-xs">
-            Raw
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="preview" className="mt-2">
-          <PayloadPreview data={data} />
-        </TabsContent>
-        <TabsContent value="raw" className="mt-2">
-          <RawPayload data={data} />
-        </TabsContent>
-      </Tabs>
+      <PayloadTabs data={data} />
+
+      <Dialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        title="Payload Output"
+        description={getTypeLabel(data)}
+        className="flex h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-none flex-col overflow-hidden"
+      >
+        <PayloadTabs data={data} viewport="dialog" />
+      </Dialog>
     </div>
   );
 };
