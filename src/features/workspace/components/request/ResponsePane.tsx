@@ -1,7 +1,7 @@
 import type React from 'react';
 import { useMemo } from 'react';
 import { CopyIcon } from '../../../../assets/svgs';
-import { Badge, Button, useToast } from '../../../../components';
+import { Badge, Button, Skeleton, useToast } from '../../../../components';
 import { useWorkspaceStore } from '../../../../store';
 import { copyResponse } from '../../utils/requestExport';
 
@@ -124,19 +124,33 @@ export const ResponsePane: React.FC = () => {
           )}
 
           {/* Response Body Code Preview */}
-          {activeRequest.response.data !== undefined && (
-            <div className="space-y-1">
+          {activeRequest.response.status === 'Pending' ? (
+            <div className="space-y-2">
               <span className="text-[10px] font-semibold text-foreground/50 uppercase tracking-wider block">
                 Payload Output
               </span>
-              <pre className="bg-foreground/5 p-4 rounded-xl overflow-x-auto text-xs font-mono text-foreground/80 max-h-80 border border-foreground/10">
-                <code>
-                  {typeof activeRequest.response.data === 'object'
-                    ? JSON.stringify(activeRequest.response.data, null, 2)
-                    : String(activeRequest.response.data)}
-                </code>
-              </pre>
+              <div className="bg-foreground/5 p-4 rounded-xl space-y-2.5 border border-foreground/10 animate-pulse">
+                <Skeleton className="h-3 w-[80%] rounded-md bg-foreground/10" />
+                <Skeleton className="h-3 w-[60%] rounded-md bg-foreground/10" />
+                <Skeleton className="h-3 w-[70%] rounded-md bg-foreground/10" />
+              </div>
             </div>
+          ) : (
+            activeRequest.response.data !== undefined &&
+            activeRequest.response.data !== null && (
+              <div className="space-y-1">
+                <span className="text-[10px] font-semibold text-foreground/50 uppercase tracking-wider block">
+                  Payload Output
+                </span>
+                <pre className="bg-foreground/5 p-4 rounded-xl overflow-x-auto text-xs font-mono text-foreground/80 max-h-80 border border-foreground/10">
+                  <code>
+                    {typeof activeRequest.response.data === 'object'
+                      ? JSON.stringify(activeRequest.response.data, null, 2)
+                      : String(activeRequest.response.data)}
+                  </code>
+                </pre>
+              </div>
+            )
           )}
 
           {/* Debug Execution Logs */}
