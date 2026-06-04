@@ -4,6 +4,7 @@ import { ChevronDownIcon, ChevronRightIcon } from '../../../../assets/svgs';
 import {
   Button,
   Dialog,
+  Input,
   Tabs,
   TabsContent,
   TabsList,
@@ -12,6 +13,7 @@ import {
 
 interface ResponsePayloadViewerProps {
   data: unknown;
+  onSave?: (name: string) => boolean;
 }
 
 type JsonPrimitive = string | number | boolean | null;
@@ -50,6 +52,22 @@ const getTypeLabel = (value: unknown) => {
   if (value === null) return 'null';
 
   return typeof value;
+};
+
+const createDefaultResponseName = () => {
+  const now = new Date();
+  const date = now.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  const time = now.toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+
+  return `${date} ${time}`;
 };
 
 const RawPayload: React.FC<{
@@ -292,16 +310,20 @@ const PayloadPreview: React.FC<{
 const PayloadTabs: React.FC<{
   data: unknown;
   viewport?: PayloadViewport;
-}> = ({ data, viewport = 'panel' }) => (
+  actions?: React.ReactNode;
+}> = ({ data, viewport = 'panel', actions }) => (
   <Tabs defaultValue="preview">
-    <TabsList className="h-9 rounded-lg">
-      <TabsTrigger value="preview" className="h-7 rounded-md px-3 text-xs">
-        Preview
-      </TabsTrigger>
-      <TabsTrigger value="raw" className="h-7 rounded-md px-3 text-xs">
-        Raw
-      </TabsTrigger>
-    </TabsList>
+    <div className="flex flex-wrap items-center justify-between gap-2">
+      <TabsList className="h-9 rounded-lg">
+        <TabsTrigger value="preview" className="h-7 rounded-md px-3 text-xs">
+          Preview
+        </TabsTrigger>
+        <TabsTrigger value="raw" className="h-7 rounded-md px-3 text-xs">
+          Raw
+        </TabsTrigger>
+      </TabsList>
+      {actions && <div className="flex items-center gap-2">{actions}</div>}
+    </div>
     <TabsContent value="preview" className="mt-2">
       <PayloadPreview data={data} viewport={viewport} />
     </TabsContent>
@@ -311,10 +333,42 @@ const PayloadTabs: React.FC<{
   </Tabs>
 );
 
+export const ResponsePayloadDialog: React.FC<{
+  data: unknown;
+  isOpen: boolean;
+  onClose: () => void;
+  title?: React.ReactNode;
+}> = ({ data, isOpen, onClose, title = 'Payload Output' }) => (
+  <Dialog
+    isOpen={isOpen}
+    onClose={onClose}
+    title={title}
+    description={getTypeLabel(data)}
+    className="flex h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-none flex-col overflow-hidden"
+  >
+    <PayloadTabs data={data} viewport="dialog" />
+  </Dialog>
+);
+
 export const ResponsePayloadViewer: React.FC<ResponsePayloadViewerProps> = ({
   data,
+  onSave,
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [responseName, setResponseName] = useState(createDefaultResponseName);
+
+  const openSaveDialog = () => {
+    setResponseName(createDefaultResponseName());
+    setIsSaveDialogOpen(true);
+  };
+
+  const handleSaveResponse = () => {
+    const didSave = onSave?.(responseName) ?? false;
+    if (didSave) {
+      setIsSaveDialogOpen(false);
+    }
+  };
 
   return (
     <div className="space-y-2">
@@ -326,29 +380,75 @@ export const ResponsePayloadViewer: React.FC<ResponsePayloadViewerProps> = ({
           <span className="rounded-full border border-foreground/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-foreground/40">
             {getTypeLabel(data)}
           </span>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsDialogOpen(true)}
-            className="h-7 rounded-lg px-2 text-[10px] font-semibold uppercase tracking-wider text-primary-600 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200"
-          >
-            Expand
-          </Button>
         </div>
       </div>
 
-      <PayloadTabs data={data} />
+      <PayloadTabs
+        data={data}
+        actions={
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsDialogOpen(true)}
+              className="h-7 rounded-lg px-2 text-[10px] font-semibold uppercase tracking-wider text-primary-600 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200"
+            >
+              Expand
+            </Button>
+            {onSave && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={openSaveDialog}
+                className="h-7 rounded-lg px-2 text-[10px] font-semibold uppercase tracking-wider text-primary-600 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200"
+              >
+                Save
+              </Button>
+            )}
+          </>
+        }
+      />
 
-      <Dialog
+      <ResponsePayloadDialog
+        data={data}
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
-        title="Payload Output"
-        description={getTypeLabel(data)}
-        className="flex h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-none flex-col overflow-hidden"
-      >
-        <PayloadTabs data={data} viewport="dialog" />
-      </Dialog>
+      />
+
+      {onSave && (
+        <Dialog
+          isOpen={isSaveDialogOpen}
+          onClose={() => setIsSaveDialogOpen(false)}
+          title="Save Response"
+          description="Name this response before saving it under the request."
+        >
+          <div className="space-y-4">
+            <Input
+              value={responseName}
+              onChange={(event) => setResponseName(event.target.value)}
+              placeholder="Response name"
+            />
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsSaveDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleSaveResponse}
+                disabled={!responseName.trim()}
+              >
+                Save Response
+              </Button>
+            </div>
+          </div>
+        </Dialog>
+      )}
     </div>
   );
 };

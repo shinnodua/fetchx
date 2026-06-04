@@ -7,13 +7,18 @@ interface CollectionPanelDialogsProps {
   renameValue: string;
   colToDelete: { id: string; name: string } | null;
   reqToDelete: { id: string; name: string } | null;
+  savedResponseToDelete: { reqId: string; id: string; name: string } | null;
   setRenameValue: (value: string) => void;
   closeRenameDialog: () => void;
   handleRenameSubmit: () => void;
   setColToDelete: (target: { id: string; name: string } | null) => void;
   setReqToDelete: (target: { id: string; name: string } | null) => void;
+  setSavedResponseToDelete: (
+    target: { reqId: string; id: string; name: string } | null,
+  ) => void;
   deleteCollection: (id: string) => void;
   deleteRequest: (id: string) => void;
+  deleteSavedResponse: (reqId: string, responseId: string) => void;
 }
 
 export const CollectionPanelDialogs: React.FC<CollectionPanelDialogsProps> = ({
@@ -21,13 +26,16 @@ export const CollectionPanelDialogs: React.FC<CollectionPanelDialogsProps> = ({
   renameValue,
   colToDelete,
   reqToDelete,
+  savedResponseToDelete,
   setRenameValue,
   closeRenameDialog,
   handleRenameSubmit,
   setColToDelete,
   setReqToDelete,
+  setSavedResponseToDelete,
   deleteCollection,
   deleteRequest,
+  deleteSavedResponse,
 }) => (
   <>
     <Dialog
@@ -138,6 +146,50 @@ export const CollectionPanelDialogs: React.FC<CollectionPanelDialogsProps> = ({
             if (reqToDelete) {
               deleteRequest(reqToDelete.id);
               setReqToDelete(null);
+            }
+          }}
+          className="cursor-pointer"
+        >
+          Delete
+        </Button>
+      </div>
+    </Dialog>
+
+    <Dialog
+      isOpen={!!savedResponseToDelete}
+      onClose={() => setSavedResponseToDelete(null)}
+      title="Delete Response?"
+      description={
+        savedResponseToDelete ? (
+          <span>
+            Are you sure you want to delete the saved response{' '}
+            <strong className="text-foreground font-semibold">
+              "{savedResponseToDelete.name}"
+            </strong>
+            ? This action cannot be undone.
+          </span>
+        ) : (
+          ''
+        )
+      }
+    >
+      <div className="flex justify-end gap-3 pt-2">
+        <Button
+          variant="ghost"
+          onClick={() => setSavedResponseToDelete(null)}
+          className="cursor-pointer"
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="primary"
+          onClick={() => {
+            if (savedResponseToDelete) {
+              deleteSavedResponse(
+                savedResponseToDelete.reqId,
+                savedResponseToDelete.id,
+              );
+              setSavedResponseToDelete(null);
             }
           }}
           className="cursor-pointer"

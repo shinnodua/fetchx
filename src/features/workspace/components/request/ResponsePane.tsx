@@ -8,7 +8,8 @@ import { ResponsePayloadViewer } from './ResponsePayloadViewer';
 
 export const ResponsePane: React.FC = () => {
   const { toast } = useToast();
-  const { collections, activeTabId, drafts } = useWorkspaceStore();
+  const { collections, activeTabId, drafts, saveActiveResponse } =
+    useWorkspaceStore();
 
   // Find active request
   const activeRequest = useMemo(() => {
@@ -53,6 +54,20 @@ export const ResponsePane: React.FC = () => {
         type: 'error',
       });
     }
+  };
+
+  const handleSaveResponse = (name: string) => {
+    const didSave = saveActiveResponse(name);
+
+    toast({
+      title: didSave ? 'Response Saved' : 'Save Failed',
+      description: didSave
+        ? 'Saved response added under this request.'
+        : 'Run the request and make sure it has response payload data first.',
+      type: didSave ? 'success' : 'warning',
+    });
+
+    return didSave;
   };
 
   return (
@@ -140,7 +155,10 @@ export const ResponsePane: React.FC = () => {
             ) : (
               activeRequest.response.data !== undefined &&
               activeRequest.response.data !== null && (
-                <ResponsePayloadViewer data={activeRequest.response.data} />
+                <ResponsePayloadViewer
+                  data={activeRequest.response.data}
+                  onSave={handleSaveResponse}
+                />
               )
             )}
 

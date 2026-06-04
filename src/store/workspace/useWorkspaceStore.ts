@@ -6,7 +6,7 @@ import type { WorkspaceState } from './workspaceStoreTypes';
 
 export const useWorkspaceStore = create<WorkspaceState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       collections: DEFAULT_COLLECTIONS,
       tabs: [],
       activeTabId: '',
@@ -29,7 +29,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       collectionsPanelCollapsed: false,
       requestToRevealId: null,
 
-      ...createWorkspaceActions(set),
+      ...createWorkspaceActions(set, get),
     }),
     {
       name: 'call3-workspace-storage',

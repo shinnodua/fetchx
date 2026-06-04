@@ -4,7 +4,7 @@ import type {
   RequestItem,
 } from '../../features/workspace/types';
 
-export const createId = (prefix: 'c' | 'r' | 'env' | 'v') =>
+export const createId = (prefix: 'c' | 'r' | 'env' | 'v' | 'res') =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
 export const createNewRequestId = () =>
@@ -31,6 +31,8 @@ export const createRequest = (
   queryParams: [],
   body: '',
   response: null,
+  savedResponses: [],
+  savedResponsesCollapsed: false,
   ...overrides,
 });
 

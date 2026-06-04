@@ -5,8 +5,9 @@ import {
   DropdownMenuSeparator,
 } from '../../../../components';
 import { useWorkspaceStore } from '../../../../store';
-import type { CollectionItem } from '../../types';
+import type { CollectionItem, SavedResponse } from '../../types';
 import { RequestMenuItems } from '../request/RequestMenuItems';
+import { ResponsePayloadDialog } from '../request/ResponsePayloadViewer';
 import { CollectionItemView } from './CollectionItemView';
 import { CollectionPanelDialogs } from './CollectionPanelDialogs';
 import type { ContextMenuTarget, RenameTarget } from './collectionPanelTypes';
@@ -31,6 +32,8 @@ export const CollectionsPanel: React.FC = () => {
     renameRequest,
     deleteRequest,
     openTab,
+    toggleSavedResponsesCollapsed,
+    deleteSavedResponse,
     setRequestToRevealId,
     toggleCollectionCollapsed,
     setCollectionsPanelWidth,
@@ -54,7 +57,10 @@ export const CollectionsPanel: React.FC = () => {
         const filteredReqs = col.requests.filter(
           (req) =>
             req.name.toLowerCase().includes(lower) ||
-            req.target.toLowerCase().includes(lower),
+            req.target.toLowerCase().includes(lower) ||
+            (req.savedResponses ?? []).some((savedResponse) =>
+              savedResponse.name.toLowerCase().includes(lower),
+            ),
         );
         if (col.name.toLowerCase().includes(lower) || filteredReqs.length > 0) {
           return { ...col, requests: filteredReqs };
@@ -72,8 +78,15 @@ export const CollectionsPanel: React.FC = () => {
     id: string;
     name: string;
   } | null>(null);
+  const [savedResponseToDelete, setSavedResponseToDelete] = useState<{
+    reqId: string;
+    id: string;
+    name: string;
+  } | null>(null);
   const [renameTarget, setRenameTarget] = useState<RenameTarget | null>(null);
   const [renameValue, setRenameValue] = useState('');
+  const [selectedSavedResponse, setSelectedSavedResponse] =
+    useState<SavedResponse | null>(null);
   const [contextMenuTarget, setContextMenuTarget] =
     useState<ContextMenuTarget | null>(null);
 
@@ -288,6 +301,15 @@ export const CollectionsPanel: React.FC = () => {
               setTargetColId={setTargetColId}
               setNewReqOpen={setNewReqOpen}
               openTab={openTab}
+              toggleSavedResponsesCollapsed={toggleSavedResponsesCollapsed}
+              openSavedResponse={setSelectedSavedResponse}
+              confirmDeleteSavedResponse={(reqId, savedResponse) =>
+                setSavedResponseToDelete({
+                  reqId,
+                  id: savedResponse.id,
+                  name: savedResponse.name,
+                })
+              }
               handleContextMenu={handleContextMenu}
               renderCollectionMenuItems={renderCollectionMenuItems}
               renderRequestMenuItems={renderRequestMenuItems}
@@ -326,9 +348,21 @@ export const CollectionsPanel: React.FC = () => {
         handleRenameSubmit={handleRenameSubmit}
         setColToDelete={setColToDelete}
         setReqToDelete={setReqToDelete}
+        savedResponseToDelete={savedResponseToDelete}
+        setSavedResponseToDelete={setSavedResponseToDelete}
         deleteCollection={deleteCollection}
         deleteRequest={deleteRequest}
+        deleteSavedResponse={deleteSavedResponse}
       />
+
+      {selectedSavedResponse && (
+        <ResponsePayloadDialog
+          data={selectedSavedResponse.response.data}
+          isOpen={selectedSavedResponse !== null}
+          onClose={() => setSelectedSavedResponse(null)}
+          title={selectedSavedResponse.name}
+        />
+      )}
     </aside>
   );
 };

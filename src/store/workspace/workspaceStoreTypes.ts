@@ -60,6 +60,9 @@ export interface WorkspaceState {
   setActiveTabId: (id: string) => void;
   updateActiveRequest: (fields: Partial<RequestItem>) => void;
   addLog: (reqId: string, log: string) => void;
+  saveActiveResponse: (name: string) => boolean;
+  toggleSavedResponsesCollapsed: (reqId: string) => void;
+  deleteSavedResponse: (reqId: string, responseId: string) => void;
 
   saveDraft: (reqId: string, colId: string) => void;
   discardDraft: (reqId: string) => void;

@@ -6,6 +6,13 @@ export interface RequestResponse {
   logs: string[];
 }
 
+export interface SavedResponse {
+  id: string;
+  name: string;
+  createdAt: string;
+  response: RequestResponse;
+}
+
 export interface RequestItem {
   id: string;
   name: string;
@@ -19,6 +26,8 @@ export interface RequestItem {
   queryParams?: { key: string; value: string }[];
   body?: string;
   response?: RequestResponse | null;
+  savedResponses?: SavedResponse[];
+  savedResponsesCollapsed?: boolean;
 }
 
 export interface CollectionItem {
