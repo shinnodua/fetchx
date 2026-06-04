@@ -10,24 +10,35 @@ import type { EnvironmentVariable } from '../types';
 
 const VARIABLE_TOKEN_REGEX = /{{\s*([^{}\s]+)\s*}}/g;
 
+interface EnvironmentVariablePreview {
+  sensitive: boolean;
+  value: string;
+}
+
 function getVariableLookup(variables: EnvironmentVariable[]) {
   return new Map(
     variables
       .filter((variable) => variable.enabled && variable.key.trim())
-      .map((variable) => [variable.key.trim(), variable.value]),
+      .map((variable) => [
+        variable.key.trim(),
+        {
+          sensitive: variable.sensitive ?? false,
+          value: variable.value,
+        },
+      ]),
   );
 }
 
 function getEnvironmentValue(
   variableName: string,
-  variableLookup: Map<string, string>,
+  variableLookup: Map<string, EnvironmentVariablePreview>,
 ) {
   return variableLookup.get(variableName.trim());
 }
 
 function renderEnvironmentHighlights(
   value: string,
-  variableLookup: Map<string, string>,
+  variableLookup: Map<string, EnvironmentVariablePreview>,
 ) {
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -42,15 +53,20 @@ function renderEnvironmentHighlights(
       parts.push(value.slice(lastIndex, matchIndex));
     }
 
-    const resolvedValue = getEnvironmentValue(variableName, variableLookup);
-    const tooltipText = `${token} = ${
-      resolvedValue ?? 'Not set in active environment'
-    }`;
+    const resolvedVariable = getEnvironmentValue(variableName, variableLookup);
+    const tooltipText =
+      resolvedVariable === undefined
+        ? `${token} = Not set in active environment`
+        : `${token} = ${
+            resolvedVariable.sensitive
+              ? 'Sensitive value'
+              : resolvedVariable.value
+          }`;
     parts.push(
       <span
         key={`${matchIndex}-${token}`}
         className={`pointer-events-auto relative inline cursor-help underline decoration-dotted underline-offset-4 ${
-          resolvedValue === undefined
+          resolvedVariable === undefined
             ? 'text-primary-700 decoration-primary-500 dark:text-primary-200'
             : 'text-secondary-800 decoration-secondary-500 dark:text-secondary-200'
         } group/env-token`}

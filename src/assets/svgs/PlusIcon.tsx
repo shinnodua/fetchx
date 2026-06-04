@@ -4,7 +4,7 @@ export const PlusIcon = ({ title, stroke, ...props }: SvgIconProps) => (
   <svg fill="none" viewBox="0 0 24 24" {...iconProps(title)} {...props}>
     <title>{title}</title>
     <path
-      stroke={stroke ?? '#e11d48'}
+      stroke={stroke ?? 'currentColor'}
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={props.strokeWidth ?? 2}

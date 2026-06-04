@@ -1,6 +1,12 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { EnvironmentIcon, PlusIcon, TrashIcon } from '../../../assets/svgs';
+import {
+  EnvironmentIcon,
+  EyeIcon,
+  EyeOffIcon,
+  PlusIcon,
+  TrashIcon,
+} from '../../../assets/svgs';
 import { Button, Checkbox, Dialog, Input } from '../../../components';
 import { useEnvironmentStore } from '../../../store/useEnvironmentStore';
 import { createId } from '../../../store/workspaceStoreUtils';
@@ -14,6 +20,13 @@ export const EnvironmentDialog: React.FC = () => {
     addEnvironment,
     deleteEnvironment,
     renameEnvironment,
+    sensitiveCryptoConfig,
+    sensitiveCryptoError,
+    sensitiveUnlocked,
+    setSensitivePin,
+    unlockSensitiveValues,
+    lockSensitiveValues,
+    clearSensitiveCryptoError,
     updateEnvironmentVariables,
   } = useEnvironmentStore();
 
@@ -21,6 +34,9 @@ export const EnvironmentDialog: React.FC = () => {
   const [environmentToDeleteId, setEnvironmentToDeleteId] = useState<
     string | null
   >(null);
+  const [sensitivePin, setSensitivePinInput] = useState('');
+  const [revealedSensitiveVariableIds, setRevealedSensitiveVariableIds] =
+    useState<string[]>([]);
 
   // Auto-select the newly added or last environment if none or invalid is selected
   useEffect(() => {
@@ -50,7 +66,13 @@ export const EnvironmentDialog: React.FC = () => {
 
   const handleRemoveVariable = (index: number) => {
     if (!selectedEnv) return;
+    const variableToRemove = selectedEnv.variables[index];
     const updated = selectedEnv.variables.filter((_, i) => i !== index);
+    if (variableToRemove) {
+      setRevealedSensitiveVariableIds((ids) =>
+        ids.filter((id) => id !== variableToRemove.id),
+      );
+    }
     updateEnvironmentVariables(selectedEnv.id, updated);
   };
 
@@ -58,7 +80,13 @@ export const EnvironmentDialog: React.FC = () => {
     if (!selectedEnv) return;
     const updated = [
       ...selectedEnv.variables,
-      { id: createId('v'), key: '', value: '', enabled: true },
+      {
+        id: createId('v'),
+        key: '',
+        value: '',
+        enabled: true,
+        sensitive: false,
+      },
     ];
     updateEnvironmentVariables(selectedEnv.id, updated);
   };
@@ -84,7 +112,32 @@ export const EnvironmentDialog: React.FC = () => {
 
   const handleManageEnvironmentClose = () => {
     setEnvironmentToDeleteId(null);
+    setRevealedSensitiveVariableIds([]);
+    clearSensitiveCryptoError();
     setManageEnvOpen(false);
+  };
+
+  const handleSensitivePinSubmit = async () => {
+    const success = sensitiveCryptoConfig
+      ? await unlockSensitiveValues(sensitivePin)
+      : await setSensitivePin(sensitivePin);
+
+    if (success) {
+      setSensitivePinInput('');
+    }
+  };
+
+  const handleLockSensitiveValues = () => {
+    setRevealedSensitiveVariableIds([]);
+    lockSensitiveValues();
+  };
+
+  const handleToggleRevealSensitiveVariable = (id: string) => {
+    setRevealedSensitiveVariableIds((ids) =>
+      ids.includes(id)
+        ? ids.filter((revealedId) => revealedId !== id)
+        : [...ids, id],
+    );
   };
 
   return (
@@ -128,12 +181,12 @@ export const EnvironmentDialog: React.FC = () => {
                           onClick={(e) =>
                             handleDeleteEnvironmentClick(env.id, e)
                           }
-                          className="h-5 w-5 rounded p-0 text-foreground/40 hover:text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="h-5 w-5 rounded p-0 text-foreground/40 hover:text-primary-500 transition-opacity"
                           title="Delete Environment"
                         >
                           <TrashIcon
                             title="Delete environment"
-                            className="w-3 h-3"
+                            className="w-3 h-3 shrink-0"
                           />
                         </Button>
                       </div>
@@ -150,7 +203,7 @@ export const EnvironmentDialog: React.FC = () => {
             >
               <PlusIcon
                 title="Add environment"
-                className="w-3.5 h-3.5"
+                className="w-3.5 h-3.5 shrink-0"
                 strokeWidth={2.5}
               />
               Add Environment
@@ -184,11 +237,61 @@ export const EnvironmentDialog: React.FC = () => {
                   />
                 </div>
 
+                <div className="mb-4 rounded-xl border border-foreground/10 bg-foreground/[0.02] p-3">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <Input
+                      label={
+                        sensitiveCryptoConfig
+                          ? 'Sensitive Pincode'
+                          : 'Set Sensitive Pincode'
+                      }
+                      type="password"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      placeholder="At least 6 numbers"
+                      value={sensitivePin}
+                      onChange={(e) => setSensitivePinInput(e.target.value)}
+                      className="h-10 rounded-lg"
+                      disabled={sensitiveUnlocked}
+                    />
+                    <div className="flex shrink-0 gap-2">
+                      {sensitiveUnlocked ? (
+                        <Button
+                          variant="outline"
+                          onClick={handleLockSensitiveValues}
+                          className="h-10 cursor-pointer"
+                        >
+                          Lock Sensitive
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="primary"
+                          onClick={handleSensitivePinSubmit}
+                          disabled={!/^\d{6,}$/.test(sensitivePin)}
+                          className="h-10 cursor-pointer"
+                        >
+                          {sensitiveCryptoConfig ? 'Unlock' : 'Set Pincode'}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-foreground/50">
+                    Sensitive values are encrypted with this pincode before
+                    being saved. The pincode is not stored.
+                  </p>
+                  {sensitiveCryptoError && (
+                    <p className="mt-2 text-xs font-medium text-primary-600">
+                      {sensitiveCryptoError}
+                    </p>
+                  )}
+                </div>
+
                 <div className="flex-1 flex flex-col min-h-0 border border-foreground/10 rounded-xl p-4 bg-foreground/[0.02]">
                   <div className="flex items-center gap-3 px-2 pb-3 border-b border-foreground/10 text-xs font-semibold text-foreground/45 uppercase tracking-wider">
                     <div className="w-14 text-center shrink-0">Active</div>
                     <div className="flex-[1.1]">Variable</div>
                     <div className="flex-[1.4]">Value</div>
+                    <div className="w-20 text-center shrink-0">Sensitive</div>
                     <div className="w-8 shrink-0" />
                   </div>
 
@@ -199,6 +302,9 @@ export const EnvironmentDialog: React.FC = () => {
                       </p>
                     ) : (
                       selectedEnv.variables.map((variable, idx) => {
+                        const isSensitiveValueRevealed =
+                          sensitiveUnlocked &&
+                          revealedSensitiveVariableIds.includes(variable.id);
                         return (
                           <div
                             key={variable.id}
@@ -228,14 +334,71 @@ export const EnvironmentDialog: React.FC = () => {
                             </div>
                             <div className="flex-[1.4]">
                               <Input
+                                type={
+                                  variable.sensitive &&
+                                  !isSensitiveValueRevealed
+                                    ? 'password'
+                                    : 'text'
+                                }
                                 placeholder="Value"
                                 value={variable.value}
+                                disabled={
+                                  variable.sensitive && !sensitiveUnlocked
+                                }
+                                rightIcon={
+                                  variable.sensitive && sensitiveUnlocked ? (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      type="button"
+                                      onClick={() =>
+                                        handleToggleRevealSensitiveVariable(
+                                          variable.id,
+                                        )
+                                      }
+                                      className="h-7 w-7 rounded p-0 text-foreground/45 hover:text-primary-500 cursor-pointer"
+                                      title={
+                                        isSensitiveValueRevealed
+                                          ? 'Hide sensitive value'
+                                          : 'Reveal sensitive value'
+                                      }
+                                    >
+                                      {isSensitiveValueRevealed ? (
+                                        <EyeOffIcon
+                                          title="Hide sensitive value"
+                                          className="w-4 h-4 shrink-0"
+                                        />
+                                      ) : (
+                                        <EyeIcon
+                                          title="Reveal sensitive value"
+                                          className="w-4 h-4 shrink-0"
+                                        />
+                                      )}
+                                    </Button>
+                                  ) : undefined
+                                }
                                 onChange={(e) =>
                                   handleVariableChange(idx, {
                                     value: e.target.value,
                                   })
                                 }
                                 className="h-10 px-3 rounded-lg text-sm"
+                              />
+                            </div>
+                            <div className="w-20 shrink-0 flex items-center justify-center">
+                              <Checkbox
+                                checked={variable.sensitive ?? false}
+                                disabled={!sensitiveUnlocked}
+                                title={
+                                  sensitiveUnlocked
+                                    ? 'Mark sensitive'
+                                    : 'Unlock sensitive values first'
+                                }
+                                onChange={(e) =>
+                                  handleVariableChange(idx, {
+                                    sensitive: e.target.checked,
+                                  })
+                                }
                               />
                             </div>
                             <div className="w-8 shrink-0 flex justify-center">
@@ -248,7 +411,7 @@ export const EnvironmentDialog: React.FC = () => {
                               >
                                 <TrashIcon
                                   title="Remove variable"
-                                  className="w-3.5 h-3.5"
+                                  className="w-3.5 h-3.5 shrink-0"
                                 />
                               </Button>
                             </div>
@@ -267,7 +430,7 @@ export const EnvironmentDialog: React.FC = () => {
                     >
                       <PlusIcon
                         title="Add variable"
-                        className="w-3.5 h-3.5"
+                        className="w-3.5 h-3.5 shrink-0"
                         strokeWidth={2.5}
                       />
                       Add Variable

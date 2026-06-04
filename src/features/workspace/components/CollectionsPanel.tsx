@@ -284,10 +284,15 @@ export const CollectionsPanel: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            className="h-8 px-2.5 rounded-lg text-xs shrink-0"
+            className="h-8 px-2.5 rounded-lg text-xs shrink-0 gap-1.5"
             onClick={() => setNewColOpen(true)}
           >
-            {collectionsPanelWidth >= 240 ? '+ Collection' : '+'}
+            <PlusIcon
+              title="Add collection"
+              className="h-3.5 w-3.5 shrink-0"
+              strokeWidth={2.5}
+            />
+            {collectionsPanelWidth >= 240 && <span>Collection</span>}
           </Button>
         </div>
         <Input
@@ -338,7 +343,7 @@ export const CollectionsPanel: React.FC = () => {
                     />
                     <span className="truncate">{col.name}</span>
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 transition-opacity">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -350,7 +355,10 @@ export const CollectionsPanel: React.FC = () => {
                       className="h-6 w-6 rounded p-0 text-foreground/60 hover:text-foreground"
                       title="Add Request"
                     >
-                      <PlusIcon title="Add request" className="w-3.5 h-3.5" />
+                      <PlusIcon
+                        title="Add request"
+                        className="w-3.5 h-3.5 shrink-0"
+                      />
                     </Button>
                     <div onClick={(event) => event.stopPropagation()}>
                       <DropdownMenu

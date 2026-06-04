@@ -40,11 +40,25 @@ export interface AbiItem {
   inputs?: AbiInput[];
 }
 
+export interface EncryptedEnvironmentValue {
+  ciphertext: string;
+  iv: string;
+}
+
+export interface SensitiveCryptoConfig {
+  algorithm: 'AES-GCM';
+  digest: 'SHA-256';
+  iterations: number;
+  salt: string;
+}
+
 export interface EnvironmentVariable {
   id: string;
   key: string;
   value: string;
   enabled: boolean;
+  sensitive: boolean;
+  encryptedValue?: EncryptedEnvironmentValue | null;
 }
 
 export interface Environment {

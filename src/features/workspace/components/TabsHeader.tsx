@@ -189,13 +189,13 @@ export const TabsHeader: React.FC = () => {
         .find((r) => r.id === contextMenu.tabId)
     : null;
   return (
-    <div className="flex items-center border-b border-foreground/10 bg-white/5 dark:bg-black/10 min-h-[38px] relative select-none">
+    <div className="relative flex min-h-11 items-stretch border-b border-foreground/10 bg-foreground/[0.03] shadow-sm shadow-foreground/5 select-none dark:bg-background/40">
       {collectionsPanelCollapsed && (
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setCollectionsPanelCollapsed(false)}
-          className="h-[38px] rounded-none border-r border-foreground/10 px-3.5 text-foreground/60 hover:text-foreground cursor-pointer"
+          className="h-11 rounded-none border-r border-foreground/10 px-3.5 text-foreground/60 hover:text-foreground cursor-pointer"
           title="Expand Sidebar"
         >
           <ChevronRightIcon title="Expand sidebar" className="w-4 h-4" />
@@ -203,7 +203,7 @@ export const TabsHeader: React.FC = () => {
       )}
 
       {/* Scrollable Tabs Container */}
-      <div className="flex-1 flex items-center overflow-x-auto scrollbar-none min-w-0">
+      <div className="flex min-w-0 flex-1 items-end gap-1 overflow-x-auto px-2 pt-1 scrollbar-none">
         {tabs.map((tabId) => {
           let reqObject: RequestItem | null = null;
           if (drafts[tabId]) {
@@ -246,37 +246,39 @@ export const TabsHeader: React.FC = () => {
               }}
               onDrop={(event) => handleDrop(tabId, event)}
               onDragEnd={resetDragState}
-              className={`flex items-center gap-2 px-4 py-1.5 text-xs border-r border-foreground/10 cursor-pointer select-none shrink-0 transition-all ${
+              className={`group relative flex h-9 min-w-[148px] max-w-[220px] shrink-0 items-center gap-2 rounded-t-lg border border-b-0 px-3 text-xs cursor-pointer select-none transition-all ${
                 isActive
-                  ? 'bg-background font-semibold text-foreground border-b-2 border-b-primary-500'
-                  : 'text-foreground/60 hover:bg-foreground/5 hover:text-foreground'
+                  ? 'z-10 border-foreground/10 bg-background text-foreground shadow-sm shadow-foreground/10 before:absolute before:inset-x-3 before:bottom-0 before:h-0.5 before:rounded-full before:bg-primary-500'
+                  : 'border-transparent bg-transparent text-foreground/60 hover:border-foreground/10 hover:bg-background/70 hover:text-foreground'
               } ${draggedTabId === tabId ? 'opacity-50' : ''} ${
                 dragOverTabId === tabId
-                  ? 'bg-primary-500/10 shadow-[inset_2px_0_0_theme(colors.primary.500)]'
+                  ? 'border-primary-500/30 bg-primary-500/10 shadow-[inset_2px_0_0_theme(colors.primary.500)]'
                   : ''
               }`}
             >
               <span
-                className={`text-[10px] font-bold ${methodColors[reqObject.type]}`}
+                className={`rounded-md bg-foreground/5 px-1.5 py-0.5 text-[10px] font-bold leading-none ring-1 ring-foreground/10 ${methodColors[reqObject.type]}`}
               >
                 {reqObject.type}
               </span>
-              <span className="inline-flex items-center gap-1 min-w-0 max-w-[120px]">
-                <span className="truncate" title={reqObject.name}>
+              <span className="inline-flex min-w-0 flex-1 items-center gap-1">
+                <span className="truncate font-medium" title={reqObject.name}>
                   {reqObject.name}
                 </span>
                 {isDirty && (
-                  <span className="w-2 h-2 rounded-full bg-primary-500 shrink-0 ml-0.5" />
+                  <span className="ml-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary-500 ring-2 ring-background" />
                 )}
               </span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={(e) => handleClose(tabId, e)}
-                className="ml-1 h-5 w-5 rounded-full p-0 text-foreground/45 hover:text-foreground"
+                className={`h-5 w-5 rounded-md p-0 hover:bg-foreground/10 hover:text-foreground ${
+                  isActive ? 'text-foreground/55' : 'text-foreground/35'
+                }`}
                 title="Close tab"
               >
-                <CloseIcon title="Close tab" className="w-3 h-3" />
+                <CloseIcon title="Close tab" className="w-3 h-3 shrink-0" />
               </Button>
             </div>
           );
@@ -284,7 +286,7 @@ export const TabsHeader: React.FC = () => {
       </div>
 
       {/* Dropdown Menu for Add/Import Request - Outside scrollable container */}
-      <div className="flex items-center px-3 border-l border-foreground/10 shrink-0 self-stretch">
+      <div className="flex shrink-0 items-center border-l border-foreground/10 px-2">
         <DropdownMenu
           align="right"
           trigger={
@@ -292,18 +294,18 @@ export const TabsHeader: React.FC = () => {
               type="button"
               variant="ghost"
               size="sm"
-              className="h-8 w-8 rounded-lg p-0 text-foreground/60 hover:text-foreground cursor-pointer"
+              className="h-8 w-8 rounded-lg p-0 text-foreground/60 hover:bg-background hover:text-foreground cursor-pointer"
             >
               <PlusIcon
                 title="Add or import request"
-                className="block h-5 w-5"
+                className="block h-5 w-5 shrink-0"
                 strokeWidth={3}
               />
             </Button>
           }
         >
           <DropdownMenuItem onClick={handleAddNewRequest} className="gap-2">
-            <PlusIcon title="New request" className="w-4 h-4" />
+            <PlusIcon title="New request" className="w-4 h-4 shrink-0" />
             <span>New Request</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleOpenImportDialog} className="gap-2">

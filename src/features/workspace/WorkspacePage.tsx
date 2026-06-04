@@ -16,7 +16,12 @@ import { TabsHeader } from './components/TabsHeader';
 import { WorkspaceDialogs } from './components/WorkspaceDialogs';
 import { WorkspaceEmptyState } from './components/WorkspaceEmptyState';
 import type { AbiItem, RequestItem } from './types';
-import { replaceVariables } from './utils/environment';
+import {
+  getLockedSensitiveVariableNames,
+  redactSensitiveData,
+  redactSensitiveValues,
+  resolveVariables,
+} from './utils/environment';
 import { getRequestIsDirty } from './utils/requestDirty';
 import {
   createImportedRequestName,
@@ -230,29 +235,84 @@ export const WorkspacePage: React.FC = () => {
     // Get current active environment variables
     const activeEnv = environments.find((e) => e.id === activeEnvironmentId);
     const activeVariables = activeEnv ? activeEnv.variables : [];
+    const requestTexts = [
+      activeRequest.target,
+      activeRequest.body || '',
+      ...(activeRequest.headers || []).flatMap((h) => [h.key, h.value]),
+      ...(activeRequest.queryParams || []).flatMap((qp) => [qp.key, qp.value]),
+      ...Object.values(activeRequest.args || {}),
+    ];
+    const lockedSensitiveNames = getLockedSensitiveVariableNames(
+      requestTexts,
+      activeVariables,
+    );
 
     // Resolve variables in request fields before execution
+    const resolvedTarget = resolveVariables(
+      activeRequest.target,
+      activeVariables,
+    );
+    const resolvedBody = resolveVariables(
+      activeRequest.body || '',
+      activeVariables,
+    );
+    const resolvedHeaders = (activeRequest.headers || []).map((h) => ({
+      key: resolveVariables(h.key, activeVariables),
+      value: resolveVariables(h.value, activeVariables),
+    }));
+    const resolvedQueryParams = (activeRequest.queryParams || []).map((qp) => ({
+      key: resolveVariables(qp.key, activeVariables),
+      value: resolveVariables(qp.value, activeVariables),
+    }));
+    const resolvedArgs = Object.fromEntries(
+      Object.entries(activeRequest.args || {}).map(([k, v]) => [
+        k,
+        resolveVariables(v, activeVariables),
+      ]),
+    );
     const resolvedRequest = {
       ...activeRequest,
-      target: replaceVariables(activeRequest.target, activeVariables),
-      body: replaceVariables(activeRequest.body || '', activeVariables),
-      headers: (activeRequest.headers || []).map((h) => ({
-        key: replaceVariables(h.key, activeVariables),
-        value: replaceVariables(h.value, activeVariables),
+      target: resolvedTarget.value,
+      body: resolvedBody.value,
+      headers: resolvedHeaders.map((h) => ({
+        key: h.key.value,
+        value: h.value.value,
       })),
-      queryParams: (activeRequest.queryParams || []).map((qp) => ({
-        key: replaceVariables(qp.key, activeVariables),
-        value: replaceVariables(qp.value, activeVariables),
+      queryParams: resolvedQueryParams.map((qp) => ({
+        key: qp.key.value,
+        value: qp.value.value,
       })),
       args: Object.fromEntries(
-        Object.entries(activeRequest.args || {}).map(([k, v]) => [
-          k,
-          replaceVariables(v, activeVariables),
+        Object.entries(resolvedArgs).map(([key, value]) => [key, value.value]),
+      ),
+    };
+    const redactedRequest = {
+      ...activeRequest,
+      target: resolvedTarget.redacted,
+      body: resolvedBody.redacted,
+      headers: resolvedHeaders.map((h) => ({
+        key: h.key.redacted,
+        value: h.value.redacted,
+      })),
+      queryParams: resolvedQueryParams.map((qp) => ({
+        key: qp.key.redacted,
+        value: qp.value.redacted,
+      })),
+      args: Object.fromEntries(
+        Object.entries(resolvedArgs).map(([key, value]) => [
+          key,
+          value.redacted,
         ]),
       ),
     };
 
     try {
+      if (lockedSensitiveNames.length > 0) {
+        throw new Error(
+          `Unlock sensitive variables before sending this request: ${lockedSensitiveNames.join(', ')}.`,
+        );
+      }
+
       if (resolvedRequest.type === 'READ' || resolvedRequest.type === 'WRITE') {
         if (!resolvedRequest.target) {
           throw new Error('Contract address is required.');
@@ -307,9 +367,16 @@ export const WorkspacePage: React.FC = () => {
 
         addLog(
           activeTabId,
-          `Initiating contract call: ${selectedFunc.name}(${formattedArgs.join(', ')})`,
+          `Initiating contract call: ${selectedFunc.name}(${(
+            selectedFunc.inputs || []
+          )
+            .map(
+              (input, idx) =>
+                redactedRequest.args?.[input.name || `arg${idx}`] || '',
+            )
+            .join(', ')})`,
         );
-        addLog(activeTabId, `Target Contract: ${resolvedRequest.target}`);
+        addLog(activeTabId, `Target Contract: ${redactedRequest.target}`);
         addLog(activeTabId, `Network ID: ${resolvedRequest.network}`);
 
         if (resolvedRequest.type === 'READ') {
@@ -328,15 +395,19 @@ export const WorkspacePage: React.FC = () => {
           // Serialize output safely (BigInt to string)
           const serializedData =
             typeof result === 'bigint' ? result.toString() : result;
+          const redactedSerializedData = redactSensitiveData(
+            serializedData,
+            activeVariables,
+          );
 
           updateActiveRequest({
             response: {
               status: 'Success',
-              data: serializedData,
+              data: redactedSerializedData,
               duration,
               logs: [
                 `[${new Date().toLocaleTimeString()}] Query succeeded.`,
-                `[${new Date().toLocaleTimeString()}] Result: ${JSON.stringify(serializedData)}`,
+                `[${new Date().toLocaleTimeString()}] Result: ${JSON.stringify(redactedSerializedData)}`,
               ],
             },
           });
@@ -413,7 +484,7 @@ export const WorkspacePage: React.FC = () => {
 
         addLog(
           activeTabId,
-          `Sending HTTP ${resolvedRequest.type} request to: ${resolvedRequest.target}`,
+          `Sending HTTP ${resolvedRequest.type} request to: ${redactedRequest.target}`,
         );
 
         const { statusText, data } = await executeRestCall(
@@ -425,12 +496,13 @@ export const WorkspacePage: React.FC = () => {
         );
 
         const duration = Date.now() - start;
+        const redactedData = redactSensitiveData(data, activeVariables);
         addLog(activeTabId, `HTTP status received: ${statusText}`);
 
         updateActiveRequest({
           response: {
             status: statusText,
-            data,
+            data: redactedData,
             duration,
             logs: [
               `[${new Date().toLocaleTimeString()}] Response received.`,
@@ -453,20 +525,22 @@ export const WorkspacePage: React.FC = () => {
           'Failed to fetch (CORS block or host unreachable). Ensure URL is correct.';
       }
 
-      addLog(activeTabId, `Error occurred: ${errorMsg}`);
+      const redactedErrorMsg = redactSensitiveValues(errorMsg, activeVariables);
+
+      addLog(activeTabId, `Error occurred: ${redactedErrorMsg}`);
       updateActiveRequest({
         response: {
           status: 'Error',
-          data: { error: errorMsg },
+          data: { error: redactedErrorMsg },
           duration,
           logs: [
-            `[${new Date().toLocaleTimeString()}] Execution failed: ${errorMsg}`,
+            `[${new Date().toLocaleTimeString()}] Execution failed: ${redactedErrorMsg}`,
           ],
         },
       });
       toast({
         title: 'Execution Failed',
-        description: errorMsg,
+        description: redactedErrorMsg,
         type: 'error',
       });
     } finally {

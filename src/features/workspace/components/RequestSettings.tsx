@@ -297,7 +297,10 @@ export const RequestSettings: React.FC = () => {
                       className="h-9 w-9 rounded p-0 text-primary-500/60 hover:text-primary-500 mt-0"
                       title="Remove parameter"
                     >
-                      <TrashIcon title="Remove parameter" className="w-4 h-4" />
+                      <TrashIcon
+                        title="Remove parameter"
+                        className="w-4 h-4 shrink-0"
+                      />
                     </Button>
                   </div>
                 ))}
@@ -363,7 +366,10 @@ export const RequestSettings: React.FC = () => {
                       className="h-9 w-9 rounded p-0 text-primary-500/60 hover:text-primary-500"
                       title="Remove header"
                     >
-                      <TrashIcon title="Remove header" className="w-4 h-4" />
+                      <TrashIcon
+                        title="Remove header"
+                        className="w-4 h-4 shrink-0"
+                      />
                     </Button>
                   </div>
                 ))}

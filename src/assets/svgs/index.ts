@@ -5,6 +5,8 @@ export * from './ChevronLeftIcon';
 export * from './ChevronRightIcon';
 export * from './CloseIcon';
 export * from './EnvironmentIcon';
+export * from './EyeIcon';
+export * from './EyeOffIcon';
 export * from './FolderIcon';
 export * from './GitHubIcon';
 export * from './ImportIcon';
