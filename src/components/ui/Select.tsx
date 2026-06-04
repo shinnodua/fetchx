@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useRef, useState } from 'react';
+import { CheckSolidIcon, ChevronDownIcon } from '../../assets/svgs';
 import { cn } from '../../utils/cn';
 
 export interface SelectOption {
@@ -88,20 +89,15 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
           >
             {selectedOption ? selectedOption.label : placeholder}
           </span>
-          <motion.svg
+          <motion.span
             animate={{ rotate: isOpen ? 180 : 0 }}
             className="h-4 w-4 text-foreground/50"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
+            <ChevronDownIcon
+              title="Toggle select options"
+              className="h-4 w-4"
             />
-          </motion.svg>
+          </motion.span>
         </div>
 
         <AnimatePresence>
@@ -127,17 +123,10 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
                   <span className="block truncate">{option.label}</span>
                   {selectedValue === option.value && (
                     <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-primary-600 dark:text-primary-400">
-                      <svg
+                      <CheckSolidIcon
+                        title="Selected option"
                         className="h-4 w-4"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                      />
                     </span>
                   )}
                 </div>

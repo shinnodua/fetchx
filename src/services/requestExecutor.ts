@@ -1,5 +1,25 @@
-import type { Abi } from 'viem';
+import type { Abi, TransactionReceipt } from 'viem';
 import type { AbiItem } from '../features/workspace/types';
+
+interface ContractClient {
+  readContract: (parameters: {
+    address: `0x${string}`;
+    abi: Abi;
+    functionName: string;
+    args: unknown[];
+  }) => Promise<unknown>;
+  waitForTransactionReceipt: (parameters: {
+    hash: `0x${string}`;
+  }) => Promise<TransactionReceipt>;
+}
+
+type WriteContractAsync = (parameters: {
+  address: `0x${string}`;
+  abi: Abi;
+  functionName: string;
+  args: unknown[];
+  chainId: number | undefined;
+}) => Promise<`0x${string}`>;
 
 /**
  * Executes a contract state read call (view/pure function).
@@ -9,8 +29,7 @@ export async function executeReadCall(
   parsedAbi: AbiItem[],
   functionName: string,
   formattedArgs: unknown[],
-  // biome-ignore lint/suspicious/noExplicitAny: publicClient type is dynamic based on wagmi provider
-  publicClient: any,
+  publicClient: ContractClient | undefined,
 ) {
   if (!publicClient) {
     throw new Error('Public client not available. Select a supported network.');
@@ -31,10 +50,8 @@ export async function executeWriteCall(
   parsedAbi: AbiItem[],
   functionName: string,
   formattedArgs: unknown[],
-  // biome-ignore lint/suspicious/noExplicitAny: writeContractAsync is a dynamic wagmi mutation trigger
-  writeContractAsync: any,
-  // biome-ignore lint/suspicious/noExplicitAny: publicClient type is dynamic based on wagmi provider
-  publicClient: any,
+  writeContractAsync: WriteContractAsync | undefined,
+  publicClient: ContractClient | undefined,
   chainId: number | undefined,
 ) {
   if (!writeContractAsync) {

@@ -1,5 +1,8 @@
+import { useLocation } from '@tanstack/react-router';
 import type React from 'react';
 import { useEffect } from 'react';
+import { CollectionTransferButtons } from '../../features/workspace/components/CollectionTransferButtons';
+import { EnvironmentSelector } from '../../features/workspace/components/EnvironmentSelector';
 import { useStore } from '../../store';
 import { AppFooter } from './AppFooter';
 import { AppHeader } from './AppHeader';
@@ -10,6 +13,8 @@ interface AppShellProps {
 
 export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const { theme, toggleTheme } = useStore();
+  const location = useLocation();
+  const isRootPage = location.pathname === '/';
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -17,7 +22,12 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
   return (
     <div className="h-screen overflow-hidden flex flex-col bg-background text-foreground">
-      <AppHeader theme={theme} onToggleTheme={toggleTheme} />
+      <AppHeader
+        actions={isRootPage ? <CollectionTransferButtons /> : undefined}
+        environmentSelector={isRootPage ? <EnvironmentSelector /> : undefined}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
         {children}
       </main>

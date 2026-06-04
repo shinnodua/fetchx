@@ -1,15 +1,16 @@
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import {
-  DropdownMenu,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from '../../../components';
-import {
-  getRequestIsDirty,
-  useWorkspaceStore,
-} from '../../../store/useWorkspaceStore';
+  ChevronRightIcon,
+  CloseIcon,
+  ImportIcon,
+  PlusIcon,
+} from '../../../assets/svgs';
+import { Button, DropdownMenu, DropdownMenuItem } from '../../../components';
+import { useWorkspaceStore } from '../../../store/useWorkspaceStore';
 import type { RequestItem } from '../types';
+import { getRequestIsDirty } from '../utils/requestDirty';
+import { TabContextMenu } from './TabContextMenu';
 
 export const TabsHeader: React.FC = () => {
   const {
@@ -125,11 +126,6 @@ export const TabsHeader: React.FC = () => {
     });
   };
 
-  const runMenuAction = (action: () => void) => {
-    action();
-    setContextMenu(null);
-  };
-
   const handleAddNewRequest = () => {
     addNewTab();
   };
@@ -186,29 +182,24 @@ export const TabsHeader: React.FC = () => {
     setDragOverTabId(null);
   };
 
+  const contextMenuReq = contextMenu
+    ? drafts[contextMenu.tabId] ||
+      collections
+        .flatMap((c) => c.requests)
+        .find((r) => r.id === contextMenu.tabId)
+    : null;
   return (
-    <div className="flex items-center border-b border-foreground/10 bg-white/5 dark:bg-black/10 min-h-[45px] relative select-none">
+    <div className="flex items-center border-b border-foreground/10 bg-white/5 dark:bg-black/10 min-h-[38px] relative select-none">
       {collectionsPanelCollapsed && (
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => setCollectionsPanelCollapsed(false)}
-          className="p-3.5 border-r border-foreground/10 hover:bg-foreground/5 text-foreground/60 hover:text-foreground transition-all flex items-center justify-center shrink-0 h-[45px] cursor-pointer"
+          className="h-[38px] rounded-none border-r border-foreground/10 px-3.5 text-foreground/60 hover:text-foreground cursor-pointer"
           title="Expand Sidebar"
         >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <title>Expand icon</title>
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </button>
+          <ChevronRightIcon title="Expand sidebar" className="w-4 h-4" />
+        </Button>
       )}
 
       {/* Scrollable Tabs Container */}
@@ -231,10 +222,10 @@ export const TabsHeader: React.FC = () => {
           const isActive = tabId === activeTabId;
           const isDirty = isTabDirty(tabId);
           const methodColors: Record<string, string> = {
-            READ: 'text-green-500',
+            READ: 'text-secondary-600',
             WRITE: 'text-primary-500',
-            GET: 'text-blue-500',
-            POST: 'text-purple-500',
+            GET: 'text-secondary-600',
+            POST: 'text-primary-500',
           };
 
           return (
@@ -255,7 +246,7 @@ export const TabsHeader: React.FC = () => {
               }}
               onDrop={(event) => handleDrop(tabId, event)}
               onDragEnd={resetDragState}
-              className={`flex items-center gap-2 px-4 py-2.5 text-xs border-r border-foreground/10 cursor-pointer select-none shrink-0 transition-all ${
+              className={`flex items-center gap-2 px-4 py-1.5 text-xs border-r border-foreground/10 cursor-pointer select-none shrink-0 transition-all ${
                 isActive
                   ? 'bg-background font-semibold text-foreground border-b-2 border-b-primary-500'
                   : 'text-foreground/60 hover:bg-foreground/5 hover:text-foreground'
@@ -275,30 +266,18 @@ export const TabsHeader: React.FC = () => {
                   {reqObject.name}
                 </span>
                 {isDirty && (
-                  <span className="text-primary-500 font-bold text-lg leading-none shrink-0">
-                    •
-                  </span>
+                  <span className="w-2 h-2 rounded-full bg-primary-500 shrink-0 ml-0.5" />
                 )}
               </span>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={(e) => handleClose(tabId, e)}
-                className="ml-1 p-0.5 rounded-full hover:bg-foreground/10 text-foreground/45 hover:text-foreground"
+                className="ml-1 h-5 w-5 rounded-full p-0 text-foreground/45 hover:text-foreground"
+                title="Close tab"
               >
-                <svg
-                  className="w-3 h-3"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <title>Close icon</title>
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
+                <CloseIcon title="Close tab" className="w-3 h-3" />
+              </Button>
             </div>
           );
         })}
@@ -309,114 +288,46 @@ export const TabsHeader: React.FC = () => {
         <DropdownMenu
           align="right"
           trigger={
-            <button
+            <Button
               type="button"
-              className="p-1.5 rounded-lg hover:bg-foreground/5 text-foreground/60 hover:text-foreground transition-all flex items-center justify-center cursor-pointer"
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 rounded-lg p-0 text-foreground/60 hover:text-foreground cursor-pointer"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <title>Add/Import Request</title>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-            </button>
+              <PlusIcon
+                title="Add or import request"
+                className="block h-5 w-5"
+                strokeWidth={3}
+              />
+            </Button>
           }
         >
           <DropdownMenuItem onClick={handleAddNewRequest} className="gap-2">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <title>Plus icon</title>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
+            <PlusIcon title="New request" className="w-4 h-4" />
             <span>New Request</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleOpenImportDialog} className="gap-2">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <title>Import icon</title>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-              />
-            </svg>
+            <ImportIcon title="Import request" className="w-4 h-4" />
             <span>Import Request</span>
           </DropdownMenuItem>
         </DropdownMenu>
       </div>
 
       {contextMenu && (
-        <div
-          ref={contextMenuRef}
-          className="fixed z-[70] w-48 overflow-hidden rounded-xl border border-foreground/10 bg-background/95 p-1 shadow-xl backdrop-blur-xl"
-          style={{ left: contextMenu.x, top: contextMenu.y }}
-          onContextMenu={(event) => event.preventDefault()}
-        >
-          <DropdownMenuItem
-            onClick={() =>
-              runMenuAction(() => closeTabWithPrompt(contextMenu.tabId))
-            }
-          >
-            Close Tab
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => runMenuAction(() => closeTab(contextMenu.tabId))}
-          >
-            Force Close Tab
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() =>
-              runMenuAction(() =>
-                closeTabsWithPrompt(
-                  tabs.filter((tabId) => tabId !== contextMenu.tabId),
-                ),
-              )
-            }
-          >
-            Close Other Tabs
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => runMenuAction(() => closeTabsWithPrompt(tabs))}
-          >
-            Close All Tabs
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => runMenuAction(() => closeTabs(tabs))}
-          >
-            Force Close All Tabs
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() =>
-              runMenuAction(() => revealRequestInSidebar(contextMenu.tabId))
-            }
-          >
-            Reveal in Sidebar
-          </DropdownMenuItem>
-        </div>
+        <TabContextMenu
+          tabId={contextMenu.tabId}
+          x={contextMenu.x}
+          y={contextMenu.y}
+          request={contextMenuReq}
+          tabs={tabs}
+          menuRef={contextMenuRef}
+          closeTab={closeTab}
+          closeTabWithPrompt={closeTabWithPrompt}
+          closeTabs={closeTabs}
+          closeTabsWithPrompt={closeTabsWithPrompt}
+          revealRequestInSidebar={revealRequestInSidebar}
+          onClose={() => setContextMenu(null)}
+        />
       )}
     </div>
   );

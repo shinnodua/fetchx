@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 import { createPortal } from 'react-dom';
+import { CloseIcon } from '../../assets/svgs';
 import { cn } from '../../utils/cn';
 
 export interface DialogProps {
@@ -60,19 +61,7 @@ export const Dialog = ({
                 onClick={onClose}
                 className="absolute right-4 top-4 rounded-full p-1 opacity-70 transition-opacity hover:opacity-100 hover:bg-foreground/10"
               >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <CloseIcon title="Close dialog" className="h-5 w-5" />
               </button>
             )}
 

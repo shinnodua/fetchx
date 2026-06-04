@@ -1,8 +1,14 @@
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  FolderIcon,
+  PlusIcon,
+  SearchIcon,
+} from '../../../assets/svgs';
+import {
   Button,
-  Dialog,
   DropdownMenu,
   DropdownMenuItem,
   DropdownMenuSeparator,
@@ -10,14 +16,9 @@ import {
 } from '../../../components';
 import { useWorkspaceStore } from '../../../store/useWorkspaceStore';
 import type { CollectionItem } from '../types';
-
-type RenameTarget =
-  | { type: 'collection'; id: string; name: string }
-  | { type: 'request'; id: string; name: string };
-
-type ContextMenuTarget =
-  | { type: 'collection'; id: string; name: string; x: number; y: number }
-  | { type: 'request'; id: string; name: string; x: number; y: number };
+import { CollectionPanelDialogs } from './CollectionPanelDialogs';
+import type { ContextMenuTarget, RenameTarget } from './collectionPanelTypes';
+import { RequestMenuItems } from './RequestMenuItems';
 
 export const CollectionsPanel: React.FC = () => {
   const {
@@ -35,7 +36,6 @@ export const CollectionsPanel: React.FC = () => {
     duplicateCollection,
     deleteCollection,
     renameRequest,
-    duplicateRequest,
     deleteRequest,
     openTab,
     setRequestToRevealId,
@@ -213,38 +213,12 @@ export const CollectionsPanel: React.FC = () => {
   );
 
   const renderRequestMenuItems = (req: { id: string; name: string }) => (
-    <>
-      <DropdownMenuItem
-        onClick={() => {
-          openRenameDialog({
-            type: 'request',
-            id: req.id,
-            name: req.name,
-          });
-          setContextMenuTarget(null);
-        }}
-      >
-        Rename
-      </DropdownMenuItem>
-      <DropdownMenuItem
-        onClick={() => {
-          duplicateRequest(req.id);
-          setContextMenuTarget(null);
-        }}
-      >
-        Duplicate
-      </DropdownMenuItem>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem
-        onClick={(event) => {
-          handleDeleteRequest(req.id, req.name, event);
-          setContextMenuTarget(null);
-        }}
-        className="text-primary-600 hover:text-primary-700 focus:text-primary-700"
-      >
-        Delete
-      </DropdownMenuItem>
-    </>
+    <RequestMenuItems
+      req={req}
+      onClose={() => setContextMenuTarget(null)}
+      openRenameDialog={openRenameDialog}
+      handleDeleteRequest={handleDeleteRequest}
+    />
   );
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -292,31 +266,20 @@ export const CollectionsPanel: React.FC = () => {
       style={{ width: collectionsPanelWidth }}
     >
       <div className="p-4 border-b border-foreground/10 flex flex-col gap-3 select-none">
-        <div className="flex items-center justify-between gap-2 min-w-0">
+        <div className="flex items-center justify-between gap-2 min-w-0 mt-[-8px]">
           <div className="flex items-center gap-1.5 min-w-0 shrink-0">
             <h2 className="text-lg font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500 truncate">
               {collectionsPanelWidth >= 220 ? 'Collections' : 'Cols'}
             </h2>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setCollectionsPanelCollapsed(true)}
-              className="p-1 rounded-lg hover:bg-foreground/5 text-foreground/40 hover:text-foreground transition-all cursor-pointer shrink-0"
+              className="h-7 w-7 rounded-lg p-0 text-foreground/40 hover:text-foreground cursor-pointer shrink-0"
               title="Collapse Sidebar"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <title>Collapse icon</title>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
+              <ChevronLeftIcon title="Collapse sidebar" className="w-4 h-4" />
+            </Button>
           </div>
           <Button
             variant="outline"
@@ -332,20 +295,10 @@ export const CollectionsPanel: React.FC = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           leftIcon={
-            <svg
+            <SearchIcon
+              title="Search collections"
               className="w-4 h-4 text-foreground/40"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <title>Search icon</title>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
+            />
           }
         />
       </div>
@@ -372,63 +325,33 @@ export const CollectionsPanel: React.FC = () => {
                   className="flex items-center justify-between group cursor-pointer hover:bg-foreground/5 p-1 -mx-1 rounded-lg select-none transition-colors"
                 >
                   <div className="flex items-center gap-1.5 text-sm font-semibold truncate text-foreground/90">
-                    <svg
+                    <ChevronDownIcon
+                      title="Toggle collection"
                       className={`w-3.5 h-3.5 text-foreground/45 transition-transform shrink-0 ${
                         isCollapsed ? '-rotate-90' : ''
                       }`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <title>Chevron icon</title>
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                    <svg
+                      strokeWidth={2.5}
+                    />
+                    <FolderIcon
+                      title="Collection"
                       className="w-4 h-4 text-primary-400 shrink-0"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <title>Folder icon</title>
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-                      />
-                    </svg>
+                    />
                     <span className="truncate">{col.name}</span>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         setTargetColId(col.id);
                         setNewReqOpen(true);
                       }}
-                      className="p-1 rounded hover:bg-foreground/10 text-foreground/60 hover:text-foreground"
+                      className="h-6 w-6 rounded p-0 text-foreground/60 hover:text-foreground"
                       title="Add Request"
                     >
-                      <svg
-                        className="w-3.5 h-3.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <title>Plus icon</title>
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 4v16m8-8H4"
-                        />
-                      </svg>
-                    </button>
+                      <PlusIcon title="Add request" className="w-3.5 h-3.5" />
+                    </Button>
                     <div onClick={(event) => event.stopPropagation()}>
                       <DropdownMenu
                         align="right"
@@ -467,11 +390,11 @@ export const CollectionsPanel: React.FC = () => {
                       col.requests.map((req) => {
                         const isActive = req.id === activeTabId;
                         const typeColors: Record<string, string> = {
-                          READ: 'bg-green-500/10 text-green-500 border-green-500/20',
+                          READ: 'bg-secondary-500/10 text-secondary-600 border-secondary-500/20',
                           WRITE:
                             'bg-primary-500/10 text-primary-500 border-primary-500/20',
-                          GET: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-                          POST: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+                          GET: 'bg-secondary-500/10 text-secondary-600 border-secondary-500/20',
+                          POST: 'bg-primary-500/10 text-primary-500 border-primary-500/20',
                         };
                         return (
                           <div
@@ -579,126 +502,19 @@ export const CollectionsPanel: React.FC = () => {
         </div>
       )}
 
-      {/* Dialog: Rename Collection or Request */}
-      <Dialog
-        isOpen={!!renameTarget}
-        onClose={closeRenameDialog}
-        title={`Rename ${
-          renameTarget?.type === 'collection' ? 'Collection' : 'Request'
-        }`}
-      >
-        <form
-          className="space-y-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-            handleRenameSubmit();
-          }}
-        >
-          <Input
-            label="Name"
-            value={renameValue}
-            onChange={(event) => setRenameValue(event.target.value)}
-          />
-          <div className="flex justify-end gap-3 pt-2">
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={closeRenameDialog}
-              className="cursor-pointer"
-            >
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit" className="cursor-pointer">
-              Rename
-            </Button>
-          </div>
-        </form>
-      </Dialog>
-
-      {/* Dialog: Confirm Delete Collection */}
-      <Dialog
-        isOpen={!!colToDelete}
-        onClose={() => setColToDelete(null)}
-        title="Delete Collection?"
-        description={
-          colToDelete ? (
-            <span>
-              Are you sure you want to delete the collection{' '}
-              <strong className="text-foreground font-semibold">
-                "{colToDelete.name}"
-              </strong>
-              ? This will permanently delete the collection and all its
-              requests.
-            </span>
-          ) : (
-            ''
-          )
-        }
-      >
-        <div className="flex justify-end gap-3 pt-2">
-          <Button
-            variant="ghost"
-            onClick={() => setColToDelete(null)}
-            className="cursor-pointer"
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            onClick={() => {
-              if (colToDelete) {
-                deleteCollection(colToDelete.id);
-                setColToDelete(null);
-              }
-            }}
-            className="cursor-pointer"
-          >
-            Delete
-          </Button>
-        </div>
-      </Dialog>
-
-      {/* Dialog: Confirm Delete Request */}
-      <Dialog
-        isOpen={!!reqToDelete}
-        onClose={() => setReqToDelete(null)}
-        title="Delete Request?"
-        description={
-          reqToDelete ? (
-            <span>
-              Are you sure you want to delete the request{' '}
-              <strong className="text-foreground font-semibold">
-                "{reqToDelete.name}"
-              </strong>
-              ? This action cannot be undone.
-            </span>
-          ) : (
-            ''
-          )
-        }
-      >
-        <div className="flex justify-end gap-3 pt-2">
-          <Button
-            variant="ghost"
-            onClick={() => setReqToDelete(null)}
-            className="cursor-pointer"
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            onClick={() => {
-              if (reqToDelete) {
-                deleteRequest(reqToDelete.id);
-                setReqToDelete(null);
-              }
-            }}
-            className="cursor-pointer"
-          >
-            Delete
-          </Button>
-        </div>
-      </Dialog>
+      <CollectionPanelDialogs
+        renameTarget={renameTarget}
+        renameValue={renameValue}
+        colToDelete={colToDelete}
+        reqToDelete={reqToDelete}
+        setRenameValue={setRenameValue}
+        closeRenameDialog={closeRenameDialog}
+        handleRenameSubmit={handleRenameSubmit}
+        setColToDelete={setColToDelete}
+        setReqToDelete={setReqToDelete}
+        deleteCollection={deleteCollection}
+        deleteRequest={deleteRequest}
+      />
     </aside>
   );
 };

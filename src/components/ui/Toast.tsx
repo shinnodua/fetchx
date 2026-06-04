@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { createContext, useCallback, useContext, useState } from 'react';
+import { CloseIcon } from '../../assets/svgs';
 import { cn } from '../../utils/cn';
 
 export interface ToastMessage {
@@ -98,19 +99,10 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
                 onClick={() => removeToast(t.id)}
                 className="absolute right-2 top-2 rounded-md p-1 opacity-0 transition-opacity focus:opacity-100 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5"
               >
-                <svg
+                <CloseIcon
+                  title="Dismiss toast"
                   className={cn('w-4 h-4', textStyles[t.type || 'default'])}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                />
               </button>
             </motion.div>
           ))}

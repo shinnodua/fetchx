@@ -7,17 +7,21 @@ import {
   executeRestCall,
   executeWriteCall,
 } from '../../services/requestExecutor';
-import {
-  getRequestIsDirty,
-  useWorkspaceStore,
-} from '../../store/useWorkspaceStore';
+import { useEnvironmentStore } from '../../store/useEnvironmentStore';
+import { useWorkspaceStore } from '../../store/useWorkspaceStore';
 import { ActiveRequestWorkspace } from './components/ActiveRequestWorkspace';
 import { CollectionsPanel } from './components/CollectionsPanel';
+import { EnvironmentDialog } from './components/EnvironmentDialog';
 import { TabsHeader } from './components/TabsHeader';
 import { WorkspaceDialogs } from './components/WorkspaceDialogs';
 import { WorkspaceEmptyState } from './components/WorkspaceEmptyState';
 import type { AbiItem, RequestItem } from './types';
-import { createImportedRequestName, parseCurl } from './utils/requestImport';
+import { replaceVariables } from './utils/environment';
+import { getRequestIsDirty } from './utils/requestDirty';
+import {
+  createImportedRequestName,
+  parseRequestImportContent,
+} from './utils/requestImport';
 
 export const WorkspacePage: React.FC = () => {
   const { isConnected } = useAccount();
@@ -40,6 +44,8 @@ export const WorkspacePage: React.FC = () => {
     saveDraft,
     initializeDraft,
   } = useWorkspaceStore();
+
+  const { environments, activeEnvironmentId } = useEnvironmentStore();
 
   const [selectedColId, setSelectedColId] = useState('');
 
@@ -110,35 +116,56 @@ export const WorkspacePage: React.FC = () => {
 
   const handleTargetPaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
     const pastedText = event.clipboardData.getData('text').trim();
-    if (!pastedText.toLowerCase().startsWith('curl')) return;
+    const lowerText = pastedText.toLowerCase();
+
+    const isCurl = lowerText.startsWith('curl');
+    const isFetch = lowerText.startsWith('fetch');
+    const isUrlWithParams =
+      (lowerText.startsWith('http://') || lowerText.startsWith('https://')) &&
+      pastedText.includes('?');
+
+    if (!isCurl && !isFetch && !isUrlWithParams) return;
 
     event.preventDefault();
 
     try {
-      const parsedCurl = parseCurl(pastedText);
-      if (!parsedCurl.target) {
+      const parsed = parseRequestImportContent(pastedText);
+      if (!parsed.target) {
         toast({
           title: 'Import Failed',
-          description: 'Could not find a URL in the pasted cURL command.',
+          description: 'Could not find a URL in the pasted content.',
           type: 'error',
         });
         return;
       }
 
-      const parsedMethod = parsedCurl.method.toUpperCase();
+      if (isUrlWithParams) {
+        updateActiveRequest({
+          target: parsed.target,
+          queryParams: parsed.queryParams || [],
+        });
+        toast({
+          title: 'URL Parameters Parsed',
+          description: 'URL and query parameters updated successfully.',
+          type: 'success',
+        });
+        return;
+      }
+
+      const parsedMethod = (parsed.type || 'GET').toUpperCase();
       const supportedMethod = ['GET', 'POST'].includes(parsedMethod)
         ? parsedMethod
-        : parsedCurl.body
+        : parsed.body
           ? 'POST'
           : 'GET';
 
       updateActiveRequest({
-        name: createImportedRequestName(supportedMethod, parsedCurl.target),
+        name: createImportedRequestName(supportedMethod, parsed.target),
         type: supportedMethod,
-        target: parsedCurl.target,
-        headers: parsedCurl.headers,
-        queryParams: parsedCurl.queryParams,
-        body: parsedCurl.body,
+        target: parsed.target,
+        headers: parsed.headers || [],
+        queryParams: parsed.queryParams || [],
+        body: parsed.body || '',
         abi: '',
         functionName: '',
         args: {},
@@ -146,8 +173,8 @@ export const WorkspacePage: React.FC = () => {
       });
 
       toast({
-        title: 'cURL Imported',
-        description: 'Request URL, method, headers, params, and body updated.',
+        title: 'Request Imported',
+        description: `Imported from ${isCurl ? 'cURL' : 'fetch'} command successfully.`,
         type: 'success',
       });
     } catch (err) {
@@ -156,7 +183,7 @@ export const WorkspacePage: React.FC = () => {
         description:
           err instanceof Error
             ? err.message
-            : 'Could not parse the pasted cURL command.',
+            : 'Could not parse the pasted command.',
         type: 'error',
       });
     }
@@ -200,15 +227,40 @@ export const WorkspacePage: React.FC = () => {
 
     const start = Date.now();
 
+    // Get current active environment variables
+    const activeEnv = environments.find((e) => e.id === activeEnvironmentId);
+    const activeVariables = activeEnv ? activeEnv.variables : [];
+
+    // Resolve variables in request fields before execution
+    const resolvedRequest = {
+      ...activeRequest,
+      target: replaceVariables(activeRequest.target, activeVariables),
+      body: replaceVariables(activeRequest.body || '', activeVariables),
+      headers: (activeRequest.headers || []).map((h) => ({
+        key: replaceVariables(h.key, activeVariables),
+        value: replaceVariables(h.value, activeVariables),
+      })),
+      queryParams: (activeRequest.queryParams || []).map((qp) => ({
+        key: replaceVariables(qp.key, activeVariables),
+        value: replaceVariables(qp.value, activeVariables),
+      })),
+      args: Object.fromEntries(
+        Object.entries(activeRequest.args || {}).map(([k, v]) => [
+          k,
+          replaceVariables(v, activeVariables),
+        ]),
+      ),
+    };
+
     try {
-      if (activeRequest.type === 'READ' || activeRequest.type === 'WRITE') {
-        if (!activeRequest.target) {
+      if (resolvedRequest.type === 'READ' || resolvedRequest.type === 'WRITE') {
+        if (!resolvedRequest.target) {
           throw new Error('Contract address is required.');
         }
 
         let parsedAbi: AbiItem[] = [];
         try {
-          parsedAbi = JSON.parse(activeRequest.abi || '[]');
+          parsedAbi = JSON.parse(resolvedRequest.abi || '[]');
         } catch {
           throw new Error('Invalid ABI format. Make sure it is valid JSON.');
         }
@@ -216,18 +268,19 @@ export const WorkspacePage: React.FC = () => {
         const selectedFunc = parsedAbi.find(
           (item) =>
             item.type === 'function' &&
-            item.name === activeRequest.functionName,
+            item.name === resolvedRequest.functionName,
         );
 
         if (!selectedFunc) {
           throw new Error(
-            `Function "${activeRequest.functionName}" not found in ABI.`,
+            `Function "${resolvedRequest.functionName}" not found in ABI.`,
           );
         }
 
         // Parse function arguments
         const formattedArgs = (selectedFunc.inputs || []).map((input, idx) => {
-          const rawVal = activeRequest.args?.[input.name || `arg${idx}`] || '';
+          const rawVal =
+            resolvedRequest.args?.[input.name || `arg${idx}`] || '';
           if (!rawVal.trim()) {
             throw new Error(
               `Parameter "${input.name || `arg${idx}`}" is required.`,
@@ -256,15 +309,15 @@ export const WorkspacePage: React.FC = () => {
           activeTabId,
           `Initiating contract call: ${selectedFunc.name}(${formattedArgs.join(', ')})`,
         );
-        addLog(activeTabId, `Target Contract: ${activeRequest.target}`);
-        addLog(activeTabId, `Network ID: ${activeRequest.network}`);
+        addLog(activeTabId, `Target Contract: ${resolvedRequest.target}`);
+        addLog(activeTabId, `Network ID: ${resolvedRequest.network}`);
 
-        if (activeRequest.type === 'READ') {
+        if (resolvedRequest.type === 'READ') {
           addLog(activeTabId, 'Querying contract state...');
           const result = await executeReadCall(
-            activeRequest.target,
+            resolvedRequest.target,
             parsedAbi,
-            activeRequest.functionName || '',
+            resolvedRequest.functionName || '',
             formattedArgs,
             publicClient,
           );
@@ -300,9 +353,9 @@ export const WorkspacePage: React.FC = () => {
             'Requesting transaction signature from wallet...',
           );
           const { txHash, receipt } = await executeWriteCall(
-            activeRequest.target,
+            resolvedRequest.target,
             parsedAbi,
-            activeRequest.functionName || '',
+            resolvedRequest.functionName || '',
             formattedArgs,
             writeContractAsync,
             publicClient,
@@ -354,21 +407,21 @@ export const WorkspacePage: React.FC = () => {
         }
       } else {
         // REST CALL (GET / POST)
-        if (!activeRequest.target) {
+        if (!resolvedRequest.target) {
           throw new Error('URL / Endpoint is required.');
         }
 
         addLog(
           activeTabId,
-          `Sending HTTP ${activeRequest.type} request to: ${activeRequest.target}`,
+          `Sending HTTP ${resolvedRequest.type} request to: ${resolvedRequest.target}`,
         );
 
         const { statusText, data } = await executeRestCall(
-          activeRequest.type,
-          activeRequest.target,
-          activeRequest.headers,
-          activeRequest.queryParams,
-          activeRequest.body,
+          resolvedRequest.type,
+          resolvedRequest.target,
+          resolvedRequest.headers || [],
+          resolvedRequest.queryParams || [],
+          resolvedRequest.body || '',
         );
 
         const duration = Date.now() - start;
@@ -455,6 +508,7 @@ export const WorkspacePage: React.FC = () => {
       </main>
 
       <WorkspaceDialogs />
+      <EnvironmentDialog />
     </div>
   );
 };

@@ -1,8 +1,8 @@
 import type React from 'react';
 import { useMemo } from 'react';
+import { TrashIcon } from '../../../assets/svgs';
 import {
   Button,
-  Input,
   Select,
   Tabs,
   TabsContent,
@@ -14,6 +14,10 @@ import {
 import { useWorkspaceStore } from '../../../store/useWorkspaceStore';
 import { ERC20_ABI, ERC721_ABI } from '../constants';
 import type { AbiItem } from '../types';
+import {
+  EnvironmentAwareInput,
+  EnvironmentAwareTextarea,
+} from './EnvironmentAwareField';
 
 export const RequestSettings: React.FC = () => {
   const { toast } = useToast();
@@ -125,20 +129,24 @@ export const RequestSettings: React.FC = () => {
                 Contract ABI
               </label>
               <div className="flex gap-2">
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => loadPresetAbi('ERC20')}
-                  className="text-[10px] text-primary-500 hover:text-primary-600 font-medium cursor-pointer"
+                  className="h-6 px-1 text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer"
                 >
                   Load ERC20 Preset
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => loadPresetAbi('ERC721')}
-                  className="text-[10px] text-primary-500 hover:text-primary-600 font-medium cursor-pointer"
+                  className="h-6 px-1 text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer"
                 >
                   Load ERC721 Preset
-                </button>
+                </Button>
               </div>
             </div>
             <Textarea
@@ -172,7 +180,7 @@ export const RequestSettings: React.FC = () => {
               />
             </div>
           ) : (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl text-xs">
+            <div className="p-3 bg-primary-500/10 border border-primary-500/20 text-primary-600 rounded-xl text-xs">
               Please paste a valid ABI JSON array containing{' '}
               {activeRequest.type === 'READ'
                 ? 'read (view/pure)'
@@ -196,7 +204,7 @@ export const RequestSettings: React.FC = () => {
                   const inputName = input.name || `arg${idx}`;
                   return (
                     <div key={inputName} className="space-y-1">
-                      <Input
+                      <EnvironmentAwareInput
                         label={`${inputName} (${input.type})`}
                         placeholder={input.type}
                         value={activeRequest.args?.[inputName] || ''}
@@ -259,7 +267,7 @@ export const RequestSettings: React.FC = () => {
                     key={idx}
                     className="flex gap-2 items-center"
                   >
-                    <Input
+                    <EnvironmentAwareInput
                       placeholder="Key"
                       value={param.key}
                       onChange={(e) => {
@@ -268,7 +276,7 @@ export const RequestSettings: React.FC = () => {
                         updateActiveRequest({ queryParams: updated });
                       }}
                     />
-                    <Input
+                    <EnvironmentAwareInput
                       placeholder="Value"
                       value={param.value}
                       onChange={(e) => {
@@ -277,30 +285,20 @@ export const RequestSettings: React.FC = () => {
                         updateActiveRequest({ queryParams: updated });
                       }}
                     />
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => {
                         const updated = (
                           activeRequest.queryParams || []
                         ).filter((_, i) => i !== idx);
                         updateActiveRequest({ queryParams: updated });
                       }}
-                      className="p-2 rounded hover:bg-red-500/10 text-red-500/60 hover:text-red-500 mt-0"
+                      className="h-9 w-9 rounded p-0 text-primary-500/60 hover:text-primary-500 mt-0"
+                      title="Remove parameter"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <title>Trash icon</title>
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
+                      <TrashIcon title="Remove parameter" className="w-4 h-4" />
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -335,7 +333,7 @@ export const RequestSettings: React.FC = () => {
                     key={idx}
                     className="flex gap-2 items-center"
                   >
-                    <Input
+                    <EnvironmentAwareInput
                       placeholder="Header Name"
                       value={header.key}
                       onChange={(e) => {
@@ -344,7 +342,7 @@ export const RequestSettings: React.FC = () => {
                         updateActiveRequest({ headers: updated });
                       }}
                     />
-                    <Input
+                    <EnvironmentAwareInput
                       placeholder="Value"
                       value={header.value}
                       onChange={(e) => {
@@ -353,30 +351,20 @@ export const RequestSettings: React.FC = () => {
                         updateActiveRequest({ headers: updated });
                       }}
                     />
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => {
                         const updated = (activeRequest.headers || []).filter(
                           (_, i) => i !== idx,
                         );
                         updateActiveRequest({ headers: updated });
                       }}
-                      className="p-2 rounded hover:bg-red-500/10 text-red-500/60 hover:text-red-500"
+                      className="h-9 w-9 rounded p-0 text-primary-500/60 hover:text-primary-500"
+                      title="Remove header"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <title>Trash icon</title>
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
+                      <TrashIcon title="Remove header" className="w-4 h-4" />
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -397,7 +385,7 @@ export const RequestSettings: React.FC = () => {
                     Beautify
                   </Button>
                 </div>
-                <Textarea
+                <EnvironmentAwareTextarea
                   className="font-mono text-xs h-64"
                   placeholder="Raw JSON Request Body"
                   value={activeRequest.body || ''}

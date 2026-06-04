@@ -31,6 +31,9 @@ We organize source files around capabilities under `src/features/`. Route files 
 ### 5. Skip Manual Verification unless Requested
 Do not run manual or browser-based verification steps unless they are explicitly requested in the user prompt.
 
+### 6. Clarify Unclear Requirements Before Implementing
+If any requirement is ambiguous, incomplete, contradictory, or could reasonably be interpreted in multiple ways, ask the user for clarification before making code changes. Do not assume intent when the implementation choice could affect behavior, architecture, user experience, dependencies, or data.
+
 ---
 
 ## 🛠 AI Agent Skill Directory

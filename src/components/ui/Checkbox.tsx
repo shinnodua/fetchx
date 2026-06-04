@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import React from 'react';
+import { CheckIcon } from '../../assets/svgs';
 import { cn } from '../../utils/cn';
 
 export interface CheckboxProps
@@ -55,7 +56,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
               if (input) input.click();
             }}
           >
-            <motion.svg
+            <motion.span
               initial={false}
               animate={{
                 opacity: isChecked ? 1 : 0,
@@ -63,17 +64,13 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
               }}
               transition={{ duration: 0.2 }}
               className="h-3.5 w-3.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={3}
             >
-              <motion.path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M5 13l4 4L19 7"
+              <CheckIcon
+                title="Checked"
+                className="h-3.5 w-3.5"
+                strokeWidth={3}
               />
-            </motion.svg>
+            </motion.span>
           </div>
         </div>
         {label && (

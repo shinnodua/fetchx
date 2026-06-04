@@ -1,5 +1,6 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { InfoIcon } from '../../../assets/svgs';
 import {
   Accordion,
   Alert,
@@ -154,7 +155,7 @@ export const ComponentShowcase: React.FC = () => {
               <DropdownMenuItem>Profile Settings</DropdownMenuItem>
               <DropdownMenuItem>Billing Information</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-500 hover:text-red-600 focus:text-red-600">
+              <DropdownMenuItem className="text-primary-600 hover:text-primary-700 focus:text-primary-700">
                 Log out
               </DropdownMenuItem>
             </DropdownMenu>
@@ -266,20 +267,7 @@ export const ComponentShowcase: React.FC = () => {
               </Tooltip>
               <Tooltip content="More information about this icon">
                 <div className="p-2 rounded-full hover:bg-foreground/10 cursor-help">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <title>Information icon</title>
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+                  <InfoIcon title="Information icon" className="w-5 h-5" />
                 </div>
               </Tooltip>
             </div>

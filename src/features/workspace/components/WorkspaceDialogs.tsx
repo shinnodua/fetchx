@@ -146,7 +146,7 @@ export const WorkspaceDialogs: React.FC = () => {
               rows={8}
             />
             {importError && (
-              <span className="text-xs text-red-500 ml-1 font-medium">
+              <span className="text-xs text-primary-600 ml-1 font-medium">
                 {importError}
               </span>
             )}

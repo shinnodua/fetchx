@@ -1,4 +1,5 @@
 import React from 'react';
+import { ChevronRightIcon } from '../../assets/svgs';
 import { cn } from '../../utils/cn';
 
 export const Breadcrumb = React.forwardRef<
@@ -77,16 +78,7 @@ export const BreadcrumbSeparator = ({
     className={cn('[&>svg]:w-3.5 [&>svg]:h-3.5', className)}
     {...props}
   >
-    {children ?? (
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 5l7 7-7 7"
-        />
-      </svg>
-    )}
+    {children ?? <ChevronRightIcon title="Breadcrumb separator" />}
   </li>
 );
 BreadcrumbSeparator.displayName = 'BreadcrumbSeparator';

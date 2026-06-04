@@ -47,6 +47,8 @@ export const createImportedRequestName = (method: string, target: string) => {
 const tokenizeCurl = (curl: string) => {
   const cleanCurl = curl
     .replace(/\\\r?\n/g, ' ')
+    .replace(/`\r?\n/g, ' ')
+    .replace(/\^\r?\n/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 
@@ -141,7 +143,7 @@ export const parseCurl = (curl: string): ParsedCurl => {
       if (CURL_OPTIONS_WITH_VALUE.includes(arg)) {
         i++;
       }
-    } else if (arg !== 'curl' && !target) {
+    } else if (arg !== 'curl' && arg !== 'curl.exe' && !target) {
       target = arg;
     }
   }
@@ -171,7 +173,111 @@ export const parseRequestImportContent = (
   content: string,
 ): Partial<RequestItem> => {
   const trimmedContent = content.trim();
-  if (trimmedContent.toLowerCase().startsWith('curl')) {
+
+  // 1. Check if it's a URL
+  if (/^https?:\/\//i.test(trimmedContent)) {
+    let target = trimmedContent;
+    const queryParams: { key: string; value: string }[] = [];
+    try {
+      const urlObj = new URL(trimmedContent);
+      urlObj.searchParams.forEach((value, key) => {
+        queryParams.push({ key, value });
+      });
+      target = `${urlObj.origin}${urlObj.pathname}`;
+    } catch {
+      // Keep as-is
+    }
+    return {
+      name: createImportedRequestName('GET', target),
+      type: 'GET',
+      target,
+      queryParams,
+      headers: [],
+      body: '',
+    };
+  }
+
+  // 2. Check if it's a JavaScript Fetch command
+  if (trimmedContent.toLowerCase().startsWith('fetch')) {
+    const fetchUrlMatch = trimmedContent.match(/fetch\s*\(\s*(['"`])(.*?)\1/);
+    if (!fetchUrlMatch) {
+      throw new Error('Could not parse URL from fetch command.');
+    }
+    const url = fetchUrlMatch[2];
+    let target = url;
+    const queryParams: { key: string; value: string }[] = [];
+    try {
+      const urlObj = new URL(url);
+      urlObj.searchParams.forEach((value, key) => {
+        queryParams.push({ key, value });
+      });
+      target = `${urlObj.origin}${urlObj.pathname}`;
+    } catch {
+      // Keep as-is
+    }
+
+    // Extract options block between first '{' and last '}'
+    const firstBrace = trimmedContent.indexOf('{');
+    const lastBrace = trimmedContent.lastIndexOf('}');
+    let method = 'GET';
+    const headers: { key: string; value: string }[] = [];
+    let body = '';
+
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      const optionsText = trimmedContent.substring(firstBrace, lastBrace + 1);
+
+      const methodMatch =
+        optionsText.match(/"method"\s*:\s*(['"`])(.*?)\1/i) ||
+        optionsText.match(/method\s*:\s*(['"`])(.*?)\1/i);
+      if (methodMatch) {
+        method = methodMatch[2].toUpperCase();
+      }
+
+      const bodyMatch =
+        optionsText.match(/"body"\s*:\s*(['"`])(.*?)\1/s) ||
+        optionsText.match(/body\s*:\s*(['"`])(.*?)\1/s);
+      if (bodyMatch) {
+        body = bodyMatch[2];
+        // Unescape body quotes/newlines
+        body = body
+          .replace(/\\"/g, '"')
+          .replace(/\\'/g, "'")
+          .replace(/\\n/g, '\n')
+          .replace(/\\\\/g, '\\');
+      }
+
+      const headersBlockMatch =
+        optionsText.match(/"headers"\s*:\s*\{([^}]+)\}/is) ||
+        optionsText.match(/headers\s*:\s*\{([^}]+)\}/is);
+      if (headersBlockMatch) {
+        const block = headersBlockMatch[1];
+        const pairRegex =
+          /(?:"([^"]+)"|'([^']+)'|([a-zA-Z0-9_-]+))\s*:\s*(?:([`'"])(.*?)\4)/g;
+        const matches = block.matchAll(pairRegex);
+        for (const match of matches) {
+          const key = match[1] || match[2] || match[3];
+          const value = match[5];
+          if (key && value !== undefined) {
+            headers.push({ key: key.trim(), value: value.trim() });
+          }
+        }
+      }
+    }
+
+    return {
+      name: createImportedRequestName(method, target),
+      type: method,
+      target,
+      headers,
+      queryParams,
+      body,
+    };
+  }
+
+  // 3. Check if it's a cURL command (bash, cmd, or PowerShell)
+  const isPowerShellCurl = trimmedContent.toLowerCase().startsWith('curl.exe');
+  const isStandardCurl = trimmedContent.toLowerCase().startsWith('curl');
+  if (isPowerShellCurl || isStandardCurl) {
     const parsedCurl = parseCurl(trimmedContent);
     if (!parsedCurl.target) {
       throw new Error('Failed to parse URL from curl command.');

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import type React from 'react';
 import { useState } from 'react';
+import { ChevronDownIcon } from '../../assets/svgs';
 import { cn } from '../../utils/cn';
 
 export interface AccordionItem {
@@ -52,21 +53,16 @@ export const Accordion = ({
               className="flex w-full items-center justify-between px-5 py-4 text-left font-medium transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:bg-foreground/5"
             >
               <span>{item.title}</span>
-              <motion.svg
+              <motion.span
                 animate={{ rotate: isOpen ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
                 className="h-4 w-4 shrink-0 text-foreground/50"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
+                <ChevronDownIcon
+                  title="Toggle accordion item"
+                  className="h-4 w-4"
                 />
-              </motion.svg>
+              </motion.span>
             </button>
 
             <AnimatePresence initial={false}>

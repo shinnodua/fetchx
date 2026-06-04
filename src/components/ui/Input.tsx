@@ -8,10 +8,25 @@ export interface InputProps extends Omit<HTMLMotionProps<'input'>, 'ref'> {
   error?: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  highlightedContent?: React.ReactNode;
+  highlightedContentClassName?: string;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, leftIcon, rightIcon, id, ...props }, ref) => {
+  (
+    {
+      className,
+      label,
+      error,
+      leftIcon,
+      rightIcon,
+      highlightedContent,
+      highlightedContentClassName,
+      id,
+      ...props
+    },
+    ref,
+  ) => {
     const generatedId = React.useId();
     const inputId = id || generatedId;
 
@@ -31,10 +46,23 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               {leftIcon}
             </div>
           )}
+          {highlightedContent && (
+            <div
+              aria-hidden="true"
+              className={cn(
+                'pointer-events-none absolute inset-0 z-30 flex items-center overflow-visible whitespace-pre px-4 py-2 text-sm text-foreground',
+                leftIcon ? 'pl-10' : '',
+                rightIcon ? 'pr-10' : '',
+                highlightedContentClassName,
+              )}
+            >
+              {highlightedContent}
+            </div>
+          )}
           <motion.input
             ref={ref}
             id={inputId}
-            whileFocus={{ scale: 1.01 }}
+            whileFocus={highlightedContent ? undefined : { scale: 1.01 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             className={cn(
               'flex h-12 w-full rounded-xl border border-foreground/10 bg-background/50 px-4 py-2 text-sm text-foreground shadow-sm backdrop-blur-sm transition-all file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground/40',
@@ -43,6 +71,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               'disabled:cursor-not-allowed disabled:opacity-50',
               leftIcon ? 'pl-10' : '',
               rightIcon ? 'pr-10' : '',
+              highlightedContent
+                ? 'relative z-20 bg-transparent text-transparent caret-foreground backdrop-blur-none'
+                : '',
               error
                 ? 'border-red-500 focus-visible:ring-red-500/50 focus-visible:border-red-500'
                 : '',

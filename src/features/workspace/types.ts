@@ -39,3 +39,16 @@ export interface AbiItem {
   constant?: boolean;
   inputs?: AbiInput[];
 }
+
+export interface EnvironmentVariable {
+  id: string;
+  key: string;
+  value: string;
+  enabled: boolean;
+}
+
+export interface Environment {
+  id: string;
+  name: string;
+  variables: EnvironmentVariable[];
+}

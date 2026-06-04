@@ -33,6 +33,9 @@ src/
 ├── components/              # Shared Flamingo UI Library
 │   ├── ui/                  # Raw UI building blocks (Button, Input, etc.)
 │   └── index.ts             # Barrel file export
+├── assets/                  # Static assets used by the application
+│   ├── images/              # PNG, JPG, WebP, and other raster images
+│   └── svgs/                # SVG files and reusable SVG icon components
 ├── utils/                   # Shared utility wrappers (cn, format, etc.)
 └── main.tsx                 # App mount & router registration
 ```
@@ -110,6 +113,16 @@ Avoid deprecated functions, hooks, props, and package APIs whenever possible.
 - Do not introduce new deprecated APIs to match old local code. If existing code uses a deprecated API and the current task touches that code path, update it when the change is low risk.
 - If a deprecated API cannot be avoided because of package constraints, leave a short comment explaining why and keep the usage isolated.
 
+### 7. Asset Placement
+
+Keep static assets organized by type:
+
+- Images must live in `src/assets/images/`.
+- SVG files and reusable SVG icon components must live in `src/assets/svgs/`.
+- Each reusable SVG icon component must live in its own file named after the component, such as `PlusIcon.tsx`, and be exported from `src/assets/svgs/index.ts`.
+- Other asset files must live directly under `src/assets/` or an appropriately named subfolder when the type needs grouping.
+- Do not define SVG icon markup inline in feature, route, layout, or UI components. Import SVG icon components from `src/assets/svgs/`, and pass the icon title as a prop at the usage site.
+
 ---
 
 ## 🎨 Styling & Component Rules
@@ -120,6 +133,13 @@ Avoid deprecated functions, hooks, props, and package APIs whenever possible.
 2. **React Key Usage**:
    - Do not use array indexes (`key={idx}`) for dynamic lists. Use unique identifiers (like `inputName` or item IDs).
    - If no unique keys exist, generate a stable ID at list instantiation or use a `// biome-ignore lint/suspicious/noArrayIndexKey` comment with a clear rationale.
+3. **Confirm Destructive Delete/Remove Actions**:
+   - When implementing any user-facing delete or remove action, show a confirmation dialog before permanently deleting data or removing user-created content.
+   - The confirmation should name the item when possible, explain the consequence, and require an explicit confirm action before calling the destructive handler.
+4. **Workspace Environment-Aware Text Fields**:
+   - In workspace request tabs, all text inputs and textareas that accept request data must use the environment-aware field components that support `{{variable}}` placeholders, such as `EnvironmentAwareInput` and `EnvironmentAwareTextarea`.
+   - This applies to target URLs or contract addresses, query parameters, headers, request bodies, and contract arguments.
+   - Use the base shared `Input` and `Textarea` only for fields that do not accept environment placeholders, such as request names, ABI JSON, search inputs, environment variable definitions, and dialog labels.
 
 ---
 
