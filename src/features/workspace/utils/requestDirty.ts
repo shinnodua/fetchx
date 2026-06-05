@@ -11,6 +11,7 @@ export const getRequestIsDirty = (
       draft.name === 'Untitled Request' || draft.name === 'Imported Request';
     const isDefaultType = draft.type === 'GET';
     const isDefaultNetwork = draft.network === '1';
+    const isDefaultRpc = !draft.customRpcId;
     const isTargetEmpty = !draft.target || draft.target.trim() === '';
     const isBodyEmpty = !draft.body || draft.body.trim() === '';
     const isFunctionNameEmpty =
@@ -25,6 +26,7 @@ export const getRequestIsDirty = (
       isDefaultName &&
       isDefaultType &&
       isDefaultNetwork &&
+      isDefaultRpc &&
       isTargetEmpty &&
       isBodyEmpty &&
       isFunctionNameEmpty &&
@@ -43,6 +45,7 @@ export const getRequestIsDirty = (
     draft.body !== original.body ||
     draft.functionName !== original.functionName ||
     draft.network !== original.network ||
+    draft.customRpcId !== original.customRpcId ||
     JSON.stringify(draft.headers) !== JSON.stringify(original.headers) ||
     JSON.stringify(draft.queryParams) !==
       JSON.stringify(original.queryParams) ||

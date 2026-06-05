@@ -19,6 +19,7 @@ import {
 interface ResponsePayloadViewerProps {
   data: unknown;
   onSave?: (name: string) => boolean;
+  explorerUrl?: string;
 }
 
 type JsonPrimitive = string | number | boolean | null;
@@ -398,6 +399,7 @@ export const ResponsePayloadDialog: React.FC<{
 export const ResponsePayloadViewer: React.FC<ResponsePayloadViewerProps> = ({
   data,
   onSave,
+  explorerUrl,
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
@@ -432,6 +434,17 @@ export const ResponsePayloadViewer: React.FC<ResponsePayloadViewerProps> = ({
         data={data}
         actions={
           <>
+            {explorerUrl && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => window.open(explorerUrl, '_blank', 'noreferrer')}
+                className="h-7 rounded-lg px-2 text-[10px] font-semibold uppercase tracking-wider text-primary-600 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200"
+              >
+                Explorer
+              </Button>
+            )}
             <Button
               type="button"
               variant="ghost"

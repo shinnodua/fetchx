@@ -77,7 +77,7 @@ export async function executeWriteCall(
 }
 
 /**
- * Executes a REST API client call (GET / POST).
+ * Executes a REST API client call.
  */
 export async function executeRestCall(
   type: string,

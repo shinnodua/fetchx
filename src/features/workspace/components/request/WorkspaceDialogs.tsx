@@ -9,10 +9,13 @@ import {
   useToast,
 } from '../../../../components';
 import { fetchContractInfo } from '../../../../services/api';
-import { useWorkspaceStore } from '../../../../store';
-import { METHOD_OPTIONS, NETWORK_OPTIONS } from '../../constants';
+import { useRpcStore, useWorkspaceStore } from '../../../../store';
+import { METHOD_OPTIONS } from '../../constants';
 import type { RequestItem } from '../../types';
 import { parseRequestImportContent } from '../../utils/requestImport';
+import { getSelectedRpcId } from '../../utils/rpcOptions';
+import { ManageRpcsDialog } from './ManageRpcsDialog';
+import { RpcSelectField } from './RpcSelectField';
 
 export const WorkspaceDialogs: React.FC = () => {
   const {
@@ -36,15 +39,20 @@ export const WorkspaceDialogs: React.FC = () => {
     addCollection,
     addRequest,
     addCustomRequest,
+    discardDraftChanges,
     closeTab,
   } = useWorkspaceStore();
 
   const { toast } = useToast();
+  const customRpcs = useRpcStore((state) => state.customRpcs);
   const [importContent, setImportContent] = useState('');
   const [importError, setImportError] = useState('');
 
   const [contractAddress, setContractAddress] = useState('');
   const [contractNetwork, setContractNetwork] = useState('1');
+  const [contractCustomRpcId, setContractCustomRpcId] = useState<
+    string | undefined
+  >(undefined);
   const [contractImportError, setContractImportError] = useState('');
   const [isImportLoading, setIsImportLoading] = useState(false);
 
@@ -58,6 +66,7 @@ export const WorkspaceDialogs: React.FC = () => {
     setImportContractOpen(false);
     setContractAddress('');
     setContractNetwork('1');
+    setContractCustomRpcId(undefined);
     setContractImportError('');
     setIsImportLoading(false);
   };
@@ -85,6 +94,7 @@ export const WorkspaceDialogs: React.FC = () => {
         type: 'READ',
         target: info.address,
         network: info.network,
+        customRpcId: contractCustomRpcId,
         abi: info.abi,
         functionName: '',
         args: {},
@@ -183,6 +193,7 @@ export const WorkspaceDialogs: React.FC = () => {
             </label>
             <Select
               options={METHOD_OPTIONS}
+              dropdownClassName="max-h-none overflow-visible"
               value={newReqType}
               onChange={setNewReqType}
             />
@@ -249,6 +260,17 @@ export const WorkspaceDialogs: React.FC = () => {
             Cancel
           </Button>
           <Button
+            variant="outline"
+            onClick={() => {
+              if (tabToClose) {
+                discardDraftChanges(tabToClose);
+                setTabToClose(null);
+              }
+            }}
+          >
+            Discard
+          </Button>
+          <Button
             variant="primary"
             onClick={() => {
               if (tabToClose) {
@@ -281,12 +303,17 @@ export const WorkspaceDialogs: React.FC = () => {
           />
           <div>
             <label className="text-sm font-medium text-foreground/80 ml-1 mb-1.5 block">
-              Network
+              RPC
             </label>
-            <Select
-              options={NETWORK_OPTIONS}
-              value={contractNetwork}
-              onChange={setContractNetwork}
+            <RpcSelectField
+              value={getSelectedRpcId(
+                { network: contractNetwork, customRpcId: contractCustomRpcId },
+                customRpcs,
+              )}
+              onChange={(fields) => {
+                setContractNetwork(fields.network);
+                setContractCustomRpcId(fields.customRpcId);
+              }}
               disabled={isImportLoading}
             />
           </div>
@@ -313,6 +340,7 @@ export const WorkspaceDialogs: React.FC = () => {
           </Button>
         </div>
       </Dialog>
+      <ManageRpcsDialog />
     </>
   );
 };

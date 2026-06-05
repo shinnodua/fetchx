@@ -11,9 +11,11 @@ export * from './environment/UnlockSensitiveDialog';
 export * from './environment/VariablesTable';
 
 export * from './request/ActiveRequestWorkspace';
+export * from './request/ManageRpcsDialog';
 export * from './request/RequestMenuItems';
 export * from './request/RequestSettings';
 export * from './request/ResponsePane';
+export * from './request/RpcSelectField';
 export * from './request/TabContextMenu';
 export * from './request/TabsHeader';
 export * from './request/WorkspaceDialogs';

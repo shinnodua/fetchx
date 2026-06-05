@@ -109,6 +109,8 @@ const parseRequest = (value: unknown): RequestItem | null => {
     functionName:
       typeof value.functionName === 'string' ? value.functionName : '',
     network: typeof value.network === 'string' ? value.network : '1',
+    customRpcId:
+      typeof value.customRpcId === 'string' ? value.customRpcId : undefined,
     args: value.args === undefined ? {} : value.args,
     headers: value.headers === undefined ? [] : value.headers,
     queryParams: value.queryParams === undefined ? [] : value.queryParams,

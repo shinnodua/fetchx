@@ -147,6 +147,11 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
                   'bg-primary-500/10 text-primary-500 border-primary-500/20',
                 GET: 'bg-secondary-500/10 text-secondary-600 border-secondary-500/20',
                 POST: 'bg-primary-500/10 text-primary-500 border-primary-500/20',
+                PUT: 'bg-primary-500/10 text-primary-500 border-primary-500/20',
+                PATCH:
+                  'bg-secondary-500/10 text-secondary-600 border-secondary-500/20',
+                DELETE:
+                  'bg-primary-500/10 text-primary-500 border-primary-500/20',
               };
               return (
                 <div key={req.id} className="space-y-1">

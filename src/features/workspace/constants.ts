@@ -1,7 +1,7 @@
 import { ERC20_ABI } from './constants/erc20';
 import { ERC721_ABI } from './constants/erc721';
 import { ERC1155_ABI } from './constants/erc1155';
-import type { CollectionItem } from './types';
+import type { CollectionItem, RpcOption } from './types';
 
 export { ERC20_ABI, ERC721_ABI, ERC1155_ABI };
 
@@ -110,9 +110,42 @@ export const NETWORK_OPTIONS = [
   { value: '8453', label: 'Base' },
 ];
 
+const DEFAULT_EXPLORER_URLS: Record<string, string> = {
+  '1': 'https://etherscan.io',
+  '11155111': 'https://sepolia.etherscan.io',
+  '137': 'https://polygonscan.com',
+  '10': 'https://optimistic.etherscan.io',
+  '42161': 'https://arbiscan.io',
+  '8453': 'https://basescan.org',
+};
+
+export const DEFAULT_RPC_OPTIONS: RpcOption[] = NETWORK_OPTIONS.map(
+  (network) => ({
+    id: `default-${network.value}`,
+    name: network.label,
+    chainId: network.value,
+    explorerUrl: DEFAULT_EXPLORER_URLS[network.value],
+    isDefault: true,
+  }),
+);
+
 export const METHOD_OPTIONS = [
   { value: 'READ', label: 'READ (Contract)' },
   { value: 'WRITE', label: 'WRITE (Contract)' },
   { value: 'GET', label: 'GET (REST)' },
   { value: 'POST', label: 'POST (REST)' },
+  { value: 'PUT', label: 'PUT (REST)' },
+  { value: 'PATCH', label: 'PATCH (REST)' },
+  { value: 'DELETE', label: 'DELETE (REST)' },
 ];
+
+export const REST_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+export const REST_METHODS_WITH_BODY = ['POST', 'PUT', 'PATCH', 'DELETE'];
+
+export function isRestMethod(type: string | undefined) {
+  return !!type && REST_METHODS.includes(type);
+}
+
+export function methodSupportsBody(type: string | undefined) {
+  return !!type && REST_METHODS_WITH_BODY.includes(type);
+}

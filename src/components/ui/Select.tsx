@@ -6,6 +6,7 @@ import { cn } from '../../utils/cn';
 export interface SelectOption {
   value: string;
   label: string;
+  separatorAfter?: boolean;
 }
 
 export interface SelectProps {
@@ -15,6 +16,7 @@ export interface SelectProps {
   placeholder?: string;
   label?: string;
   className?: string;
+  dropdownClassName?: string;
   disabled?: boolean;
 }
 
@@ -27,6 +29,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
       placeholder = 'Select an option',
       label,
       className,
+      dropdownClassName,
       disabled,
     },
     ref,
@@ -107,29 +110,36 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-[calc(100%+4px)] z-50 max-h-60 w-full overflow-auto rounded-xl border border-foreground/10 bg-background/90 p-1 shadow-xl backdrop-blur-xl"
+              className={cn(
+                'absolute top-[calc(100%+4px)] z-50 w-full rounded-xl border border-foreground/10 bg-background/90 p-1 shadow-xl backdrop-blur-xl',
+                dropdownClassName || 'max-h-60 overflow-auto',
+              )}
             >
               {options.map((option) => (
-                <div
-                  key={option.value}
-                  onClick={() => handleSelect(option.value)}
-                  className={cn(
-                    'relative flex w-full cursor-pointer select-none items-center rounded-lg py-2.5 pl-3 pr-9 text-sm outline-none transition-colors hover:bg-foreground/5 focus:bg-foreground/5',
-                    selectedValue === option.value
-                      ? 'bg-primary-50 text-primary-900 font-medium dark:bg-primary-900/20 dark:text-primary-100'
-                      : 'text-foreground',
+                <React.Fragment key={option.value}>
+                  <div
+                    onClick={() => handleSelect(option.value)}
+                    className={cn(
+                      'relative flex w-full cursor-pointer select-none items-center rounded-lg py-2.5 pl-3 pr-9 text-sm outline-none transition-colors hover:bg-foreground/5 focus:bg-foreground/5',
+                      selectedValue === option.value
+                        ? 'bg-primary-50 text-primary-900 font-medium dark:bg-primary-900/20 dark:text-primary-100'
+                        : 'text-foreground',
+                    )}
+                  >
+                    <span className="block truncate">{option.label}</span>
+                    {selectedValue === option.value && (
+                      <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-primary-600 dark:text-primary-400">
+                        <CheckSolidIcon
+                          title="Selected option"
+                          className="h-4 w-4"
+                        />
+                      </span>
+                    )}
+                  </div>
+                  {option.separatorAfter && (
+                    <div className="my-1 h-px bg-foreground/10" />
                   )}
-                >
-                  <span className="block truncate">{option.label}</span>
-                  {selectedValue === option.value && (
-                    <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-primary-600 dark:text-primary-400">
-                      <CheckSolidIcon
-                        title="Selected option"
-                        className="h-4 w-4"
-                      />
-                    </span>
-                  )}
-                </div>
+                </React.Fragment>
               ))}
             </motion.div>
           )}

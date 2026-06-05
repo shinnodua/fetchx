@@ -7,6 +7,7 @@ import {
   useToast,
 } from '../../../../components';
 import { useWorkspaceStore } from '../../../../store';
+import { isRestMethod } from '../../constants';
 import {
   copyAsCurlBash,
   copyAsCurlCmd,
@@ -44,7 +45,7 @@ export const RequestMenuItems: React.FC<RequestMenuItemsProps> = ({
     collections
       .flatMap((collection) => collection.requests)
       .find((r) => r.id === req.id);
-  const isHttp = reqObj && (reqObj.type === 'GET' || reqObj.type === 'POST');
+  const isHttp = reqObj && isRestMethod(reqObj.type);
 
   const handleCopy = async (type: string, event: React.MouseEvent) => {
     event.stopPropagation();

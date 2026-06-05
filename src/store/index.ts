@@ -22,4 +22,5 @@ export const useStore = create<AppState>()(
 );
 
 export * from './environment/useEnvironmentStore';
+export * from './rpc/useRpcStore';
 export * from './workspace/useWorkspaceStore';

@@ -6,6 +6,7 @@ import {
   DropdownMenuSeparator,
   useToast,
 } from '../../../../components';
+import { isRestMethod } from '../../constants';
 import type { RequestItem } from '../../types';
 import {
   copyAsCurlBash,
@@ -48,7 +49,7 @@ export const TabContextMenu: React.FC<TabContextMenuProps> = ({
 }) => {
   const { toast } = useToast();
   const [showCopyOptions, setShowCopyOptions] = useState(false);
-  const isHttp = request && (request.type === 'GET' || request.type === 'POST');
+  const isHttp = request && isRestMethod(request.type);
 
   const closeMenu = () => {
     setShowCopyOptions(false);

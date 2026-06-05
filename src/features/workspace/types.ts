@@ -16,11 +16,12 @@ export interface SavedResponse {
 export interface RequestItem {
   id: string;
   name: string;
-  type: string; // 'READ' | 'WRITE' | 'GET' | 'POST'
+  type: string; // 'READ' | 'WRITE' | REST method
   target: string;
   abi?: string;
   functionName?: string;
   network?: string;
+  customRpcId?: string;
   args?: Record<string, string>;
   headers?: { key: string; value: string }[];
   queryParams?: { key: string; value: string }[];
@@ -47,6 +48,23 @@ export interface AbiItem {
   stateMutability?: string;
   constant?: boolean;
   inputs?: AbiInput[];
+}
+
+export interface RpcOption {
+  id: string;
+  name: string;
+  chainId: string;
+  url?: string;
+  explorerUrl?: string;
+  isDefault: boolean;
+}
+
+export interface CustomRpc {
+  id: string;
+  name: string;
+  chainId: string;
+  url: string;
+  explorerUrl?: string;
 }
 
 export interface EncryptedEnvironmentValue {

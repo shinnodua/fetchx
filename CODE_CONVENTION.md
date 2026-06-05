@@ -33,6 +33,8 @@ src/
 │   ├── index.ts             # Global exports & theme config
 │   ├── environment/         # Environment state management
 │   │   └── useEnvironmentStore.ts
+│   ├── rpc/                 # Custom RPC endpoint persistence
+│   │   └── useRpcStore.ts
 │   └── workspace/           # Workspace state management
 │       ├── useWorkspaceStore.ts
 │       ├── workspaceStoreActions.ts
@@ -121,6 +123,7 @@ Use these rules when deciding where code belongs:
 
 ### 5. Shared State & Service Placements
 - **Zustand Stores**: Shared state that needs local storage persistence or global cross-feature visibility must be written inside `src/store/`.
+- **RPC Endpoint State**: User-managed RPC endpoints must be stored in `src/store/rpc/useRpcStore.ts`. Default RPC entries are static feature constants and must remain non-deletable.
 - **Service Layers**: Non-UI side-effects, dynamic SDK integrations (like Viem/Wagmi read/write handlers), or network requests must be encapsulated inside `src/services/` rather than embedded in page hooks.
 - **HTTP API Calls**: All `fetch`-based API calls must live under `src/services/api/`. Do not add direct `fetch` calls inside feature components, hooks, stores, or page files.
 - **API Organization**: Put each external API domain or product capability in a focused client file such as `contractExplorerApi.ts` or `restApi.ts`. Reuse shared request helpers from `httpClient.ts` instead of duplicating response parsing, query building, or CORS fallback logic.

@@ -241,6 +241,9 @@ export const TabsHeader: React.FC = () => {
             WRITE: 'text-primary-500',
             GET: 'text-secondary-600',
             POST: 'text-primary-500',
+            PUT: 'text-primary-500',
+            PATCH: 'text-secondary-600',
+            DELETE: 'text-primary-500',
           };
 
           return (

@@ -14,7 +14,13 @@ import {
   useToast,
 } from '../../../../components';
 import { useWorkspaceStore } from '../../../../store';
-import { ERC20_ABI, ERC721_ABI, ERC1155_ABI } from '../../constants';
+import {
+  ERC20_ABI,
+  ERC721_ABI,
+  ERC1155_ABI,
+  isRestMethod,
+  methodSupportsBody,
+} from '../../constants';
 import type { AbiItem } from '../../types';
 import {
   type ContractArgValueMode,
@@ -133,13 +139,13 @@ export const RequestSettings: React.FC = () => {
 
   if (!activeRequest) return null;
 
-  const isRestRequest =
-    activeRequest.type === 'GET' || activeRequest.type === 'POST';
+  const isRestRequest = isRestMethod(activeRequest.type);
   const isWeb3Request =
     activeRequest.type === 'READ' || activeRequest.type === 'WRITE';
+  const supportsBody = methodSupportsBody(activeRequest.type);
   const savedRestTab = restTabsByRequestId[activeRequest.id];
   const activeRestTab =
-    activeRequest.type === 'POST' && savedRestTab === 'body'
+    supportsBody && savedRestTab === 'body'
       ? savedRestTab
       : savedRestTab === 'headers'
         ? savedRestTab
@@ -204,7 +210,7 @@ export const RequestSettings: React.FC = () => {
               >
                 Headers
               </TabsTrigger>
-              {activeRequest.type === 'POST' && (
+              {supportsBody && (
                 <TabsTrigger
                   value="body"
                   className="h-7 rounded-md px-3 text-xs"
@@ -358,7 +364,7 @@ export const RequestSettings: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-xs font-semibold text-foreground/75 block">
-                    POST Payload (JSON)
+                    {activeRequest.type} Payload (JSON)
                   </span>
                   <Button
                     variant="outline"

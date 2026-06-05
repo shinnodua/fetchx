@@ -1,5 +1,6 @@
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPublicClient, http } from 'viem';
 import { useAccount, usePublicClient, useWriteContract } from 'wagmi';
 import { useToast } from '../../components';
 import { fetchContractInfo } from '../../services/api';
@@ -8,7 +9,11 @@ import {
   executeRestCall,
   executeWriteCall,
 } from '../../services/requestExecutor';
-import { useEnvironmentStore, useWorkspaceStore } from '../../store';
+import {
+  useEnvironmentStore,
+  useRpcStore,
+  useWorkspaceStore,
+} from '../../store';
 import {
   ActiveRequestWorkspace,
   CollectionsPanel,
@@ -18,6 +23,7 @@ import {
   WorkspaceDialogs,
   WorkspaceEmptyState,
 } from './components';
+import { isRestMethod } from './constants';
 import type { AbiItem, RequestItem } from './types';
 import {
   formatIntegerContractArg,
@@ -63,6 +69,7 @@ export const WorkspacePage: React.FC = () => {
   } = useWorkspaceStore();
 
   const { activeEnvironmentId } = useEnvironmentStore();
+  const customRpcs = useRpcStore((state) => state.customRpcs);
 
   const [selectedColId, setSelectedColId] = useState('');
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
@@ -271,7 +278,18 @@ export const WorkspacePage: React.FC = () => {
   const activeNetworkId = activeRequest?.network
     ? Number(activeRequest.network)
     : undefined;
-  const publicClient = usePublicClient({ chainId: activeNetworkId });
+  const defaultPublicClient = usePublicClient({ chainId: activeNetworkId });
+  const activeCustomRpc = activeRequest?.customRpcId
+    ? customRpcs.find((rpc) => rpc.id === activeRequest.customRpcId)
+    : undefined;
+  const customPublicClient = useMemo(() => {
+    if (!activeCustomRpc?.url) return undefined;
+
+    return createPublicClient({
+      transport: http(activeCustomRpc.url),
+    });
+  }, [activeCustomRpc?.url]);
+  const publicClient = customPublicClient ?? defaultPublicClient;
 
   const handleTargetPaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
     const pastedText = event.clipboardData.getData('text').trim();
@@ -312,7 +330,7 @@ export const WorkspacePage: React.FC = () => {
       }
 
       const parsedMethod = (parsed.type || 'GET').toUpperCase();
-      const supportedMethod = ['GET', 'POST'].includes(parsedMethod)
+      const supportedMethod = isRestMethod(parsedMethod)
         ? parsedMethod
         : parsed.body
           ? 'POST'
@@ -653,7 +671,7 @@ export const WorkspacePage: React.FC = () => {
           }
         }
       } else {
-        // REST CALL (GET / POST)
+        // REST CALL
         if (!resolvedRequest.target) {
           throw new Error('URL / Endpoint is required.');
         }

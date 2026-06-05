@@ -2,14 +2,16 @@ import type React from 'react';
 import { useMemo } from 'react';
 import { CopyIcon } from '../../../../assets/svgs';
 import { Badge, Button, Skeleton, useToast } from '../../../../components';
-import { useWorkspaceStore } from '../../../../store';
+import { useRpcStore, useWorkspaceStore } from '../../../../store';
 import { copyResponse } from '../../utils/requestExport';
+import { findRpcOption, getSelectedRpcId } from '../../utils/rpcOptions';
 import { ResponsePayloadViewer } from './ResponsePayloadViewer';
 
 export const ResponsePane: React.FC = () => {
   const { toast } = useToast();
   const { collections, activeTabId, drafts, saveActiveResponse } =
     useWorkspaceStore();
+  const customRpcs = useRpcStore((state) => state.customRpcs);
 
   // Find active request
   const activeRequest = useMemo(() => {
@@ -27,6 +29,14 @@ export const ResponsePane: React.FC = () => {
   const hasResponsePayload =
     activeRequest.response?.data !== undefined &&
     activeRequest.response.data !== null;
+  const selectedRpc = findRpcOption(
+    getSelectedRpcId(activeRequest, customRpcs),
+    customRpcs,
+  );
+  const txExplorerUrl =
+    activeRequest.response?.txHash && selectedRpc?.explorerUrl
+      ? `${selectedRpc.explorerUrl.replace(/\/$/, '')}/tx/${activeRequest.response.txHash}`
+      : undefined;
 
   const handleCopyResponse = async () => {
     const responseText = copyResponse(activeRequest);
@@ -125,18 +135,20 @@ export const ResponsePane: React.FC = () => {
                 <span className="text-[10px] font-bold text-primary-500 uppercase tracking-wider block">
                   Transaction Sent
                 </span>
-                <a
-                  href={
-                    activeRequest.network === '11155111'
-                      ? `https://sepolia.etherscan.io/tx/${activeRequest.response.txHash}`
-                      : `https://etherscan.io/tx/${activeRequest.response.txHash}`
-                  }
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs font-mono text-primary-600 dark:text-primary-400 hover:underline break-all"
-                >
-                  {activeRequest.response.txHash}
-                </a>
+                {txExplorerUrl ? (
+                  <a
+                    href={txExplorerUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs font-mono text-primary-600 dark:text-primary-400 hover:underline break-all"
+                  >
+                    {activeRequest.response.txHash}
+                  </a>
+                ) : (
+                  <span className="text-xs font-mono text-primary-600 dark:text-primary-400 break-all">
+                    {activeRequest.response.txHash}
+                  </span>
+                )}
               </div>
             )}
 
@@ -158,6 +170,7 @@ export const ResponsePane: React.FC = () => {
                 <ResponsePayloadViewer
                   data={activeRequest.response.data}
                   onSave={handleSaveResponse}
+                  explorerUrl={txExplorerUrl}
                 />
               )
             )}

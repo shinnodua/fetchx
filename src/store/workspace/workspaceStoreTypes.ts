@@ -68,6 +68,7 @@ export interface WorkspaceState {
 
   saveDraft: (reqId: string, colId: string) => void;
   discardDraft: (reqId: string) => void;
+  discardDraftChanges: (reqId: string) => void;
   addNewTab: () => void;
   initializeDraft: (reqId: string) => void;
   setTabToClose: (id: string | null) => void;

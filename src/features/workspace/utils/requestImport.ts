@@ -1,3 +1,4 @@
+import { METHOD_OPTIONS } from '../constants';
 import type { RequestItem } from '../types';
 
 interface ParsedCurl {
@@ -302,13 +303,14 @@ export const parseRequestImportContent = (
   const rawType = typeof parsed.type === 'string' ? parsed.type : '';
   if (!name || !rawType) {
     throw new Error(
-      "Invalid request JSON. 'name' and 'type' (e.g. GET, POST, READ, WRITE) are required fields.",
+      "Invalid request JSON. 'name' and 'type' (e.g. GET, POST, PUT, PATCH, DELETE, READ, WRITE) are required fields.",
     );
   }
 
   const method = rawType.toUpperCase();
-  if (!['GET', 'POST', 'READ', 'WRITE'].includes(method)) {
-    throw new Error('Method must be one of: GET, POST, READ, WRITE');
+  const supportedMethods = METHOD_OPTIONS.map((option) => option.value);
+  if (!supportedMethods.includes(method)) {
+    throw new Error(`Method must be one of: ${supportedMethods.join(', ')}`);
   }
 
   return {
@@ -319,6 +321,8 @@ export const parseRequestImportContent = (
     functionName:
       typeof parsed.functionName === 'string' ? parsed.functionName : '',
     network: typeof parsed.network === 'string' ? parsed.network : '1',
+    customRpcId:
+      typeof parsed.customRpcId === 'string' ? parsed.customRpcId : undefined,
     args: isImportObject(parsed.args)
       ? Object.fromEntries(
           Object.entries(parsed.args).filter(

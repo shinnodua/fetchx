@@ -685,6 +685,23 @@ export const createWorkspaceActions = (
       return { drafts: updatedDrafts };
     }),
 
+  discardDraftChanges: (reqId: string) =>
+    set((state) => {
+      const isNew = reqId.startsWith('r-new-');
+      const original = isNew
+        ? createRequest(reqId, 'Untitled Request', 'GET', { abi: '' })
+        : findRequestById(state.collections, reqId);
+
+      if (!original) return {};
+
+      return {
+        drafts: {
+          ...state.drafts,
+          [reqId]: cloneRequest(original),
+        },
+      };
+    }),
+
   addNewTab: () =>
     set((state) => {
       const newId = createNewRequestId();
