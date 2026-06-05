@@ -17,6 +17,15 @@ import { useWorkspaceStore } from '../../../../store';
 import { ERC20_ABI, ERC721_ABI, ERC1155_ABI } from '../../constants';
 import type { AbiItem } from '../../types';
 import {
+  type ContractArgValueMode,
+  convertDecimalStringToHex,
+  convertHexStringToDecimal,
+  getArgDecimalsKey,
+  getArgValueModeKey,
+  isIntegerAbiType,
+  isStringAbiType,
+} from '../../utils/contractArgs';
+import {
   EnvironmentAwareInput,
   EnvironmentAwareTextarea,
 } from '../environment/EnvironmentAwareField';
@@ -141,6 +150,31 @@ export const RequestSettings: React.FC = () => {
       ...currentTabs,
       [activeRequest.id]: value,
     }));
+  };
+
+  const handleStringModeChange = (
+    inputName: string,
+    nextMode: ContractArgValueMode,
+  ) => {
+    const modeKey = getArgValueModeKey(inputName);
+    const currentMode =
+      (activeRequest.args?.[modeKey] as ContractArgValueMode | undefined) ??
+      'hex';
+    if (currentMode === nextMode) return;
+
+    const currentValue = activeRequest.args?.[inputName] || '';
+    const nextValue =
+      nextMode === 'hex'
+        ? convertDecimalStringToHex(currentValue)
+        : convertHexStringToDecimal(currentValue);
+
+    updateActiveRequest({
+      args: {
+        ...(activeRequest.args || {}),
+        [inputName]: nextValue,
+        [modeKey]: nextMode,
+      },
+    });
   };
 
   return (
@@ -444,21 +478,105 @@ export const RequestSettings: React.FC = () => {
                     ) : (
                       activeSelectedFunction.inputs?.map((input, idx) => {
                         const inputName = input.name || `arg${idx}`;
+                        const decimalsKey = getArgDecimalsKey(inputName);
+                        const valueModeKey = getArgValueModeKey(inputName);
+                        const isIntegerInput = isIntegerAbiType(input.type);
+                        const isStringInput = isStringAbiType(input.type);
+                        const activeValueMode =
+                          (activeRequest.args?.[
+                            valueModeKey
+                          ] as ContractArgValueMode) || 'hex';
                         return (
                           <div key={inputName} className="space-y-1">
-                            <EnvironmentAwareInput
-                              label={`${inputName} (${input.type})`}
-                              placeholder={input.type}
-                              value={activeRequest.args?.[inputName] || ''}
-                              onChange={(e) =>
-                                updateActiveRequest({
-                                  args: {
-                                    ...(activeRequest.args || {}),
-                                    [inputName]: e.target.value,
-                                  },
-                                })
-                              }
-                            />
+                            <div className="flex items-start gap-2">
+                              <EnvironmentAwareInput
+                                inputMode={
+                                  isStringInput && activeValueMode === 'dec'
+                                    ? 'numeric'
+                                    : undefined
+                                }
+                                label={`${inputName} (${input.type})`}
+                                placeholder={input.type}
+                                value={activeRequest.args?.[inputName] || ''}
+                                onChange={(e) =>
+                                  updateActiveRequest({
+                                    args: {
+                                      ...(activeRequest.args || {}),
+                                      [inputName]: e.target.value,
+                                    },
+                                  })
+                                }
+                              />
+                              {isIntegerInput && (
+                                <div className="w-20 shrink-0">
+                                  <EnvironmentAwareInput
+                                    className="px-2 text-center"
+                                    inputMode="numeric"
+                                    label="Dec."
+                                    maxLength={2}
+                                    placeholder="0"
+                                    value={
+                                      activeRequest.args?.[decimalsKey] || ''
+                                    }
+                                    onChange={(e) =>
+                                      updateActiveRequest({
+                                        args: {
+                                          ...(activeRequest.args || {}),
+                                          [decimalsKey]: e.target.value,
+                                        },
+                                      })
+                                    }
+                                  />
+                                </div>
+                              )}
+                              {isStringInput && (
+                                <div className="w-24 shrink-0">
+                                  <div className="flex w-full flex-col gap-1.5">
+                                    <span className="ml-1 text-sm font-medium text-foreground/80">
+                                      Mode
+                                    </span>
+                                    <div className="flex h-12 rounded-xl bg-foreground/5 p-1">
+                                      <Button
+                                        type="button"
+                                        variant={
+                                          activeValueMode === 'hex'
+                                            ? 'primary'
+                                            : 'ghost'
+                                        }
+                                        size="sm"
+                                        className="h-10 flex-1 rounded-lg px-0 text-xs"
+                                        onClick={() =>
+                                          handleStringModeChange(
+                                            inputName,
+                                            'hex',
+                                          )
+                                        }
+                                      >
+                                        Hex
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        variant={
+                                          activeValueMode === 'dec'
+                                            ? 'primary'
+                                            : 'ghost'
+                                        }
+                                        size="sm"
+                                        className="h-10 flex-1 rounded-lg px-0 text-xs"
+                                        onClick={() =>
+                                          handleStringModeChange(
+                                            inputName,
+                                            'dec',
+                                          )
+                                        }
+                                      >
+                                        Dec
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         );
                       })

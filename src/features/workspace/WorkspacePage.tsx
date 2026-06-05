@@ -2,7 +2,7 @@ import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAccount, usePublicClient, useWriteContract } from 'wagmi';
 import { useToast } from '../../components';
-import { fetchContractInfo } from '../../services/contractImporter';
+import { fetchContractInfo } from '../../services/api';
 import {
   executeReadCall,
   executeRestCall,
@@ -19,6 +19,14 @@ import {
   WorkspaceEmptyState,
 } from './components';
 import type { AbiItem, RequestItem } from './types';
+import {
+  formatIntegerContractArg,
+  formatStringContractArg,
+  getArgDecimalsKey,
+  getArgValueModeKey,
+  isIntegerAbiType,
+  isStringAbiType,
+} from './utils/contractArgs';
 import {
   getLockedSensitiveVariableNames,
   redactSensitiveData,
@@ -511,11 +519,24 @@ export const WorkspacePage: React.FC = () => {
               );
             }
           }
-          if (input.type.startsWith('uint') || input.type.startsWith('int')) {
-            return BigInt(rawVal);
+          if (isIntegerAbiType(input.type)) {
+            return formatIntegerContractArg(
+              rawVal,
+              resolvedRequest.args?.[
+                getArgDecimalsKey(input.name || `arg${idx}`)
+              ] || '',
+            );
           }
           if (input.type === 'bool') {
             return rawVal.toLowerCase() === 'true';
+          }
+          if (isStringAbiType(input.type)) {
+            return formatStringContractArg(
+              rawVal,
+              resolvedRequest.args?.[
+                getArgValueModeKey(input.name || `arg${idx}`)
+              ],
+            );
           }
           return rawVal;
         });
@@ -642,7 +663,7 @@ export const WorkspacePage: React.FC = () => {
           `Sending HTTP ${resolvedRequest.type} request to: ${redactedRequest.target}`,
         );
 
-        const { statusText, data } = await executeRestCall(
+        const { statusText, data, proxied } = await executeRestCall(
           resolvedRequest.type,
           resolvedRequest.target,
           resolvedRequest.headers || [],
@@ -652,6 +673,12 @@ export const WorkspacePage: React.FC = () => {
 
         const duration = Date.now() - start;
         const redactedData = redactSensitiveData(data, activeVariables);
+        if (proxied) {
+          addLog(
+            activeTabId,
+            'Direct browser request was blocked. Retried through Call3 proxy.',
+          );
+        }
         addLog(activeTabId, `HTTP status received: ${statusText}`);
 
         updateActiveRequest({

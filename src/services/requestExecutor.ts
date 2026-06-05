@@ -1,5 +1,6 @@
 import type { Abi, TransactionReceipt } from 'viem';
 import type { AbiItem } from '../features/workspace/types';
+import { executeRestApiCall } from './api';
 
 interface ContractClient {
   readContract: (parameters: {
@@ -85,43 +86,5 @@ export async function executeRestCall(
   queryParams: { key: string; value: string }[] | undefined,
   body: string | undefined,
 ) {
-  const query = new URLSearchParams();
-  if (queryParams) {
-    for (const q of queryParams) {
-      if (q.key) query.append(q.key, q.value);
-    }
-  }
-  const queryString = query.toString();
-  const url = queryString ? `${target}?${queryString}` : target;
-
-  const headersObj: Record<string, string> = {};
-  if (headers) {
-    for (const h of headers) {
-      if (h.key) headersObj[h.key] = h.value;
-    }
-  }
-
-  const fetchOptions: RequestInit = {
-    method: type,
-    headers: headersObj,
-  };
-
-  if (type === 'POST' && body) {
-    fetchOptions.body = body;
-  }
-
-  const response = await fetch(url, fetchOptions);
-  const contentType = response.headers.get('content-type');
-
-  let responseData: unknown;
-  if (contentType?.includes('application/json')) {
-    responseData = await response.json();
-  } else {
-    responseData = await response.text();
-  }
-
-  return {
-    statusText: `${response.status} ${response.statusText}`,
-    data: responseData,
-  };
+  return await executeRestApiCall(type, target, headers, queryParams, body);
 }

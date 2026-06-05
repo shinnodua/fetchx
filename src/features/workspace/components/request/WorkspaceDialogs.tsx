@@ -8,7 +8,7 @@ import {
   Textarea,
   useToast,
 } from '../../../../components';
-import { fetchContractInfo } from '../../../../services/contractImporter';
+import { fetchContractInfo } from '../../../../services/api';
 import { useWorkspaceStore } from '../../../../store';
 import { METHOD_OPTIONS, NETWORK_OPTIONS } from '../../constants';
 import type { RequestItem } from '../../types';

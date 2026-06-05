@@ -39,7 +39,15 @@ src/
 │       ├── workspaceStoreTypes.ts
 │       └── workspaceStoreUtils.ts
 ├── services/                # Shared application services
-│   └── requestExecutor.ts   # On-chain queries & HTTP REST logic
+│   ├── api/                 # HTTP API clients, base URL config, proxy fallback, response parsing
+│   │   ├── config.ts        # Named API base URLs and URL helpers
+│   │   ├── httpClient.ts    # Shared direct fetch + optional CORS proxy fallback
+│   │   ├── proxyClient.ts   # Call3 proxy API client
+│   │   ├── restApi.ts       # User-defined REST request execution
+│   │   ├── contractExplorerApi.ts # Block explorer contract import API
+│   │   ├── types.ts         # Shared API request/response types
+│   │   └── index.ts         # API service barrel exports
+│   └── requestExecutor.ts   # On-chain read/write orchestration and REST delegation
 ├── components/              # Shared Flamingo UI Library
 │   ├── ui/                  # Raw UI building blocks (Button, Input, etc.)
 │   └── index.ts             # Barrel file export
@@ -113,7 +121,12 @@ Use these rules when deciding where code belongs:
 
 ### 5. Shared State & Service Placements
 - **Zustand Stores**: Shared state that needs local storage persistence or global cross-feature visibility must be written inside `src/store/`.
-- **Service Layers**: Non-UI side-effects, dynamic SDK integrations (like Viem/Wagmi read/write handlers), or fetch requests must be encapsulated in class services inside `src/services/` rather than embedded in page hooks.
+- **Service Layers**: Non-UI side-effects, dynamic SDK integrations (like Viem/Wagmi read/write handlers), or network requests must be encapsulated inside `src/services/` rather than embedded in page hooks.
+- **HTTP API Calls**: All `fetch`-based API calls must live under `src/services/api/`. Do not add direct `fetch` calls inside feature components, hooks, stores, or page files.
+- **API Organization**: Put each external API domain or product capability in a focused client file such as `contractExplorerApi.ts` or `restApi.ts`. Reuse shared request helpers from `httpClient.ts` instead of duplicating response parsing, query building, or CORS fallback logic.
+- **Base URLs**: Add shared or per-service base URLs to `src/services/api/config.ts` using named constants. API clients with the same base URL must reference the same config entry; API clients with different base URLs should add a separate named config entry.
+- **CORS Proxy Fallback**: Use the shared API client option for proxy fallback only when a browser request is blocked before receiving a response. Do not route every request through the proxy by default.
+- **API Exports**: Export new API clients from `src/services/api/index.ts` and import them through the API barrel where practical.
 
 ### 6. Deprecated API Avoidance
 
