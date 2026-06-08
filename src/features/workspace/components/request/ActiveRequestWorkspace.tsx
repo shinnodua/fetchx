@@ -1,4 +1,6 @@
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 import type React from 'react';
+import { useAccount } from 'wagmi';
 import { Button, Input, Select } from '../../../../components';
 import { useRpcStore } from '../../../../store';
 import { cn } from '../../../../utils/cn';
@@ -41,6 +43,8 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
 }) => {
   const customRpcs = useRpcStore((state) => state.customRpcs);
   const selectedRpcId = getSelectedRpcId(activeRequest, customRpcs);
+  const { isConnected } = useAccount();
+  const { openConnectModal } = useConnectModal();
 
   return (
     <div className="flex-grow flex flex-col min-h-0 min-w-0 p-6 space-y-4">
@@ -150,10 +154,16 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
         <Button
           variant={activeRequest.type === 'WRITE' ? 'primary' : 'secondary'}
           className="h-12 px-8 cursor-pointer"
-          onClick={onRunRequest}
+          onClick={
+            activeRequest.type === 'WRITE' && !isConnected
+              ? () => openConnectModal?.()
+              : onRunRequest
+          }
           isLoading={isLoading}
         >
-          Send
+          {activeRequest.type === 'WRITE' && !isConnected
+            ? 'Connect Wallet'
+            : 'Send'}
         </Button>
       </div>
 

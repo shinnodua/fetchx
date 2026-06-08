@@ -1,3 +1,4 @@
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPublicClient, http } from 'viem';
@@ -47,6 +48,7 @@ import {
 
 export const WorkspacePage: React.FC = () => {
   const { isConnected } = useAccount();
+  const { openConnectModal } = useConnectModal();
   const { toast } = useToast();
   const { writeContractAsync } = useWriteContract();
 
@@ -608,6 +610,7 @@ export const WorkspacePage: React.FC = () => {
         } else {
           // WRITE CALL
           if (!isConnected) {
+            openConnectModal?.();
             throw new Error(
               'Wallet not connected. Please connect your wallet.',
             );

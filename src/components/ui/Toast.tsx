@@ -71,14 +71,14 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               className={cn(
-                'group pointer-events-auto relative flex w-full items-center justify-between space-x-2 overflow-hidden rounded-xl border p-4 pr-6 shadow-lg backdrop-blur-md mb-4',
+                'group pointer-events-auto relative flex w-full items-center justify-between space-x-2 overflow-hidden rounded-xl border p-4 pr-10 shadow-lg backdrop-blur-md mb-4',
                 typeStyles[t.type || 'default'],
               )}
             >
-              <div className="flex flex-col gap-1">
+              <div className="flex-1 min-w-0 flex flex-col gap-1">
                 <div
                   className={cn(
-                    'text-sm font-semibold',
+                    'text-sm font-semibold break-words',
                     textStyles[t.type || 'default'],
                   )}
                 >
@@ -87,7 +87,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
                 {t.description && (
                   <div
                     className={cn(
-                      'text-xs opacity-90',
+                      'text-xs opacity-90 break-words whitespace-pre-wrap',
                       textStyles[t.type || 'default'],
                     )}
                   >
