@@ -27,7 +27,7 @@ export const Pagination = ({
           <button
             onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
-            className="inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium transition-colors hover:bg-foreground/5 disabled:pointer-events-none disabled:opacity-50"
+            className="inline-flex h-[34px] items-center justify-center rounded-md px-3 text-sm font-medium transition-colors hover:bg-foreground/5 disabled:pointer-events-none disabled:opacity-50"
           >
             Previous
           </button>
@@ -38,7 +38,7 @@ export const Pagination = ({
             <button
               onClick={() => onPageChange?.(page)}
               className={cn(
-                'inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors',
+                'inline-flex h-[34px] w-[34px] items-center justify-center rounded-md text-sm font-medium transition-colors',
                 currentPage === page
                   ? 'bg-primary-500 text-white shadow-sm hover:bg-primary-600'
                   : 'hover:bg-foreground/5 text-foreground',
@@ -55,7 +55,7 @@ export const Pagination = ({
               onPageChange?.(Math.min(totalPages, currentPage + 1))
             }
             disabled={currentPage === totalPages}
-            className="inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium transition-colors hover:bg-foreground/5 disabled:pointer-events-none disabled:opacity-50"
+            className="inline-flex h-[34px] items-center justify-center rounded-md px-3 text-sm font-medium transition-colors hover:bg-foreground/5 disabled:pointer-events-none disabled:opacity-50"
           >
             Next
           </button>

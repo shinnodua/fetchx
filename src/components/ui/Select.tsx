@@ -77,7 +77,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
           ref={ref}
           onClick={() => !disabled && setIsOpen(!isOpen)}
           className={cn(
-            'flex h-12 w-full items-center justify-between rounded-xl border border-foreground/10 bg-background/50 px-4 py-2 text-sm text-foreground shadow-sm backdrop-blur-sm transition-all cursor-pointer',
+            'flex h-[44px] w-full items-center justify-between rounded-xl border border-foreground/10 bg-background/50 px-4 py-2 text-sm text-foreground shadow-sm backdrop-blur-sm transition-all cursor-pointer',
             'hover:border-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500',
             disabled && 'cursor-not-allowed opacity-50',
             isOpen && 'border-primary-500 ring-2 ring-primary-500/50',

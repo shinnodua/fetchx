@@ -28,7 +28,7 @@ export const EnvironmentSelector: React.FC = () => {
       className="w-56"
       trigger={
         <Button
-          variant="outline"
+          variant="glass"
           size="sm"
           className="h-8 px-3 rounded-lg text-xs flex items-center gap-1.5 shrink-0 select-none cursor-pointer"
         >

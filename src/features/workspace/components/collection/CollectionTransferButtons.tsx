@@ -126,7 +126,7 @@ export const CollectionTransferButtons: React.FC = () => {
     <>
       <div className="flex items-center gap-2 sm:ml-4 ml-1">
         <Button
-          variant="outline"
+          variant="glass"
           size="sm"
           className="h-8 rounded-lg px-3 text-xs"
           onClick={openExportDialog}
@@ -135,7 +135,7 @@ export const CollectionTransferButtons: React.FC = () => {
           Export
         </Button>
         <Button
-          variant="outline"
+          variant="glass"
           size="sm"
           className="h-8 rounded-lg px-3 text-xs"
           onClick={() => importFileInputRef.current?.click()}

@@ -62,7 +62,7 @@ export const TabsList = ({
   return (
     <div
       className={cn(
-        'inline-flex h-10 items-center justify-center rounded-xl bg-foreground/5 p-1 text-foreground/60 backdrop-blur-sm',
+        'inline-flex h-[38px] items-center justify-center rounded-xl bg-foreground/5 p-1 text-foreground/60 backdrop-blur-sm',
         className,
       )}
     >
@@ -93,7 +93,7 @@ export const TabsTrigger = ({
       disabled={disabled}
       onClick={() => context.setActiveTab(value)}
       className={cn(
-        'relative inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+        'relative inline-flex h-[30px] items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
         isActive
           ? 'text-foreground shadow-sm'
           : 'hover:bg-foreground/5 hover:text-foreground',
@@ -133,7 +133,7 @@ export const TabsContent = ({
       exit={{ opacity: 0, y: 5 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        'mt-4 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        'ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         className,
       )}
     >

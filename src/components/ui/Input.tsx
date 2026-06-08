@@ -65,7 +65,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             whileFocus={highlightedContent ? undefined : { scale: 1.01 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             className={cn(
-              'flex h-12 w-full rounded-xl border border-foreground/10 bg-background/50 px-4 py-2 text-sm text-foreground shadow-sm backdrop-blur-sm transition-all file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground/40',
+              'flex h-[44px] w-full rounded-xl border border-foreground/10 bg-background/50 px-4 py-2 text-sm text-foreground shadow-sm backdrop-blur-sm transition-all file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground/40',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50 focus-visible:border-primary-500',
               'hover:border-foreground/20',
               'disabled:cursor-not-allowed disabled:opacity-50',

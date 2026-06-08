@@ -68,7 +68,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             whileFocus={highlightedContent ? undefined : { scale: 1.01 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             className={cn(
-              'flex min-h-[80px] w-full rounded-xl border border-foreground/10 bg-background/50 px-4 py-3 text-sm text-foreground shadow-sm backdrop-blur-sm transition-all placeholder:text-foreground/40',
+              'flex min-h-[76px] w-full rounded-xl border border-foreground/10 bg-background/50 px-4 py-3 text-sm text-foreground shadow-sm backdrop-blur-sm transition-all placeholder:text-foreground/40',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50 focus-visible:border-primary-500',
               'hover:border-foreground/20',
               'disabled:cursor-not-allowed disabled:opacity-50',

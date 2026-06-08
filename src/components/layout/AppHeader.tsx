@@ -34,7 +34,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     <div className="flex items-center gap-2">
       {environmentSelector}
       <Button
-        variant="outline"
+        variant="glass"
         size="sm"
         className="h-8 px-3 rounded-lg text-xs"
         onClick={onToggleTheme}

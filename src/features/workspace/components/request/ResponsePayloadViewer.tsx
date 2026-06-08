@@ -26,7 +26,7 @@ type JsonPrimitive = string | number | boolean | null;
 type PayloadViewport = 'panel' | 'dialog';
 
 const inspectorRowClassName =
-  'grid grid-cols-[minmax(8rem,0.45fr)_minmax(10rem,1fr)_auto] items-start gap-3 border-b border-foreground/10 px-3 py-2 font-mono text-xs last:border-b-0';
+  'grid w-full min-w-0 grid-cols-[minmax(8rem,0.45fr)_minmax(10rem,1fr)_auto] items-start gap-3 border-b border-foreground/10 px-3 py-2 font-mono text-xs last:border-b-0';
 
 const getScrollHeightClassName = (viewport: PayloadViewport) =>
   viewport === 'dialog' ? 'max-h-[calc(100vh-14rem)]' : 'max-h-80';
@@ -112,12 +112,16 @@ const RawPayload: React.FC<{
 };
 
 const PrimitiveValue: React.FC<{ value: JsonPrimitive }> = ({ value }) => {
-  const valueClassName =
+  const colorClass =
     typeof value === 'string'
       ? 'text-secondary-700 dark:text-secondary-300'
       : 'text-primary-700 dark:text-primary-300';
 
-  return <span className={valueClassName}>{formatPrimitiveValue(value)}</span>;
+  return (
+    <span className={`min-w-0 break-all w-full block ${colorClass}`}>
+      {formatPrimitiveValue(value)}
+    </span>
+  );
 };
 
 const InspectorLabel: React.FC<{
@@ -175,7 +179,7 @@ const InspectorNode: React.FC<{
       <div className={inspectorRowClassName}>
         <InspectorLabel depth={depth} label={label ?? 'value'} />
         <PrimitiveValue value={value} />
-        <span className="text-[10px] uppercase tracking-wider text-foreground/35">
+        <span className="text-[10px] uppercase tracking-wider text-foreground/35 text-right justify-self-end">
           {getTypeLabel(value)}
         </span>
       </div>
@@ -196,7 +200,7 @@ const InspectorNode: React.FC<{
             onToggle={hasChildren ? () => onToggle(path) : undefined}
           />
           <span className="text-foreground/80">[{value.length} items]</span>
-          <span className="text-[10px] uppercase tracking-wider text-foreground/35">
+          <span className="text-[10px] uppercase tracking-wider text-foreground/35 text-right justify-self-end">
             Array
           </span>
         </div>
@@ -235,7 +239,7 @@ const InspectorNode: React.FC<{
             onToggle={hasChildren ? () => onToggle(path) : undefined}
           />
           <span className="text-foreground/80">{`{${entries.length} keys}`}</span>
-          <span className="text-[10px] uppercase tracking-wider text-foreground/35">
+          <span className="text-[10px] uppercase tracking-wider text-foreground/35 text-right justify-self-end">
             Object
           </span>
         </div>
@@ -258,8 +262,10 @@ const InspectorNode: React.FC<{
   return (
     <div className={inspectorRowClassName}>
       <InspectorLabel depth={depth} label={label ?? 'value'} />
-      <span className="break-all text-foreground/80">{String(value)}</span>
-      <span className="text-[10px] uppercase tracking-wider text-foreground/35">
+      <span className="min-w-0 break-all w-full block text-foreground/80">
+        {String(value)}
+      </span>
+      <span className="text-[10px] uppercase tracking-wider text-foreground/35 text-right justify-self-end">
         {getTypeLabel(value)}
       </span>
     </div>
@@ -293,21 +299,23 @@ const PayloadPreview: React.FC<{
   }
 
   return (
-    <div className="isolate overflow-hidden rounded-xl border border-foreground/10 bg-foreground/5 [clip-path:inset(0_round_0.75rem)]">
+    <div className="w-full isolate overflow-hidden rounded-xl border border-foreground/10 bg-foreground/5 [clip-path:inset(0_round_0.75rem)]">
       <div
-        className={`${getScrollHeightClassName(viewport)} overflow-auto rounded-[inherit]`}
+        className={`${getScrollHeightClassName(viewport)} w-full overflow-auto rounded-[inherit]`}
       >
-        <div className="sticky top-0 z-10 grid grid-cols-[minmax(8rem,0.45fr)_minmax(10rem,1fr)_auto] gap-3 rounded-t-[inherit] border-b border-foreground/10 bg-background/95 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-foreground/45 backdrop-blur">
-          <span>Key</span>
-          <span>Value</span>
-          <span>Type</span>
+        <div className="w-full min-w-0 flex flex-col">
+          <div className="sticky top-0 z-10 grid w-full min-w-0 grid-cols-[minmax(8rem,0.45fr)_minmax(10rem,1fr)_auto] gap-3 rounded-t-[inherit] border-b border-foreground/10 bg-background/95 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-foreground/45 backdrop-blur">
+            <span>Key</span>
+            <span>Value</span>
+            <span className="text-right justify-self-end">Type</span>
+          </div>
+          <InspectorNode
+            value={data}
+            path="root"
+            collapsedPaths={collapsedPaths}
+            onToggle={handleToggleNode}
+          />
         </div>
-        <InspectorNode
-          value={data}
-          path="root"
-          collapsedPaths={collapsedPaths}
-          onToggle={handleToggleNode}
-        />
       </div>
     </div>
   );

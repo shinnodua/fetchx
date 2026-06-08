@@ -20,6 +20,8 @@
     "@tanstack/react-router": "1.170.10",
     "@tanstack/router-devtools": "1.167.0",
     "@tanstack/router-plugin": "1.168.13",
+    "@walletconnect/ethereum-provider": "2.23.9",
+    "@wagmi/connectors": "8.0.15",
     "framer-motion": "12.40.0",
     "react": "19.2.6",
     "react-dom": "19.2.6",
@@ -37,5 +39,11 @@
     "typescript": "6.0.2",
     "vite": "8.0.12",
     "wrangler": "4.97.0"
+  },
+  "overrides": {
+    "qr": "0.5.5"
+  },
+  "resolutions": {
+    "qr": "0.5.5"
   }
 }

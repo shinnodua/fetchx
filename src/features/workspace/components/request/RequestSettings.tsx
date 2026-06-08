@@ -193,7 +193,7 @@ export const RequestSettings: React.FC = () => {
           onValueChange={handleRestTabChange}
           className="flex min-h-0 flex-1 flex-col"
         >
-          <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-foreground/10 bg-background/80 px-4 py-3 backdrop-blur">
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-foreground/10 bg-background/80 px-4 py-1.5 backdrop-blur">
             <h3 className="text-sm font-semibold text-foreground/50 uppercase tracking-wider">
               Request Settings
             </h3>
@@ -389,7 +389,7 @@ export const RequestSettings: React.FC = () => {
         </Tabs>
       ) : (
         <>
-          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-foreground/10 bg-background/80 px-4 py-3 backdrop-blur">
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-foreground/10 bg-background/80 px-4 py-1.5 backdrop-blur">
             <h3 className="text-sm font-semibold text-foreground/50 uppercase tracking-wider">
               Request Settings
             </h3>
