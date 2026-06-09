@@ -108,6 +108,8 @@ export const NETWORK_OPTIONS = [
   { value: '10', label: 'Optimism Mainnet' },
   { value: '42161', label: 'Arbitrum One' },
   { value: '8453', label: 'Base' },
+  { value: '2020', label: 'Ronin Mainnet' },
+  { value: '012026', label: 'Saigon Testnet' },
 ];
 
 const DEFAULT_EXPLORER_URLS: Record<string, string> = {
@@ -117,6 +119,8 @@ const DEFAULT_EXPLORER_URLS: Record<string, string> = {
   '10': 'https://optimistic.etherscan.io',
   '42161': 'https://arbiscan.io',
   '8453': 'https://basescan.org',
+  '2020': 'https://explorer.roninchain.com',
+  '012026': 'https://saigon-explorer.roninchain.com',
 };
 
 export const DEFAULT_RPC_OPTIONS: RpcOption[] = NETWORK_OPTIONS.map(

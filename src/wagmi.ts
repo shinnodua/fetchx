@@ -5,12 +5,14 @@ import {
   mainnet,
   optimism,
   polygon,
+  ronin,
+  saigon,
   sepolia,
 } from 'wagmi/chains';
 
 export const config = getDefaultConfig({
   appName: 'Call3.dev',
   projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID',
-  chains: [mainnet, sepolia, polygon, optimism, arbitrum, base],
+  chains: [mainnet, sepolia, polygon, optimism, arbitrum, base, ronin, saigon],
   ssr: false, // Since this is a client-side Vite app
 });

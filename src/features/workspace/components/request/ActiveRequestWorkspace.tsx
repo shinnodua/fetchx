@@ -113,15 +113,6 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
             onChange={(value) =>
               onUpdateActiveRequest({
                 type: value,
-                target: '',
-                abi:
-                  value === 'READ' || value === 'WRITE'
-                    ? activeRequest.abi
-                    : '',
-                functionName: '',
-                args: {},
-                customRpcId: undefined,
-                response: null,
               })
             }
           />
