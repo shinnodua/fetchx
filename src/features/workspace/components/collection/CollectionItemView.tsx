@@ -129,7 +129,7 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
       </div>
 
       {!isCollapsed && (
-        <div className="pl-4 border-l border-foreground/10 space-y-1 pt-1 pb-1.5">
+        <div className="pl-0.5 border-l border-foreground/10 space-y-1 pt-1 pb-1.5">
           {col.requests.length === 0 ? (
             <span className="text-xs text-foreground/30 pl-2">
               Empty collection

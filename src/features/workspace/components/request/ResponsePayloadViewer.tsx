@@ -15,6 +15,15 @@ import {
   TabsTrigger,
   useToast,
 } from '../../../../components';
+import type { JsonPrimitive } from '../../utils/responsePayload';
+import {
+  createDefaultResponseName,
+  formatPrimitiveValue,
+  getPayloadText,
+  getTypeLabel,
+  isPrimitive,
+  isRecord,
+} from '../../utils/responsePayload';
 
 interface ResponsePayloadViewerProps {
   data: unknown;
@@ -22,7 +31,6 @@ interface ResponsePayloadViewerProps {
   explorerUrl?: string;
 }
 
-type JsonPrimitive = string | number | boolean | null;
 type PayloadViewport = 'panel' | 'dialog';
 
 const inspectorRowClassName =
@@ -30,51 +38,6 @@ const inspectorRowClassName =
 
 const getScrollHeightClassName = (viewport: PayloadViewport) =>
   viewport === 'dialog' ? 'max-h-[calc(100vh-14rem)]' : 'max-h-80';
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-const isPrimitive = (value: unknown): value is JsonPrimitive =>
-  value === null ||
-  typeof value === 'string' ||
-  typeof value === 'number' ||
-  typeof value === 'boolean';
-
-const getPayloadText = (data: unknown) => {
-  if (typeof data === 'string') return data;
-
-  return JSON.stringify(data, null, 2);
-};
-
-const formatPrimitiveValue = (value: JsonPrimitive) => {
-  if (value === null) return 'null';
-  if (typeof value === 'string') return `"${value}"`;
-
-  return String(value);
-};
-
-const getTypeLabel = (value: unknown) => {
-  if (Array.isArray(value)) return `Array(${value.length})`;
-  if (value === null) return 'null';
-
-  return typeof value;
-};
-
-const createDefaultResponseName = () => {
-  const now = new Date();
-  const date = now.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-  const time = now.toLocaleTimeString(undefined, {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
-
-  return `${date} ${time}`;
-};
 
 const RawPayload: React.FC<{
   data: unknown;
