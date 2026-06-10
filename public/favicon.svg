@@ -1,6 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
   <title id="title">Call3.dev</title>
   <rect width="64" height="64" rx="16" fill="#f43f5e"/>
-  <path fill="#ffffff" d="M18 20a6 6 0 0 1 6-6h16v6H24v24h16v-6h6v6a6 6 0 0 1-6 6H24a6 6 0 0 1-6-6V20Z"/>
-  <path fill="#14b8a6" transform="translate(23 15) scale(.5)" d="M34 20h6a6 6 0 0 1 6 6v2a6 6 0 0 1-2.1 4.5A6 6 0 0 1 46 37v1a6 6 0 0 1-6 6h-6v-6h6v-3H36v-6h4v-3h-6v-6Z"/>
+  <path fill="#ffffff" d="M18 20a6 6 0 0 1 6-6h16a6 6 0 0 1 6 6v6h-6v-6H24v24h16v-6h6v6a6 6 0 0 1-6 6H24a6 6 0 0 1-6-6V20Z"/>
+  <g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-width=".22">
+    <g transform="translate(11.85 10.05) scale(.7)">
+      <path d="M39.2 31.15h-.25a.35.35 0 0 0 0 .7h.25"/>
+      <path d="M39.4 31.15h.25a.35.35 0 0 1 0 .7h-.25"/>
+      <path d="M39.1 31.5h.4"/>
+    </g>
+    <g transform="translate(13.95 10.05) scale(.7)">
+      <path d="M46.2 31.15h-.25a.35.35 0 0 0 0 .7h.25"/>
+      <path d="M46.4 31.15h.25a.35.35 0 0 1 0 .7h-.25"/>
+      <path d="M46.1 31.5h.4"/>
+    </g>
+  </g>
+  <g transform="translate(0 .6)">
+    <path fill="#5eead4" d="m36 28.5 2.5 1.45L36 31.4l-2.5-1.45L36 28.5Z"/>
+    <path fill="#14b8a6" d="m33.5 29.95 2.5 1.45v2.9l-2.5-1.45v-2.9Z"/>
+    <path fill="#0f766e" d="M38.5 29.95 36 31.4v2.9l2.5-1.45v-2.9Z"/>
+  </g>
+  <g transform="translate(0 .6)">
+    <path fill="#99f6e4" d="m43 28.5 2.5 1.45L43 31.4l-2.5-1.45L43 28.5Z"/>
+    <path fill="#2dd4bf" d="m40.5 29.95 2.5 1.45v2.9l-2.5-1.45v-2.9Z"/>
+    <path fill="#0d9488" d="M45.5 29.95 43 31.4v2.9l2.5-1.45v-2.9Z"/>
+  </g>
+  <g transform="translate(0 .6)">
+    <path fill="#5eead4" d="m50 28.5 2.5 1.45L50 31.4l-2.5-1.45L50 28.5Z"/>
+    <path fill="#14b8a6" d="m47.5 29.95 2.5 1.45v2.9l-2.5-1.45v-2.9Z"/>
+    <path fill="#0f766e" d="M52.5 29.95 50 31.4v2.9l2.5-1.45v-2.9Z"/>
+  </g>
 </svg>
