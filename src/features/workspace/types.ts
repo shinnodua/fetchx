@@ -40,14 +40,19 @@ export interface CollectionItem {
 export interface AbiInput {
   name: string;
   type: string;
+  indexed?: boolean;
+  internalType?: string;
 }
 
 export interface AbiItem {
   type: string;
-  name: string;
+  name?: string;
   stateMutability?: string;
   constant?: boolean;
+  payable?: boolean;
+  anonymous?: boolean;
   inputs?: AbiInput[];
+  outputs?: AbiInput[];
 }
 
 export interface RpcOption {

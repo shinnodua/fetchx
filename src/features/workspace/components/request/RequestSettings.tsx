@@ -13,6 +13,7 @@ import {
   Textarea,
   useToast,
 } from '../../../../components';
+import { fetchContractInfo } from '../../../../services/api';
 import { useWorkspaceStore } from '../../../../store';
 import {
   ERC20_ABI,
@@ -43,6 +44,7 @@ export const RequestSettings: React.FC = () => {
   const [restTabsByRequestId, setRestTabsByRequestId] = useState<
     Record<string, string>
   >({});
+  const [isAbiLoading, setIsAbiLoading] = useState(false);
 
   // Find active request
   const activeRequest = useMemo(() => {
@@ -59,9 +61,14 @@ export const RequestSettings: React.FC = () => {
   const activeFunctions = useMemo<AbiItem[]>(() => {
     if (!activeRequest?.abi) return [];
     try {
-      const parsed = JSON.parse(activeRequest.abi) as AbiItem[];
+      const parsed: unknown = JSON.parse(activeRequest.abi);
+      if (!Array.isArray(parsed)) return [];
+
       return parsed.filter(
-        (item) =>
+        (item): item is AbiItem =>
+          typeof item === 'object' &&
+          item !== null &&
+          'type' in item &&
           item.type === 'function' &&
           (activeRequest.type === 'READ'
             ? item.stateMutability === 'view' ||
@@ -108,6 +115,47 @@ export const RequestSettings: React.FC = () => {
       description: `Loaded standard ${preset} interface.`,
       type: 'success',
     });
+  };
+
+  const loadContractAbi = async () => {
+    const address = activeRequest?.target.trim() || '';
+    if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+      toast({
+        title: 'Invalid Contract Address',
+        description: 'Enter a valid contract address before loading its ABI.',
+        type: 'error',
+      });
+      return;
+    }
+
+    setIsAbiLoading(true);
+    try {
+      const info = await fetchContractInfo(
+        address,
+        activeRequest?.network || '1',
+      );
+      updateActiveRequest({
+        abi: info.abi,
+        functionName: '',
+        args: {},
+      });
+      toast({
+        title: 'ABI Loaded',
+        description: `Loaded ABI for "${info.name}" successfully.`,
+        type: 'success',
+      });
+    } catch (error) {
+      toast({
+        title: 'ABI Load Failed',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Could not load the contract ABI.',
+        type: 'error',
+      });
+    } finally {
+      setIsAbiLoading(false);
+    }
   };
 
   const beautifyBody = () => {
@@ -404,32 +452,48 @@ export const RequestSettings: React.FC = () => {
                     <label className="text-xs font-semibold text-foreground/75">
                       Contract ABI
                     </label>
-                    <DropdownMenu
-                      align="right"
-                      className="w-40"
-                      trigger={
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 px-1.5 text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer"
-                        >
-                          Load Preset ABI
-                        </Button>
-                      }
-                    >
-                      <DropdownMenuItem onClick={() => loadPresetAbi('ERC20')}>
-                        ERC20 Preset
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => loadPresetAbi('ERC721')}>
-                        ERC721 Preset
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => loadPresetAbi('ERC1155')}
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-1.5 text-[10px] text-secondary-600 hover:text-secondary-700 cursor-pointer"
+                        onClick={loadContractAbi}
+                        isLoading={isAbiLoading}
                       >
-                        ERC1155 Preset
-                      </DropdownMenuItem>
-                    </DropdownMenu>
+                        Load ABI
+                      </Button>
+                      <DropdownMenu
+                        align="right"
+                        className="w-40"
+                        trigger={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-1.5 text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer"
+                          >
+                            Load Preset ABI
+                          </Button>
+                        }
+                      >
+                        <DropdownMenuItem
+                          onClick={() => loadPresetAbi('ERC20')}
+                        >
+                          ERC20 Preset
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => loadPresetAbi('ERC721')}
+                        >
+                          ERC721 Preset
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => loadPresetAbi('ERC1155')}
+                        >
+                          ERC1155 Preset
+                        </DropdownMenuItem>
+                      </DropdownMenu>
+                    </div>
                   </div>
                   <Textarea
                     placeholder="Paste contract ABI array (JSON format)"
@@ -456,8 +520,8 @@ export const RequestSettings: React.FC = () => {
                       value={activeRequest.functionName || ''}
                       onChange={handleFunctionChange}
                       options={activeFunctions.map((f) => ({
-                        value: f.name,
-                        label: `${f.name}(${(f.inputs || []).map((i) => i.type).join(', ')})`,
+                        value: f.name || '',
+                        label: `${f.name || 'anonymous'}(${(f.inputs || []).map((i) => i.type).join(', ')})`,
                       }))}
                     />
                   </div>

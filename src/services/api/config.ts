@@ -6,6 +6,8 @@ export const API_BASE_URLS = {
   optimisticEtherscan: 'https://api-optimistic.etherscan.io/api',
   arbiscan: 'https://api.arbiscan.io/api',
   basescan: 'https://api.basescan.org/api',
+  roninExplorer: 'https://explorer.roninchain.com/api/v2',
+  saigonExplorer: 'https://saigon-explorer.roninchain.com/api/v2',
 } as const;
 
 export function buildApiUrl(baseUrl: string, path = '') {

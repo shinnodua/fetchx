@@ -1,4 +1,4 @@
-import { API_BASE_URLS } from './config';
+import { API_BASE_URLS, buildApiUrl } from './config';
 import { apiRequest } from './httpClient';
 
 export interface ImportedContractInfo {
@@ -17,13 +17,27 @@ interface EtherscanSourceCodeResponse {
   }[];
 }
 
-const explorerBaseUrls: Record<string, string> = {
+interface BlockscoutContractResponse {
+  name?: string;
+  abi?: unknown[];
+  implementations?: {
+    address_hash?: string;
+    name?: string | null;
+  }[];
+}
+
+const etherscanBaseUrls: Record<string, string> = {
   '1': API_BASE_URLS.etherscan,
   '11155111': API_BASE_URLS.sepoliaEtherscan,
   '137': API_BASE_URLS.polygonscan,
   '10': API_BASE_URLS.optimisticEtherscan,
   '42161': API_BASE_URLS.arbiscan,
   '8453': API_BASE_URLS.basescan,
+};
+
+const blockscoutBaseUrls: Record<string, string> = {
+  '2020': API_BASE_URLS.roninExplorer,
+  '012026': API_BASE_URLS.saigonExplorer,
 };
 
 /**
@@ -33,17 +47,33 @@ export async function fetchContractInfo(
   address: string,
   network: string,
 ): Promise<ImportedContractInfo> {
-  const baseUrl = explorerBaseUrls[network];
-  if (!baseUrl) {
-    throw new Error('Unsupported network for contract fetching.');
+  const etherscanBaseUrl = etherscanBaseUrls[network];
+  if (etherscanBaseUrl) {
+    return fetchEtherscanContractInfo(address, network, etherscanBaseUrl);
   }
 
+  const blockscoutBaseUrl = blockscoutBaseUrls[network];
+  if (blockscoutBaseUrl) {
+    return fetchBlockscoutContractInfo(address, network, blockscoutBaseUrl);
+  }
+
+  throw new Error('Unsupported network for contract fetching.');
+}
+
+async function fetchEtherscanContractInfo(
+  address: string,
+  network: string,
+  baseUrl: string,
+): Promise<ImportedContractInfo> {
   const url = new URL(baseUrl);
   url.searchParams.set('module', 'contract');
   url.searchParams.set('action', 'getsourcecode');
   url.searchParams.set('address', address);
 
-  const response = await apiRequest({ url: url.toString() });
+  const response = await apiRequest(
+    { url: url.toString() },
+    { proxyOnBrowserBlock: true },
+  );
   if (response.status < 200 || response.status >= 300) {
     throw new Error(`HTTP error! Status: ${response.status}`);
   }
@@ -65,6 +95,52 @@ export async function fetchContractInfo(
   return {
     name,
     abi,
+    address,
+    network,
+  };
+}
+
+async function fetchBlockscoutContract(
+  address: string,
+  baseUrl: string,
+): Promise<BlockscoutContractResponse> {
+  const response = await apiRequest(
+    {
+      url: buildApiUrl(baseUrl, `smart-contracts/${address}`),
+    },
+    { proxyOnBrowserBlock: true },
+  );
+  if (response.status < 200 || response.status >= 300) {
+    throw new Error(`HTTP error! Status: ${response.status}`);
+  }
+
+  return response.data as BlockscoutContractResponse;
+}
+
+async function fetchBlockscoutContractInfo(
+  address: string,
+  network: string,
+  baseUrl: string,
+): Promise<ImportedContractInfo> {
+  const proxyContract = await fetchBlockscoutContract(address, baseUrl);
+  const implementationAddress =
+    proxyContract.implementations?.[0]?.address_hash;
+
+  const contract = implementationAddress
+    ? await fetchBlockscoutContract(implementationAddress, baseUrl)
+    : proxyContract;
+
+  if (!Array.isArray(contract.abi) || contract.abi.length === 0) {
+    throw new Error('Contract ABI is not available from this explorer.');
+  }
+
+  return {
+    name:
+      contract.name ||
+      proxyContract.implementations?.[0]?.name ||
+      proxyContract.name ||
+      'Imported Contract',
+    abi: JSON.stringify(contract.abi, null, 2),
     address,
     network,
   };

@@ -27,7 +27,20 @@ export async function callCorsProxy(request: ApiRequest): Promise<ApiResponse> {
     body: JSON.stringify(proxyBody),
   });
 
-  const proxyData = (await response.json()) as unknown;
+  const responseText = await response.text();
+  let proxyData: unknown;
+  try {
+    proxyData = responseText ? JSON.parse(responseText) : null;
+  } catch {
+    throw new Error(
+      `Proxy request failed with status ${response.status}: invalid response.`,
+    );
+  }
+
+  if (!response.ok) {
+    throw new Error(getProxyErrorMessage(proxyData, response.status));
+  }
+
   if (!isProxyResponseBody(proxyData)) {
     throw new Error('Proxy returned an invalid response.');
   }
@@ -39,6 +52,17 @@ export async function callCorsProxy(request: ApiRequest): Promise<ApiResponse> {
     data: proxyData.body,
     proxied: true,
   };
+}
+
+function getProxyErrorMessage(value: unknown, status: number): string {
+  if (typeof value === 'object' && value !== null && 'error' in value) {
+    const error = value.error;
+    if (typeof error === 'string' && error.trim()) {
+      return `Proxy request failed: ${error}`;
+    }
+  }
+
+  return `Proxy request failed with status ${status}.`;
 }
 
 function isProxyResponseBody(value: unknown): value is ProxyResponseBody {

@@ -28,7 +28,8 @@ export const WorkspaceEmptyState: React.FC<WorkspaceEmptyStateProps> = ({
           contract calls.
         </li>
         <li>
-          Import standard presets (ERC-20, ERC-721) to quickly populate ABIs.
+          Import standard presets (ERC-20, ERC-721, ERC-1155) to quickly
+          populate ABIs.
         </li>
         <li>
           Add query parameters, custom HTTP headers, or request bodies for API
