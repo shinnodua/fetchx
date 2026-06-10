@@ -20,8 +20,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     <div className="flex items-center gap-3">
       <Link
         to="/"
-        className="text-sm font-bold text-inherit text-primary-500 hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2 text-sm font-bold text-inherit text-primary-500 hover:opacity-80 transition-opacity"
       >
+        <img
+          src="/favicon.svg"
+          alt=""
+          aria-hidden="true"
+          className="h-5 w-5 shrink-0"
+        />
         Call3.dev
       </Link>
       {actions}
