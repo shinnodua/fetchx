@@ -22,6 +22,12 @@ type WriteContractAsync = (parameters: {
   chainId: number | undefined;
 }) => Promise<`0x${string}`>;
 
+type SendTransactionAsync = (parameters: {
+  to: `0x${string}`;
+  value: bigint;
+  chainId: number | undefined;
+}) => Promise<`0x${string}`>;
+
 /**
  * Executes a contract state read call (view/pure function).
  */
@@ -63,6 +69,36 @@ export async function executeWriteCall(
     abi: parsedAbi as unknown as Abi,
     functionName,
     args: formattedArgs,
+    chainId,
+  });
+
+  if (!publicClient) {
+    return { txHash, receipt: null };
+  }
+
+  const receipt = await publicClient.waitForTransactionReceipt({
+    hash: txHash,
+  });
+  return { txHash, receipt };
+}
+
+/**
+ * Sends native currency through the connected wallet and waits for confirmation.
+ */
+export async function executeNativeTransfer(
+  target: string,
+  value: bigint,
+  sendTransactionAsync: SendTransactionAsync | undefined,
+  publicClient: ContractClient | undefined,
+  chainId: number | undefined,
+) {
+  if (!sendTransactionAsync) {
+    throw new Error('Wallet connection / sendTransaction not available.');
+  }
+
+  const txHash = await sendTransactionAsync({
+    to: target as `0x${string}`,
+    value,
     chainId,
   });
 

@@ -16,7 +16,7 @@ export interface SavedResponse {
 export interface RequestItem {
   id: string;
   name: string;
-  type: string; // 'READ' | 'WRITE' | REST method
+  type: string; // 'READ' | 'WRITE' | 'SEND' | REST method
   target: string;
   abi?: string;
   functionName?: string;

@@ -19,6 +19,7 @@ import {
   ERC20_ABI,
   ERC721_ABI,
   ERC1155_ABI,
+  getNativeTokenSymbol,
   isRestMethod,
   methodSupportsBody,
 } from '../../constants';
@@ -190,6 +191,7 @@ export const RequestSettings: React.FC = () => {
   const isRestRequest = isRestMethod(activeRequest.type);
   const isWeb3Request =
     activeRequest.type === 'READ' || activeRequest.type === 'WRITE';
+  const isNativeTransfer = activeRequest.type === 'SEND';
   const supportsBody = methodSupportsBody(activeRequest.type);
   const savedRestTab = restTabsByRequestId[activeRequest.id];
   const activeRestTab =
@@ -444,6 +446,29 @@ export const RequestSettings: React.FC = () => {
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto p-4">
+            {isNativeTransfer && (
+              <div className="space-y-4">
+                <EnvironmentAwareInput
+                  label={`Amount (${getNativeTokenSymbol(activeRequest.network)})`}
+                  inputMode="decimal"
+                  placeholder="0.0"
+                  value={activeRequest.args?.nativeAmount || ''}
+                  onChange={(event) =>
+                    updateActiveRequest({
+                      args: {
+                        ...(activeRequest.args || {}),
+                        nativeAmount: event.target.value,
+                      },
+                    })
+                  }
+                />
+                <div className="rounded-xl border border-secondary-500/20 bg-secondary-500/10 p-3 text-xs text-secondary-700 dark:text-secondary-300">
+                  The connected wallet will show the recipient, amount, network,
+                  and estimated fee for confirmation before sending.
+                </div>
+              </div>
+            )}
+
             {/* ABI Configuration (Web3) */}
             {isWeb3Request && (
               <div className="space-y-4">

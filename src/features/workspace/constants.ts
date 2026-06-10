@@ -109,7 +109,7 @@ export const NETWORK_OPTIONS = [
   { value: '42161', label: 'Arbitrum One' },
   { value: '8453', label: 'Base' },
   { value: '2020', label: 'Ronin Mainnet' },
-  { value: '012026', label: 'Saigon Testnet' },
+  { value: '202601', label: 'Saigon Testnet' },
 ];
 
 const DEFAULT_EXPLORER_URLS: Record<string, string> = {
@@ -120,7 +120,7 @@ const DEFAULT_EXPLORER_URLS: Record<string, string> = {
   '42161': 'https://arbiscan.io',
   '8453': 'https://basescan.org',
   '2020': 'https://explorer.roninchain.com',
-  '012026': 'https://saigon-explorer.roninchain.com',
+  '202601': 'https://saigon-explorer.roninchain.com',
 };
 
 export const DEFAULT_RPC_OPTIONS: RpcOption[] = NETWORK_OPTIONS.map(
@@ -136,12 +136,28 @@ export const DEFAULT_RPC_OPTIONS: RpcOption[] = NETWORK_OPTIONS.map(
 export const METHOD_OPTIONS = [
   { value: 'READ', label: 'READ (Contract)' },
   { value: 'WRITE', label: 'WRITE (Contract)' },
+  { value: 'SEND', label: 'SEND (Native Token)' },
   { value: 'GET', label: 'GET (REST)' },
   { value: 'POST', label: 'POST (REST)' },
   { value: 'PUT', label: 'PUT (REST)' },
   { value: 'PATCH', label: 'PATCH (REST)' },
   { value: 'DELETE', label: 'DELETE (REST)' },
 ];
+
+const NATIVE_TOKEN_SYMBOLS: Record<string, string> = {
+  '1': 'ETH',
+  '11155111': 'ETH',
+  '137': 'POL',
+  '10': 'ETH',
+  '42161': 'ETH',
+  '8453': 'ETH',
+  '2020': 'RON',
+  '202601': 'RON',
+};
+
+export function getNativeTokenSymbol(network: string | undefined) {
+  return (network && NATIVE_TOKEN_SYMBOLS[network]) || 'native token';
+}
 
 export const REST_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 export const REST_METHODS_WITH_BODY = ['POST', 'PUT', 'PATCH', 'DELETE'];

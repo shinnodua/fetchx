@@ -123,7 +123,9 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
             placeholder={
               activeRequest.type === 'READ' || activeRequest.type === 'WRITE'
                 ? 'Contract Address (0x...)'
-                : 'URL Endpoint (https://...)'
+                : activeRequest.type === 'SEND'
+                  ? 'Recipient Address (0x...)'
+                  : 'URL Endpoint (https://...)'
             }
             value={activeRequest.target}
             onChange={(event) =>
@@ -133,7 +135,9 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
           />
         </div>
 
-        {(activeRequest.type === 'READ' || activeRequest.type === 'WRITE') && (
+        {(activeRequest.type === 'READ' ||
+          activeRequest.type === 'WRITE' ||
+          activeRequest.type === 'SEND') && (
           <div className="w-full sm:w-56">
             <RpcSelectField
               value={selectedRpcId}
@@ -143,16 +147,22 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
         )}
 
         <Button
-          variant={activeRequest.type === 'WRITE' ? 'primary' : 'secondary'}
+          variant={
+            activeRequest.type === 'WRITE' || activeRequest.type === 'SEND'
+              ? 'primary'
+              : 'secondary'
+          }
           className="h-12 px-8 cursor-pointer"
           onClick={
-            activeRequest.type === 'WRITE' && !isConnected
+            (activeRequest.type === 'WRITE' || activeRequest.type === 'SEND') &&
+            !isConnected
               ? () => openConnectModal?.()
               : onRunRequest
           }
           isLoading={isLoading}
         >
-          {activeRequest.type === 'WRITE' && !isConnected
+          {(activeRequest.type === 'WRITE' || activeRequest.type === 'SEND') &&
+          !isConnected
             ? 'Connect Wallet'
             : 'Send'}
         </Button>

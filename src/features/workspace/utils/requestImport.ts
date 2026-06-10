@@ -303,7 +303,7 @@ export const parseRequestImportContent = (
   const rawType = typeof parsed.type === 'string' ? parsed.type : '';
   if (!name || !rawType) {
     throw new Error(
-      "Invalid request JSON. 'name' and 'type' (e.g. GET, POST, PUT, PATCH, DELETE, READ, WRITE) are required fields.",
+      "Invalid request JSON. 'name' and 'type' (e.g. GET, POST, PUT, PATCH, DELETE, READ, WRITE, SEND) are required fields.",
     );
   }
 

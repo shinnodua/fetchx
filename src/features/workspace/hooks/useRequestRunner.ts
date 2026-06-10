@@ -1,9 +1,15 @@
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { useEffect, useRef, useState } from 'react';
-import type { PublicClient } from 'viem';
-import { useAccount, useWriteContract } from 'wagmi';
+import { type PublicClient, parseEther } from 'viem';
+import {
+  useAccount,
+  useSendTransaction,
+  useSwitchChain,
+  useWriteContract,
+} from 'wagmi';
 import { useToast } from '../../../components';
 import {
+  executeNativeTransfer,
   executeReadCall,
   executeRestCall,
   executeWriteCall,
@@ -29,16 +35,19 @@ import {
   createImportedRequestName,
   parseRequestImportContent,
 } from '../utils/requestImport';
+import { getWalletErrorMessage } from '../utils/walletError';
 
 export const useRequestRunner = (
   activeRequest: RequestItem | null,
   activeTabId: string,
   publicClient: PublicClient | undefined,
 ) => {
-  const { isConnected } = useAccount();
+  const { chainId: connectedChainId, isConnected } = useAccount();
   const { openConnectModal } = useConnectModal();
   const { toast } = useToast();
   const { writeContractAsync } = useWriteContract();
+  const { sendTransactionAsync } = useSendTransaction();
+  const { chains, switchChainAsync } = useSwitchChain();
 
   const [isLoading, setIsLoading] = useState(false);
   const [selectedColId, setSelectedColId] = useState('');
@@ -50,6 +59,25 @@ export const useRequestRunner = (
   const activeNetworkId = activeRequest?.network
     ? Number(activeRequest.network)
     : undefined;
+
+  const ensureSelectedWalletNetwork = async () => {
+    if (!activeNetworkId || connectedChainId === activeNetworkId) return;
+
+    const selectedChain = chains.find((chain) => chain.id === activeNetworkId);
+    if (!selectedChain) {
+      throw new Error(
+        `The selected network (chain ID ${activeNetworkId}) is not configured for wallet transactions.`,
+      );
+    }
+
+    try {
+      await switchChainAsync({ chainId: selectedChain.id });
+    } catch (error) {
+      throw new Error(
+        `Could not switch to ${selectedChain.name}: ${getWalletErrorMessage(error)}`,
+      );
+    }
+  };
 
   // Selected collection ID sync
   const prevLengthRef = useRef(collections.length);
@@ -271,7 +299,100 @@ export const useRequestRunner = (
         );
       }
 
-      if (resolvedRequest.type === 'READ' || resolvedRequest.type === 'WRITE') {
+      if (resolvedRequest.type === 'SEND') {
+        if (!/^0x[a-fA-F0-9]{40}$/.test(resolvedRequest.target)) {
+          throw new Error('A valid recipient address is required.');
+        }
+        if (!isConnected) {
+          openConnectModal?.();
+          throw new Error('Wallet not connected. Please connect your wallet.');
+        }
+        await ensureSelectedWalletNetwork();
+
+        const rawAmount = resolvedRequest.args?.nativeAmount?.trim() || '';
+        if (!rawAmount) {
+          throw new Error('Native token amount is required.');
+        }
+
+        let value: bigint;
+        try {
+          value = parseEther(rawAmount);
+        } catch {
+          throw new Error('Enter a valid native token amount.');
+        }
+        if (value <= 0n) {
+          throw new Error('Native token amount must be greater than zero.');
+        }
+
+        addLog(
+          activeTabId,
+          `Preparing native token transfer to: ${redactedRequest.target}`,
+        );
+        addLog(
+          activeTabId,
+          `Amount: ${redactedRequest.args?.nativeAmount || ''}`,
+        );
+        addLog(activeTabId, `Network ID: ${resolvedRequest.network}`);
+        addLog(activeTabId, 'Requesting transaction signature from wallet...');
+
+        const { txHash, receipt } = await executeNativeTransfer(
+          resolvedRequest.target,
+          value,
+          sendTransactionAsync,
+          publicClient,
+          activeNetworkId,
+        );
+
+        addLog(activeTabId, `Transaction sent successfully. Hash: ${txHash}`);
+        const duration = Date.now() - start;
+
+        if (receipt) {
+          addLog(
+            activeTabId,
+            `Transaction confirmed in block ${receipt.blockNumber.toString()}`,
+          );
+          addLog(activeTabId, `Gas used: ${receipt.gasUsed.toString()}`);
+          updateActiveRequest({
+            response: {
+              status: 'Confirmed',
+              data: {
+                transactionHash: receipt.transactionHash,
+                blockNumber: receipt.blockNumber.toString(),
+                status: receipt.status === 'success' ? 'SUCCESS' : 'FAILED',
+                gasUsed: receipt.gasUsed.toString(),
+                amount: rawAmount,
+                recipient: resolvedRequest.target,
+              },
+              duration,
+              txHash,
+              logs: [
+                `[${new Date().toLocaleTimeString()}] Native transfer confirmed.`,
+                `[${new Date().toLocaleTimeString()}] Block: ${receipt.blockNumber.toString()}`,
+                `[${new Date().toLocaleTimeString()}] Status: ${receipt.status.toUpperCase()}`,
+              ],
+            },
+          });
+        } else {
+          updateActiveRequest({
+            response: {
+              status: 'Sent',
+              data: {
+                transactionHash: txHash,
+                amount: rawAmount,
+                recipient: resolvedRequest.target,
+              },
+              duration,
+              txHash,
+              logs: [
+                `[${new Date().toLocaleTimeString()}] Native transfer sent.`,
+              ],
+            },
+          });
+        }
+      } else if (
+        resolvedRequest.type === 'READ' ||
+        resolvedRequest.type === 'WRITE'
+      ) {
         if (!resolvedRequest.target) {
           throw new Error('Contract address is required.');
         }
@@ -390,6 +511,7 @@ export const useRequestRunner = (
               'Wallet not connected. Please connect your wallet.',
             );
           }
+          await ensureSelectedWalletNetwork();
 
           addLog(
             activeTabId,
@@ -492,8 +614,7 @@ export const useRequestRunner = (
       }
     } catch (err: unknown) {
       const duration = Date.now() - start;
-      let errorMsg =
-        err instanceof Error ? err.message : 'Unknown execution error.';
+      let errorMsg = getWalletErrorMessage(err);
       if (
         err instanceof Error &&
         err.message &&
@@ -502,7 +623,6 @@ export const useRequestRunner = (
         errorMsg =
           'Failed to fetch (CORS block or host unreachable). Ensure URL is correct.';
       }
-
       const redactedErrorMsg = redactSensitiveValues(errorMsg, activeVariables);
 
       addLog(activeTabId, `Error occurred: ${redactedErrorMsg}`);

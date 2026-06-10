@@ -37,7 +37,7 @@ const etherscanBaseUrls: Record<string, string> = {
 
 const blockscoutBaseUrls: Record<string, string> = {
   '2020': API_BASE_URLS.roninExplorer,
-  '012026': API_BASE_URLS.saigonExplorer,
+  '202601': API_BASE_URLS.saigonExplorer,
 };
 
 /**

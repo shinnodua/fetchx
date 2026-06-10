@@ -52,7 +52,10 @@ export const copyAsCurlBash = (request: RequestItem): string => {
   const url = copyLinkAddress(request);
 
   // Handle contract read/write fallbacks
-  if (method === 'READ' || method === 'WRITE') {
+  if (method === 'READ' || method === 'WRITE' || method === 'SEND') {
+    if (method === 'SEND') {
+      return `# Native Token Transfer\n# Recipient: ${url}\n# Amount: ${request.args?.nativeAmount || 'none'}`;
+    }
     return `# Contract ${method} Call\n# Target: ${url}\n# Function: ${request.functionName || 'none'}`;
   }
 
@@ -85,7 +88,10 @@ export const copyAsCurlCmd = (request: RequestItem): string => {
   const method = (request.type || 'GET').toUpperCase();
   const url = copyLinkAddress(request);
 
-  if (method === 'READ' || method === 'WRITE') {
+  if (method === 'READ' || method === 'WRITE' || method === 'SEND') {
+    if (method === 'SEND') {
+      return `rem Native Token Transfer\nrem Recipient: ${url}\nrem Amount: ${request.args?.nativeAmount || 'none'}`;
+    }
     return `rem Contract ${method} Call\nrem Target: ${url}\nrem Function: ${request.functionName || 'none'}`;
   }
 
@@ -119,7 +125,10 @@ export const copyAsCurlPowerShell = (request: RequestItem): string => {
   const method = (request.type || 'GET').toUpperCase();
   const url = copyLinkAddress(request);
 
-  if (method === 'READ' || method === 'WRITE') {
+  if (method === 'READ' || method === 'WRITE' || method === 'SEND') {
+    if (method === 'SEND') {
+      return `# Native Token Transfer\n# Recipient: ${url}\n# Amount: ${request.args?.nativeAmount || 'none'}`;
+    }
     return `# Contract ${method} Call\n# Target: ${url}\n# Function: ${request.functionName || 'none'}`;
   }
 
