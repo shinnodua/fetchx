@@ -55,6 +55,12 @@ export interface AbiItem {
   outputs?: AbiInput[];
 }
 
+export interface SavedContractAbi {
+  id: string;
+  name: string;
+  abi: string;
+}
+
 export interface RpcOption {
   id: string;
   name: string;

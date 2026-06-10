@@ -11,6 +11,7 @@ export * from './environment/UnlockSensitiveDialog';
 export * from './environment/VariablesTable';
 
 export * from './request/ActiveRequestWorkspace';
+export * from './request/ManageAbisDialog';
 export * from './request/ManageRpcsDialog';
 export * from './request/RequestMenuItems';
 export * from './request/RequestSettings';

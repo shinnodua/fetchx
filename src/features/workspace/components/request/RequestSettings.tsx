@@ -3,8 +3,11 @@ import { useMemo, useState } from 'react';
 import { TrashIcon } from '../../../../assets/svgs';
 import {
   Button,
+  Dialog,
   DropdownMenu,
   DropdownMenuItem,
+  DropdownMenuSeparator,
+  Input,
   Select,
   Tabs,
   TabsContent,
@@ -14,7 +17,7 @@ import {
   useToast,
 } from '../../../../components';
 import { fetchContractInfo } from '../../../../services/api';
-import { useWorkspaceStore } from '../../../../store';
+import { useAbiStore, useWorkspaceStore } from '../../../../store';
 import {
   ERC20_ABI,
   ERC721_ABI,
@@ -24,6 +27,7 @@ import {
   methodSupportsBody,
 } from '../../constants';
 import type { AbiItem } from '../../types';
+import { formatContractAbi, parseContractAbi } from '../../utils/contractAbi';
 import {
   type ContractArgValueMode,
   convertDecimalStringToHex,
@@ -37,15 +41,22 @@ import {
   EnvironmentAwareInput,
   EnvironmentAwareTextarea,
 } from '../environment/EnvironmentAwareField';
+import { ManageAbisDialog } from './ManageAbisDialog';
 
 export const RequestSettings: React.FC = () => {
   const { toast } = useToast();
   const { collections, activeTabId, drafts, updateActiveRequest } =
     useWorkspaceStore();
+  const { savedAbis, saveAbi, setManageAbiOpen } = useAbiStore();
   const [restTabsByRequestId, setRestTabsByRequestId] = useState<
     Record<string, string>
   >({});
   const [isAbiLoading, setIsAbiLoading] = useState(false);
+  const [isSaveAbiOpen, setIsSaveAbiOpen] = useState(false);
+  const [savedAbiName, setSavedAbiName] = useState('');
+  const [contractNamesByRequestId, setContractNamesByRequestId] = useState<
+    Record<string, string>
+  >({});
 
   // Find active request
   const activeRequest = useMemo(() => {
@@ -61,28 +72,26 @@ export const RequestSettings: React.FC = () => {
   // Helper: Get parsed functions list
   const activeFunctions = useMemo<AbiItem[]>(() => {
     if (!activeRequest?.abi) return [];
-    try {
-      const parsed: unknown = JSON.parse(activeRequest.abi);
-      if (!Array.isArray(parsed)) return [];
+    const parsed = parseContractAbi(activeRequest.abi);
+    if (!parsed) return [];
 
-      return parsed.filter(
-        (item): item is AbiItem =>
-          typeof item === 'object' &&
-          item !== null &&
-          'type' in item &&
-          item.type === 'function' &&
-          (activeRequest.type === 'READ'
-            ? item.stateMutability === 'view' ||
-              item.stateMutability === 'pure' ||
-              item.constant === true
-            : item.stateMutability !== 'view' &&
-              item.stateMutability !== 'pure' &&
-              item.constant !== true),
-      );
-    } catch {
-      return [];
-    }
+    return parsed.filter(
+      (item) =>
+        item.type === 'function' &&
+        (activeRequest.type === 'READ'
+          ? item.stateMutability === 'view' ||
+            item.stateMutability === 'pure' ||
+            item.constant === true
+          : item.stateMutability !== 'view' &&
+            item.stateMutability !== 'pure' &&
+            item.constant !== true),
+    );
   }, [activeRequest]);
+
+  const formattedActiveAbi = useMemo(
+    () => formatContractAbi(activeRequest?.abi || ''),
+    [activeRequest?.abi],
+  );
 
   // Helper: Find selected function object
   const activeSelectedFunction = useMemo<AbiItem | null>(() => {
@@ -118,8 +127,52 @@ export const RequestSettings: React.FC = () => {
     });
   };
 
+  const loadSavedAbi = (abi: string, name: string) => {
+    updateActiveRequest({
+      abi,
+      functionName: '',
+      args: {},
+    });
+    toast({
+      title: 'Saved ABI Loaded',
+      description: `Loaded "${name}" successfully.`,
+      type: 'success',
+    });
+  };
+
+  const openSaveAbiDialog = () => {
+    if (!activeRequest || !formattedActiveAbi) return;
+
+    const contractName = contractNamesByRequestId[activeRequest.id];
+    const defaultName =
+      contractName ||
+      (activeRequest.name !== 'Untitled Request' ? activeRequest.name : '') ||
+      activeRequest.target.trim() ||
+      'Custom ABI';
+    setSavedAbiName(defaultName);
+    setIsSaveAbiOpen(true);
+  };
+
+  const handleSaveAbi = () => {
+    const name = savedAbiName.trim();
+    if (!name || !formattedActiveAbi) return;
+
+    const isUpdate = savedAbis.some(
+      (savedAbi) => savedAbi.name.toLowerCase() === name.toLowerCase(),
+    );
+    saveAbi(name, formattedActiveAbi);
+    setIsSaveAbiOpen(false);
+    toast({
+      title: isUpdate ? 'ABI Preset Updated' : 'ABI Preset Saved',
+      description: `"${name}" is available under Load Preset ABI.`,
+      type: 'success',
+    });
+  };
+
   const loadContractAbi = async () => {
-    const address = activeRequest?.target.trim() || '';
+    if (!activeRequest) return;
+
+    const address = activeRequest.target.trim();
     if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
       toast({
         title: 'Invalid Contract Address',
@@ -140,6 +193,10 @@ export const RequestSettings: React.FC = () => {
         functionName: '',
         args: {},
       });
+      setContractNamesByRequestId((currentNames) => ({
+        ...currentNames,
+        [activeRequest.id]: info.name,
+      }));
       toast({
         title: 'ABI Loaded',
         description: `Loaded ABI for "${info.name}" successfully.`,
@@ -478,6 +535,17 @@ export const RequestSettings: React.FC = () => {
                       Contract ABI
                     </label>
                     <div className="flex items-center gap-1">
+                      {formattedActiveAbi && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-1.5 text-[10px] text-secondary-600 hover:text-secondary-700 cursor-pointer"
+                          onClick={openSaveAbiDialog}
+                        >
+                          SAVE
+                        </Button>
+                      )}
                       <Button
                         type="button"
                         variant="ghost"
@@ -486,11 +554,11 @@ export const RequestSettings: React.FC = () => {
                         onClick={loadContractAbi}
                         isLoading={isAbiLoading}
                       >
-                        Load ABI
+                        LOAD ABI
                       </Button>
                       <DropdownMenu
                         align="right"
-                        className="w-40"
+                        className="w-56"
                         trigger={
                           <Button
                             type="button"
@@ -498,10 +566,16 @@ export const RequestSettings: React.FC = () => {
                             size="sm"
                             className="h-6 px-1.5 text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer"
                           >
-                            Load Preset ABI
+                            LOAD PRESET ABI
                           </Button>
                         }
                       >
+                        <DropdownMenuItem
+                          onClick={() => setManageAbiOpen(true)}
+                        >
+                          Manage ABI
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => loadPresetAbi('ERC20')}
                         >
@@ -517,6 +591,28 @@ export const RequestSettings: React.FC = () => {
                         >
                           ERC1155 Preset
                         </DropdownMenuItem>
+                        {savedAbis.length > 0 && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-foreground/40">
+                              Saved ABIs
+                            </div>
+                            {savedAbis.map((savedAbi) => (
+                              <DropdownMenuItem
+                                key={savedAbi.id}
+                                onClick={() =>
+                                  loadSavedAbi(savedAbi.abi, savedAbi.name)
+                                }
+                                className="truncate"
+                                title={savedAbi.name}
+                              >
+                                <span className="truncate">
+                                  {savedAbi.name}
+                                </span>
+                              </DropdownMenuItem>
+                            ))}
+                          </>
+                        )}
                       </DropdownMenu>
                     </div>
                   </div>
@@ -533,6 +629,40 @@ export const RequestSettings: React.FC = () => {
                     }
                   />
                 </div>
+
+                <Dialog
+                  isOpen={isSaveAbiOpen}
+                  onClose={() => setIsSaveAbiOpen(false)}
+                  title="Save Contract ABI"
+                  description="Choose a name for this ABI preset. Saving with an existing name updates that preset."
+                >
+                  <div className="space-y-4">
+                    <Input
+                      label="ABI Name"
+                      value={savedAbiName}
+                      onChange={(event) => setSavedAbiName(event.target.value)}
+                      placeholder="Contract name or address"
+                      autoFocus
+                    />
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => setIsSaveAbiOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={handleSaveAbi}
+                        disabled={!savedAbiName.trim()}
+                      >
+                        Save ABI
+                      </Button>
+                    </div>
+                  </div>
+                </Dialog>
+                <ManageAbisDialog />
 
                 {/* Function Selector */}
                 {activeFunctions.length > 0 ? (
