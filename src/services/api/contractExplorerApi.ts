@@ -1,4 +1,4 @@
-import { API_BASE_URLS, API_KEYS, buildApiUrl } from './config';
+import { API_BASE_URLS, buildApiUrl } from './config';
 import { apiRequest } from './httpClient';
 
 export interface ImportedContractInfo {
@@ -80,9 +80,6 @@ async function fetchEtherscanContractInfo(
   url.searchParams.set('module', 'contract');
   url.searchParams.set('action', 'getsourcecode');
   url.searchParams.set('address', address);
-  if (API_KEYS.etherscan) {
-    url.searchParams.set('apikey', API_KEYS.etherscan);
-  }
 
   const response = await apiRequest(
     { url: url.toString() },

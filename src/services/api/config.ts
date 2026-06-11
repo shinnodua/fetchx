@@ -6,14 +6,9 @@ export const API_BASE_URLS = {
   optimisticEtherscan: import.meta.env.VITE_API_URL_OPTIMISTIC_ETHERSCAN,
   arbiscan: import.meta.env.VITE_API_URL_ARBISCAN,
   basescan: import.meta.env.VITE_API_URL_BASESCAN,
-  etherscanV2:
-    import.meta.env.VITE_API_URL_ETHERSCAN_V2,
+  etherscanV2: import.meta.env.VITE_API_URL_ETHERSCAN_V2,
   roninExplorer: import.meta.env.VITE_API_URL_RONIN_EXPLORER,
   saigonExplorer: import.meta.env.VITE_API_URL_SAIGON_EXPLORER,
-} as const;
-
-export const API_KEYS = {
-  etherscan: import.meta.env.VITE_ETHERSCAN_API_KEY,
 } as const;
 
 export function buildApiUrl(baseUrl: string, path = '') {

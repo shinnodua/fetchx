@@ -47,7 +47,7 @@ export async function apiRequest(
       throw error;
     }
 
-    // Direct request failed because of CORS / network issue
+    // The browser explicitly reported a CORS-blocked response.
     if (origin) {
       useCorsStore.getState().markOriginAsBlocked(origin);
     }
@@ -121,10 +121,21 @@ function headersToObject(headers: Headers) {
 function isBrowserFetchBlocked(error: unknown) {
   if (!(error instanceof TypeError)) return false;
 
-  const message = error.message.toLowerCase();
+  const messages = [error.message];
+  if (
+    typeof error.cause === 'object' &&
+    error.cause !== null &&
+    'message' in error.cause &&
+    typeof error.cause.message === 'string'
+  ) {
+    messages.push(error.cause.message);
+  }
+
+  const message = messages.join(' ').toLowerCase();
   return (
-    message.includes('failed to fetch') ||
-    message.includes('networkerror') ||
-    message.includes('load failed')
+    message.includes('cors') ||
+    message.includes('cross-origin') ||
+    message.includes('access-control-allow-origin') ||
+    message.includes('blocked by access control')
   );
 }

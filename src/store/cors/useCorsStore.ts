@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface CorsState {
-  blockedOrigins: string[];
+  corsOrigins: string[];
   isOriginBlocked: (origin: string) => boolean;
   markOriginAsBlocked: (origin: string) => void;
 }
@@ -10,17 +10,17 @@ interface CorsState {
 export const useCorsStore = create<CorsState>()(
   persist(
     (set, get) => ({
-      blockedOrigins: [],
+      corsOrigins: [],
 
       isOriginBlocked: (origin) => {
-        return get().blockedOrigins.includes(origin);
+        return get().corsOrigins.includes(origin);
       },
 
       markOriginAsBlocked: (origin) => {
         set((state) => {
-          if (state.blockedOrigins.includes(origin)) return {};
+          if (state.corsOrigins.includes(origin)) return {};
           return {
-            blockedOrigins: [...state.blockedOrigins, origin],
+            corsOrigins: [...state.corsOrigins, origin],
           };
         });
       },
