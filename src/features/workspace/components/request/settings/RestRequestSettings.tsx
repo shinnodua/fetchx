@@ -12,6 +12,7 @@ import {
 import { useWorkspaceStore } from '../../../../../store';
 import { methodSupportsBody } from '../../../constants';
 import type { RequestItem } from '../../../types';
+import { beautifyJson } from '../../../utils/json';
 import {
   EnvironmentAwareInput,
   EnvironmentAwareTextarea,
@@ -58,7 +59,8 @@ export const RestRequestSettings: React.FC<RestRequestSettingsProps> = ({
     }
 
     try {
-      updateActiveRequest({ body: JSON.stringify(JSON.parse(body), null, 2) });
+      const beautified = beautifyJson(body);
+      updateActiveRequest({ body: beautified });
       toast({
         title: 'Body Beautified',
         description: 'Formatted request body as JSON.',
