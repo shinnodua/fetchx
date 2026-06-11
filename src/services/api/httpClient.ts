@@ -1,3 +1,4 @@
+import { useCorsStore } from '../../store';
 import { callCorsProxy } from './proxyClient';
 import type { ApiRequest, ApiResponse } from './types';
 
@@ -10,6 +11,14 @@ interface NormalizedApiRequest extends ApiRequest {
   headers: Record<string, string>;
 }
 
+function getUrlOrigin(url: string): string | null {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return null;
+  }
+}
+
 export async function apiRequest(
   request: ApiRequest,
   options: ApiClientOptions = {},
@@ -20,11 +29,27 @@ export async function apiRequest(
     headers: request.headers ?? {},
   };
 
+  const origin = getUrlOrigin(normalizedRequest.url);
+
+  // Check if we should bypass direct request because origin is known to be blocked by CORS
+  if (
+    options.proxyOnBrowserBlock &&
+    origin &&
+    useCorsStore.getState().isOriginBlocked(origin)
+  ) {
+    return await callCorsProxy(normalizedRequest);
+  }
+
   try {
     return await directApiRequest(normalizedRequest);
   } catch (error) {
     if (!options.proxyOnBrowserBlock || !isBrowserFetchBlocked(error)) {
       throw error;
+    }
+
+    // Direct request failed because of CORS / network issue
+    if (origin) {
+      useCorsStore.getState().markOriginAsBlocked(origin);
     }
   }
 

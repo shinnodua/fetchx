@@ -22,6 +22,7 @@ export const useStore = create<AppState>()(
 );
 
 export * from './abi/useAbiStore';
+export * from './cors/useCorsStore';
 export * from './environment/useEnvironmentStore';
 export * from './rpc/useRpcStore';
 export * from './workspace/useWorkspaceStore';
