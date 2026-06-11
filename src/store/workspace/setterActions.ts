@@ -32,4 +32,5 @@ export const createSetterActions = (set: WorkspaceSet, _get: WorkspaceGet) => ({
     set({ collectionsPanelCollapsed }),
   setRequestToRevealId: (requestToRevealId: string | null) =>
     set({ requestToRevealId }),
+  setAbiLoading: (abiLoading: boolean) => set({ abiLoading }),
 });

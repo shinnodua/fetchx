@@ -13,6 +13,7 @@ export const useAutoLoadAbi = (
   const updateActiveRequest = useWorkspaceStore(
     (state) => state.updateActiveRequest,
   );
+  const setAbiLoading = useWorkspaceStore((state) => state.setAbiLoading);
   const activeEnvironmentId = useEnvironmentStore(
     (state) => state.activeEnvironmentId,
   );
@@ -63,6 +64,7 @@ export const useAutoLoadAbi = (
 
     // Fetch the contract info
     const loadAbi = async () => {
+      setAbiLoading(true);
       try {
         const info = await fetchContractInfo(resolvedTarget, network);
         if (info.abi) {
@@ -88,6 +90,8 @@ export const useAutoLoadAbi = (
         }
       } catch (err) {
         console.warn('Failed to auto-load ABI:', err);
+      } finally {
+        setAbiLoading(false);
       }
     };
 
@@ -100,6 +104,7 @@ export const useAutoLoadAbi = (
     activeRequestName,
     activeEnvironmentId,
     updateActiveRequest,
+    setAbiLoading,
     toast,
   ]);
 };

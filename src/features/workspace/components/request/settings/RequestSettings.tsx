@@ -5,7 +5,15 @@ import { isRestMethod } from '../../../constants';
 import { ContractRequestSettings } from './ContractRequestSettings';
 import { RestRequestSettings } from './RestRequestSettings';
 
-export const RequestSettings: React.FC = () => {
+interface RequestSettingsProps {
+  onSimulateRequest?: () => void;
+  isLoading?: boolean;
+}
+
+export const RequestSettings: React.FC<RequestSettingsProps> = ({
+  onSimulateRequest,
+  isLoading,
+}) => {
   const { collections, activeTabId, drafts } = useWorkspaceStore();
 
   // Find active request
@@ -28,7 +36,11 @@ export const RequestSettings: React.FC = () => {
       {isRestRequest ? (
         <RestRequestSettings activeRequest={activeRequest} />
       ) : (
-        <ContractRequestSettings activeRequest={activeRequest} />
+        <ContractRequestSettings
+          activeRequest={activeRequest}
+          onSimulateRequest={onSimulateRequest}
+          isLoading={isLoading}
+        />
       )}
     </div>
   );

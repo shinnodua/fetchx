@@ -8,11 +8,13 @@ import { ContractParamsForm } from './ContractParamsForm';
 
 interface ContractRequestSettingsProps {
   activeRequest: RequestItem;
+  onSimulateRequest?: () => void;
+  isLoading?: boolean;
 }
 
 export const ContractRequestSettings: React.FC<
   ContractRequestSettingsProps
-> = ({ activeRequest }) => {
+> = ({ activeRequest, onSimulateRequest, isLoading }) => {
   const { updateActiveRequest } = useWorkspaceStore();
 
   const isNativeTransfer = activeRequest.type === 'SEND';
@@ -54,7 +56,11 @@ export const ContractRequestSettings: React.FC<
         {isWeb3Request && (
           <div className="space-y-4">
             <ContractAbiForm activeRequest={activeRequest} />
-            <ContractParamsForm activeRequest={activeRequest} />
+            <ContractParamsForm
+              activeRequest={activeRequest}
+              onSimulateRequest={onSimulateRequest}
+              isLoading={isLoading}
+            />
           </div>
         )}
       </div>

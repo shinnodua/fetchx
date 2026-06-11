@@ -25,10 +25,14 @@ import { EnvironmentAwareInput } from '../../environment/EnvironmentAwareField';
 
 interface ContractParamsFormProps {
   activeRequest: RequestItem;
+  onSimulateRequest?: () => void;
+  isLoading?: boolean;
 }
 
 export const ContractParamsForm: React.FC<ContractParamsFormProps> = ({
   activeRequest,
+  onSimulateRequest,
+  isLoading,
 }) => {
   const { toast } = useToast();
   const { updateActiveRequest } = useWorkspaceStore();
@@ -174,23 +178,37 @@ export const ContractParamsForm: React.FC<ContractParamsFormProps> = ({
             <label className="text-xs font-semibold text-foreground/75 block">
               Parameters
             </label>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-7 px-2 text-[10px] rounded-lg flex items-center gap-1 cursor-pointer"
-              onClick={handleCopyCalldata}
-            >
-              {copiedCalldata ? (
-                <CheckIcon
-                  title="Check"
-                  className="w-3.5 h-3.5 text-green-500"
-                />
-              ) : (
-                <CopyIcon title="Copy" className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-1.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-[10px] rounded-lg flex items-center gap-1 cursor-pointer"
+                onClick={handleCopyCalldata}
+              >
+                {copiedCalldata ? (
+                  <CheckIcon
+                    title="Check"
+                    className="w-3.5 h-3.5 text-green-500"
+                  />
+                ) : (
+                  <CopyIcon title="Copy" className="w-3.5 h-3.5" />
+                )}
+                {copiedCalldata ? 'Copied' : 'Copy Calldata'}
+              </Button>
+              {activeRequest.type === 'WRITE' && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="h-7 px-2 text-[10px] rounded-lg cursor-pointer border border-foreground/10 hover:border-foreground/20"
+                  onClick={onSimulateRequest}
+                  isLoading={isLoading}
+                >
+                  Simulate
+                </Button>
               )}
-              {copiedCalldata ? 'Copied' : 'Copy Calldata'}
-            </Button>
+            </div>
           </div>
           {activeSelectedFunction.inputs?.length === 0 ? (
             <p className="text-xs text-foreground/40 italic">

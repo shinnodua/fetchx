@@ -29,11 +29,17 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       collectionsPanelWidth: 320,
       collectionsPanelCollapsed: false,
       requestToRevealId: null,
+      abiLoading: false,
 
       ...createWorkspaceActions(set, get),
     }),
     {
       name: 'call3-workspace-storage',
+      onRehydrateStorage: () => () => {
+        useWorkspaceStore.setState({
+          abiLoading: false,
+        });
+      },
     },
   ),
 );

@@ -26,6 +26,7 @@ export interface WorkspaceState {
   collectionsPanelWidth: number;
   collectionsPanelCollapsed: boolean;
   requestToRevealId: string | null;
+  abiLoading: boolean;
 
   setSearchTerm: (term: string) => void;
   setCollections: (collections: CollectionItem[]) => void;
@@ -72,4 +73,5 @@ export interface WorkspaceState {
   addNewTab: () => void;
   initializeDraft: (reqId: string) => void;
   setTabToClose: (id: string | null) => void;
+  setAbiLoading: (loading: boolean) => void;
 }

@@ -148,17 +148,6 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
           </div>
         )}
 
-        {activeRequest.type === 'WRITE' && (
-          <Button
-            variant="secondary"
-            className="h-12 px-6 cursor-pointer border border-foreground/10 hover:border-foreground/20"
-            onClick={onSimulateRequest}
-            isLoading={isLoading}
-          >
-            Simulate
-          </Button>
-        )}
-
         <Button
           variant={
             activeRequest.type === 'WRITE' || activeRequest.type === 'SEND'
@@ -182,7 +171,10 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
       </div>
 
       <div className="flex-grow flex flex-col lg:flex-row min-h-0 gap-6">
-        <RequestSettings />
+        <RequestSettings
+          onSimulateRequest={onSimulateRequest}
+          isLoading={isLoading}
+        />
         <ResponsePane />
       </div>
     </div>

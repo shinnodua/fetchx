@@ -25,9 +25,9 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
   activeRequest,
 }) => {
   const { toast } = useToast();
-  const { updateActiveRequest } = useWorkspaceStore();
+  const { updateActiveRequest, abiLoading, setAbiLoading } =
+    useWorkspaceStore();
   const { savedAbis, saveAbi, setManageAbiOpen } = useAbiStore();
-  const [isAbiLoading, setIsAbiLoading] = useState(false);
   const [isSaveAbiOpen, setIsSaveAbiOpen] = useState(false);
   const [savedAbiName, setSavedAbiName] = useState('');
   const [contractNamesByRequestId, setContractNamesByRequestId] = useState<
@@ -111,7 +111,7 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
       return;
     }
 
-    setIsAbiLoading(true);
+    setAbiLoading(true);
     try {
       const info = await fetchContractInfo(
         address,
@@ -141,7 +141,7 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
         type: 'error',
       });
     } finally {
-      setIsAbiLoading(false);
+      setAbiLoading(false);
     }
   };
 
@@ -211,7 +211,7 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
             size="sm"
             className="h-6 px-1.5 text-[10px] text-secondary-600 hover:text-secondary-700 cursor-pointer"
             onClick={loadContractAbi}
-            isLoading={isAbiLoading}
+            isLoading={abiLoading}
           >
             LOAD ABI
           </Button>
