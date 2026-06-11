@@ -616,6 +616,8 @@ export const useRequestRunner = (
     } catch (err: unknown) {
       const duration = Date.now() - start;
       let errorMsg = getWalletErrorMessage(err);
+      const originalErrorMsg =
+        err instanceof Error && err.message ? err.message : errorMsg;
       if (
         err instanceof Error &&
         err.message &&
@@ -625,15 +627,19 @@ export const useRequestRunner = (
           'Failed to fetch (CORS block or host unreachable). Ensure URL is correct.';
       }
       const redactedErrorMsg = redactSensitiveValues(errorMsg, activeVariables);
+      const redactedLogErrorMsg = redactSensitiveValues(
+        isRestMethod(resolvedRequest.type) ? originalErrorMsg : errorMsg,
+        activeVariables,
+      );
 
-      addLog(activeTabId, `Error occurred: ${redactedErrorMsg}`);
+      addLog(activeTabId, `Error occurred: ${redactedLogErrorMsg}`);
       updateActiveRequest({
         response: {
           status: 'Error',
           data: { error: redactedErrorMsg },
           duration,
           logs: [
-            `[${new Date().toLocaleTimeString()}] Execution failed: ${redactedErrorMsg}`,
+            `[${new Date().toLocaleTimeString()}] Execution failed: ${redactedLogErrorMsg}`,
           ],
         },
       });
