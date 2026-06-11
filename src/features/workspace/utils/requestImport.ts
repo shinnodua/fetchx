@@ -89,6 +89,23 @@ const tokenizeCurl = (curl: string) => {
   return args;
 };
 
+const FORBIDDEN_IMPORT_HEADERS = [
+  'sec-ch-ua',
+  'sec-ch-ua-mobile',
+  'sec-ch-ua-platform',
+  'sec-fetch-dest',
+  'sec-fetch-mode',
+  'sec-fetch-site',
+  'sec-fetch-user',
+  'priority',
+  'origin',
+  'referer',
+  'user-agent',
+  'host',
+  'connection',
+  'accept-encoding',
+];
+
 export const parseCurl = (curl: string): ParsedCurl => {
   const args = tokenizeCurl(curl);
   let method = 'GET';
@@ -107,10 +124,13 @@ export const parseCurl = (curl: string): ParsedCurl => {
     } else if (arg === '-H' || arg === '--header') {
       const parts = nextArg.split(':');
       if (parts.length >= 2) {
-        headers.push({
-          key: parts[0].trim(),
-          value: parts.slice(1).join(':').trim(),
-        });
+        const key = parts[0].trim();
+        if (!FORBIDDEN_IMPORT_HEADERS.includes(key.toLowerCase())) {
+          headers.push({
+            key,
+            value: parts.slice(1).join(':').trim(),
+          });
+        }
       }
       i++;
     } else if (
@@ -258,7 +278,11 @@ export const parseRequestImportContent = (
         for (const match of matches) {
           const key = match[1] || match[2] || match[3];
           const value = match[5];
-          if (key && value !== undefined) {
+          if (
+            key &&
+            value !== undefined &&
+            !FORBIDDEN_IMPORT_HEADERS.includes(key.toLowerCase().trim())
+          ) {
             headers.push({ key: key.trim(), value: value.trim() });
           }
         }
