@@ -21,6 +21,7 @@ interface ActiveRequestWorkspaceProps {
   selectedColId: string;
   onCreateCollection: () => void;
   onRunRequest: () => void;
+  onSimulateRequest?: () => void;
   onSave: () => void;
   onSelectedCollectionChange: (collectionId: string) => void;
   onTargetPaste: (event: React.ClipboardEvent<HTMLInputElement>) => void;
@@ -36,6 +37,7 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
   selectedColId,
   onCreateCollection,
   onRunRequest,
+  onSimulateRequest,
   onSave,
   onSelectedCollectionChange,
   onTargetPaste,
@@ -144,6 +146,17 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
               onChange={onUpdateActiveRequest}
             />
           </div>
+        )}
+
+        {activeRequest.type === 'WRITE' && (
+          <Button
+            variant="secondary"
+            className="h-12 px-6 cursor-pointer border border-foreground/10 hover:border-foreground/20"
+            onClick={onSimulateRequest}
+            isLoading={isLoading}
+          >
+            Simulate
+          </Button>
         )}
 
         <Button

@@ -87,6 +87,7 @@ export const WorkspacePage: React.FC = () => {
     handleTargetPaste,
     handleSaveActiveRequest,
     handleRunRequest,
+    handleSimulateRequest,
   } = useRequestRunner(activeRequest, activeTabId, publicClient);
 
   const validTabs = useMemo(() => {
@@ -130,6 +131,7 @@ export const WorkspacePage: React.FC = () => {
                 selectedColId={selectedColId}
                 onCreateCollection={() => setNewColOpen(true)}
                 onRunRequest={handleRunRequest}
+                onSimulateRequest={handleSimulateRequest}
                 onSave={handleSaveActiveRequest}
                 onSelectedCollectionChange={setSelectedColId}
                 onTargetPaste={handleTargetPaste}

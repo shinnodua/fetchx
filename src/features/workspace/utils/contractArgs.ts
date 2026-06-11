@@ -111,3 +111,18 @@ export function formatContractArgs(
     return rawVal;
   });
 }
+
+export function serializeBigInts(value: unknown): unknown {
+  if (typeof value === 'bigint') {
+    return value.toString();
+  }
+  if (Array.isArray(value)) {
+    return value.map(serializeBigInts);
+  }
+  if (typeof value === 'object' && value !== null) {
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, serializeBigInts(v)]),
+    );
+  }
+  return value;
+}

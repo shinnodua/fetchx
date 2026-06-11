@@ -9,6 +9,13 @@ interface ContractClient {
     functionName: string;
     args: unknown[];
   }) => Promise<unknown>;
+  simulateContract: (parameters: {
+    address: `0x${string}`;
+    abi: Abi;
+    functionName: string;
+    args: unknown[];
+    account?: `0x${string}`;
+  }) => Promise<{ result: unknown }>;
   waitForTransactionReceipt: (parameters: {
     hash: `0x${string}`;
   }) => Promise<TransactionReceipt>;
@@ -46,6 +53,29 @@ export async function executeReadCall(
     abi: parsedAbi as unknown as Abi,
     functionName,
     args: formattedArgs,
+  });
+}
+
+/**
+ * Simulates a contract transaction execution (dry-run).
+ */
+export async function executeSimulateCall(
+  target: string,
+  parsedAbi: AbiItem[],
+  functionName: string,
+  formattedArgs: unknown[],
+  publicClient: ContractClient | undefined,
+  accountAddress: `0x${string}` | undefined,
+) {
+  if (!publicClient) {
+    throw new Error('Public client not available. Select a supported network.');
+  }
+  return await publicClient.simulateContract({
+    address: target as `0x${string}`,
+    abi: parsedAbi as unknown as Abi,
+    functionName,
+    args: formattedArgs,
+    account: accountAddress,
   });
 }
 
