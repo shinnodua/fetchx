@@ -8,7 +8,7 @@ export { ERC20_ABI, ERC721_ABI, ERC1155_ABI };
 export const DEFAULT_COLLECTIONS: CollectionItem[] = [
   {
     id: 'c-1',
-    name: 'Uniswap Token V2 (ERC-20)',
+    name: '[Example] Uniswap Token V2 (ERC-20)',
     requests: [
       {
         id: 'r-1',
@@ -59,7 +59,7 @@ export const DEFAULT_COLLECTIONS: CollectionItem[] = [
   },
   {
     id: 'c-2',
-    name: 'Public JSON APIs',
+    name: '[Example] Public JSON APIs',
     requests: [
       {
         id: 'r-4',
@@ -108,6 +108,7 @@ export const NETWORK_OPTIONS = [
   { value: '10', label: 'Optimism Mainnet' },
   { value: '42161', label: 'Arbitrum One' },
   { value: '8453', label: 'Base' },
+  { value: '56', label: 'BNB Smart Chain' },
   { value: '2020', label: 'Ronin Mainnet' },
   { value: '202601', label: 'Saigon Testnet' },
 ];
@@ -119,6 +120,7 @@ const DEFAULT_EXPLORER_URLS: Record<string, string> = {
   '10': 'https://optimistic.etherscan.io',
   '42161': 'https://arbiscan.io',
   '8453': 'https://basescan.org',
+  '56': 'https://bscscan.com',
   '2020': 'https://explorer.roninchain.com',
   '202601': 'https://saigon-explorer.roninchain.com',
 };
@@ -151,6 +153,7 @@ const NATIVE_TOKEN_SYMBOLS: Record<string, string> = {
   '10': 'ETH',
   '42161': 'ETH',
   '8453': 'ETH',
+  '56': 'BNB',
   '2020': 'RON',
   '202601': 'RON',
 };

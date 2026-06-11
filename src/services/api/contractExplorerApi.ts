@@ -1,4 +1,4 @@
-import { API_BASE_URLS, buildApiUrl } from './config';
+import { API_BASE_URLS, API_KEYS, buildApiUrl } from './config';
 import { apiRequest } from './httpClient';
 
 export interface ImportedContractInfo {
@@ -11,10 +11,12 @@ export interface ImportedContractInfo {
 interface EtherscanSourceCodeResponse {
   status: string;
   message?: string;
-  result?: {
-    ContractName?: string;
-    ABI?: string;
-  }[];
+  result?:
+    | {
+        ContractName?: string;
+        ABI?: string;
+      }[]
+    | string;
 }
 
 interface BlockscoutContractResponse {
@@ -26,13 +28,19 @@ interface BlockscoutContractResponse {
   }[];
 }
 
-const etherscanBaseUrls: Record<string, string> = {
-  '1': API_BASE_URLS.etherscan,
-  '11155111': API_BASE_URLS.sepoliaEtherscan,
-  '137': API_BASE_URLS.polygonscan,
-  '10': API_BASE_URLS.optimisticEtherscan,
-  '42161': API_BASE_URLS.arbiscan,
-  '8453': API_BASE_URLS.basescan,
+interface EtherscanApiConfig {
+  baseUrl: string;
+  chainId?: string;
+}
+
+const etherscanApiConfigs: Record<string, EtherscanApiConfig> = {
+  '1': { baseUrl: API_BASE_URLS.etherscan },
+  '11155111': { baseUrl: API_BASE_URLS.sepoliaEtherscan },
+  '137': { baseUrl: API_BASE_URLS.polygonscan },
+  '10': { baseUrl: API_BASE_URLS.optimisticEtherscan },
+  '42161': { baseUrl: API_BASE_URLS.arbiscan },
+  '8453': { baseUrl: API_BASE_URLS.basescan },
+  '56': { baseUrl: API_BASE_URLS.etherscanV2, chainId: '56' },
 };
 
 const blockscoutBaseUrls: Record<string, string> = {
@@ -47,9 +55,9 @@ export async function fetchContractInfo(
   address: string,
   network: string,
 ): Promise<ImportedContractInfo> {
-  const etherscanBaseUrl = etherscanBaseUrls[network];
-  if (etherscanBaseUrl) {
-    return fetchEtherscanContractInfo(address, network, etherscanBaseUrl);
+  const etherscanConfig = etherscanApiConfigs[network];
+  if (etherscanConfig) {
+    return fetchEtherscanContractInfo(address, network, etherscanConfig);
   }
 
   const blockscoutBaseUrl = blockscoutBaseUrls[network];
@@ -63,12 +71,18 @@ export async function fetchContractInfo(
 async function fetchEtherscanContractInfo(
   address: string,
   network: string,
-  baseUrl: string,
+  config: EtherscanApiConfig,
 ): Promise<ImportedContractInfo> {
-  const url = new URL(baseUrl);
+  const url = new URL(config.baseUrl);
+  if (config.chainId) {
+    url.searchParams.set('chainid', config.chainId);
+  }
   url.searchParams.set('module', 'contract');
   url.searchParams.set('action', 'getsourcecode');
   url.searchParams.set('address', address);
+  if (API_KEYS.etherscan) {
+    url.searchParams.set('apikey', API_KEYS.etherscan);
+  }
 
   const response = await apiRequest(
     { url: url.toString() },
@@ -80,8 +94,16 @@ async function fetchEtherscanContractInfo(
 
   const data = response.data as EtherscanSourceCodeResponse;
 
-  if (data.status !== '1' || !data.result || data.result.length === 0) {
-    throw new Error(data.message || 'Failed to fetch contract info.');
+  if (
+    data.status !== '1' ||
+    !Array.isArray(data.result) ||
+    data.result.length === 0
+  ) {
+    throw new Error(
+      (typeof data.result === 'string' && data.result) ||
+        data.message ||
+        'Failed to fetch contract info.',
+    );
   }
 
   const contract = data.result[0];
