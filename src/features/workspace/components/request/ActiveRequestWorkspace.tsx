@@ -8,9 +8,9 @@ import { METHOD_OPTIONS } from '../../constants';
 import type { CollectionItem, RequestItem } from '../../types';
 import { getSelectedRpcId } from '../../utils/rpcOptions';
 import { EnvironmentAwareInput } from '../environment/EnvironmentAwareField';
-import { RequestSettings } from './RequestSettings';
-import { ResponsePane } from './ResponsePane';
-import { RpcSelectField } from './RpcSelectField';
+import { ResponsePane } from './response/ResponsePane';
+import { RequestSettings } from './settings/RequestSettings';
+import { RpcSelectField } from './settings/RpcSelectField';
 
 interface ActiveRequestWorkspaceProps {
   activeRequest: RequestItem;

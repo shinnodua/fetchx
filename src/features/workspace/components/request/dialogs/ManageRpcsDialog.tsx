@@ -1,11 +1,11 @@
 import type React from 'react';
 import { useState } from 'react';
-import { TrashIcon } from '../../../../assets/svgs';
-import { Button, Dialog, Input } from '../../../../components';
-import { useRpcStore } from '../../../../store';
-import { DEFAULT_RPC_OPTIONS } from '../../constants';
-import type { CustomRpc } from '../../types';
-import { validateChainId, validateRpcUrl } from '../../utils/rpcOptions';
+import { TrashIcon } from '../../../../../assets/svgs';
+import { Button, Dialog, Input } from '../../../../../components';
+import { useRpcStore } from '../../../../../store';
+import { DEFAULT_RPC_OPTIONS } from '../../../constants';
+import type { CustomRpc } from '../../../types';
+import { validateChainId, validateRpcUrl } from '../../../utils/rpcOptions';
 
 export const ManageRpcsDialog: React.FC = () => {
   const {

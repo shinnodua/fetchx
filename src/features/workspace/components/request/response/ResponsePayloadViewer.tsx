@@ -4,7 +4,7 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   CopyIcon,
-} from '../../../../assets/svgs';
+} from '../../../../../assets/svgs';
 import {
   Button,
   Dialog,
@@ -14,8 +14,8 @@ import {
   TabsList,
   TabsTrigger,
   useToast,
-} from '../../../../components';
-import type { JsonPrimitive } from '../../utils/responsePayload';
+} from '../../../../../components';
+import type { JsonPrimitive } from '../../../utils/responsePayload';
 import {
   createDefaultResponseName,
   formatPrimitiveValue,
@@ -23,7 +23,7 @@ import {
   getTypeLabel,
   isPrimitive,
   isRecord,
-} from '../../utils/responsePayload';
+} from '../../../utils/responsePayload';
 
 interface ResponsePayloadViewerProps {
   data: unknown;

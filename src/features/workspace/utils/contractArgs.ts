@@ -69,3 +69,45 @@ export function formatIntegerContractArg(value: string, decimalsValue: string) {
 
   return parseUnits(value, decimals);
 }
+
+export interface AbiInput {
+  name?: string;
+  type: string;
+}
+
+export function formatContractArgs(
+  inputs: readonly AbiInput[] | undefined,
+  args: Record<string, string> | undefined,
+) {
+  return (inputs || []).map((input, idx) => {
+    const inputName = input.name || `arg${idx}`;
+    const rawVal = args?.[inputName] || '';
+    if (!rawVal.trim()) {
+      throw new Error(`Parameter "${inputName}" is required.`);
+    }
+
+    if (input.type.includes('[]')) {
+      try {
+        return JSON.parse(rawVal);
+      } catch {
+        throw new Error(`Parameter "${inputName}" must be a JSON array.`);
+      }
+    }
+    if (isIntegerAbiType(input.type)) {
+      return formatIntegerContractArg(
+        rawVal,
+        args?.[getArgDecimalsKey(inputName)] || '',
+      );
+    }
+    if (input.type === 'bool') {
+      return rawVal.toLowerCase() === 'true';
+    }
+    if (isStringAbiType(input.type)) {
+      return formatStringContractArg(
+        rawVal,
+        args?.[getArgValueModeKey(inputName)],
+      );
+    }
+    return rawVal;
+  });
+}

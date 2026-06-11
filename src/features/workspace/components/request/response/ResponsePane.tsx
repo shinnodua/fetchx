@@ -1,10 +1,10 @@
 import type React from 'react';
 import { useMemo } from 'react';
-import { CopyIcon } from '../../../../assets/svgs';
-import { Badge, Button, Skeleton, useToast } from '../../../../components';
-import { useRpcStore, useWorkspaceStore } from '../../../../store';
-import { copyResponse } from '../../utils/requestExport';
-import { findRpcOption, getSelectedRpcId } from '../../utils/rpcOptions';
+import { CopyIcon } from '../../../../../assets/svgs';
+import { Badge, Button, Skeleton, useToast } from '../../../../../components';
+import { useRpcStore, useWorkspaceStore } from '../../../../../store';
+import { copyResponse } from '../../../utils/requestExport';
+import { findRpcOption, getSelectedRpcId } from '../../../utils/rpcOptions';
 import { ResponsePayloadViewer } from './ResponsePayloadViewer';
 
 export const ResponsePane: React.FC = () => {

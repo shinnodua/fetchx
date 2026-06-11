@@ -18,14 +18,7 @@ import { useEnvironmentStore, useWorkspaceStore } from '../../../store';
 import { isRestMethod } from '../constants';
 import type { RequestItem } from '../types';
 import { parseContractAbi } from '../utils/contractAbi';
-import {
-  formatIntegerContractArg,
-  formatStringContractArg,
-  getArgDecimalsKey,
-  getArgValueModeKey,
-  isIntegerAbiType,
-  isStringAbiType,
-} from '../utils/contractArgs';
+import { formatContractArgs } from '../utils/contractArgs';
 import {
   getLockedSensitiveVariableNames,
   redactSensitiveData,
@@ -418,45 +411,10 @@ export const useRequestRunner = (
         }
 
         // Parse function arguments
-        const formattedArgs = (selectedFunc.inputs || []).map((input, idx) => {
-          const rawVal =
-            resolvedRequest.args?.[input.name || `arg${idx}`] || '';
-          if (!rawVal.trim()) {
-            throw new Error(
-              `Parameter "${input.name || `arg${idx}`}" is required.`,
-            );
-          }
-
-          if (input.type.includes('[]')) {
-            try {
-              return JSON.parse(rawVal);
-            } catch {
-              throw new Error(
-                `Parameter "${input.name}" must be a JSON array.`,
-              );
-            }
-          }
-          if (isIntegerAbiType(input.type)) {
-            return formatIntegerContractArg(
-              rawVal,
-              resolvedRequest.args?.[
-                getArgDecimalsKey(input.name || `arg${idx}`)
-              ] || '',
-            );
-          }
-          if (input.type === 'bool') {
-            return rawVal.toLowerCase() === 'true';
-          }
-          if (isStringAbiType(input.type)) {
-            return formatStringContractArg(
-              rawVal,
-              resolvedRequest.args?.[
-                getArgValueModeKey(input.name || `arg${idx}`)
-              ],
-            );
-          }
-          return rawVal;
-        });
+        const formattedArgs = formatContractArgs(
+          selectedFunc.inputs,
+          resolvedRequest.args,
+        );
 
         addLog(
           activeTabId,

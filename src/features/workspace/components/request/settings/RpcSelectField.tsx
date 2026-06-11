@@ -1,7 +1,7 @@
 import type React from 'react';
-import { Select } from '../../../../components';
-import { useRpcStore } from '../../../../store';
-import { findRpcOption, getRpcSelectOptions } from '../../utils/rpcOptions';
+import { Select } from '../../../../../components';
+import { useRpcStore } from '../../../../../store';
+import { findRpcOption, getRpcSelectOptions } from '../../../utils/rpcOptions';
 
 const MANAGE_RPCS_OPTION_VALUE = '__manage_rpcs';
 

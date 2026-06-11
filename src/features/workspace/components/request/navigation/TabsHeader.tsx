@@ -6,11 +6,15 @@ import {
   EnvironmentIcon,
   ImportIcon,
   PlusIcon,
-} from '../../../../assets/svgs';
-import { Button, DropdownMenu, DropdownMenuItem } from '../../../../components';
-import { useWorkspaceStore } from '../../../../store';
-import type { RequestItem } from '../../types';
-import { getRequestIsDirty } from '../../utils/requestDirty';
+} from '../../../../../assets/svgs';
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuItem,
+} from '../../../../../components';
+import { useWorkspaceStore } from '../../../../../store';
+import type { RequestItem } from '../../../types';
+import { getRequestIsDirty } from '../../../utils/requestDirty';
 import { TabContextMenu } from './TabContextMenu';
 
 export const TabsHeader: React.FC = () => {

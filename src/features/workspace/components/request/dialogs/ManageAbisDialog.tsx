@@ -1,9 +1,9 @@
 import type React from 'react';
 import { useState } from 'react';
-import { TrashIcon } from '../../../../assets/svgs';
-import { Button, Dialog } from '../../../../components';
-import { useAbiStore } from '../../../../store';
-import type { SavedContractAbi } from '../../types';
+import { TrashIcon } from '../../../../../assets/svgs';
+import { Button, Dialog } from '../../../../../components';
+import { useAbiStore } from '../../../../../store';
+import type { SavedContractAbi } from '../../../types';
 
 const DEFAULT_ABIS = ['ERC20 Preset', 'ERC721 Preset', 'ERC1155 Preset'];
 

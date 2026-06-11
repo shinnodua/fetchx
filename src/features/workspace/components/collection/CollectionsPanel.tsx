@@ -7,7 +7,7 @@ import {
 import { useWorkspaceStore } from '../../../../store';
 import type { CollectionItem, SavedResponse } from '../../types';
 import { RequestMenuItems } from '../request/RequestMenuItems';
-import { ResponsePayloadDialog } from '../request/ResponsePayloadViewer';
+import { ResponsePayloadDialog } from '../request/response/ResponsePayloadViewer';
 import { CollectionItemView } from './CollectionItemView';
 import { CollectionPanelDialogs } from './CollectionPanelDialogs';
 import type { ContextMenuTarget, RenameTarget } from './collectionPanelTypes';

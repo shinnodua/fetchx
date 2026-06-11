@@ -7,15 +7,15 @@ import {
   Select,
   Textarea,
   useToast,
-} from '../../../../components';
-import { fetchContractInfo } from '../../../../services/api';
-import { useRpcStore, useWorkspaceStore } from '../../../../store';
-import { METHOD_OPTIONS } from '../../constants';
-import type { RequestItem } from '../../types';
-import { parseRequestImportContent } from '../../utils/requestImport';
-import { getSelectedRpcId } from '../../utils/rpcOptions';
+} from '../../../../../components';
+import { fetchContractInfo } from '../../../../../services/api';
+import { useRpcStore, useWorkspaceStore } from '../../../../../store';
+import { METHOD_OPTIONS } from '../../../constants';
+import type { RequestItem } from '../../../types';
+import { parseRequestImportContent } from '../../../utils/requestImport';
+import { getSelectedRpcId } from '../../../utils/rpcOptions';
+import { RpcSelectField } from '../settings/RpcSelectField';
 import { ManageRpcsDialog } from './ManageRpcsDialog';
-import { RpcSelectField } from './RpcSelectField';
 
 export const WorkspaceDialogs: React.FC = () => {
   const {
