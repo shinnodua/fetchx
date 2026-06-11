@@ -38,7 +38,7 @@ export interface CollectionItem {
 }
 
 export interface AbiInput {
-  name: string;
+  name?: string;
   type: string;
   indexed?: boolean;
   internalType?: string;

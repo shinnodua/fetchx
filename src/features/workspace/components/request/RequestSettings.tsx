@@ -27,7 +27,12 @@ import {
   methodSupportsBody,
 } from '../../constants';
 import type { AbiItem } from '../../types';
-import { formatContractAbi, parseContractAbi } from '../../utils/contractAbi';
+import {
+  formatContractAbi,
+  isReadContractFunction,
+  isWriteContractFunction,
+  parseContractAbi,
+} from '../../utils/contractAbi';
 import {
   type ContractArgValueMode,
   convertDecimalStringToHex,
@@ -69,24 +74,28 @@ export const RequestSettings: React.FC = () => {
     return null;
   }, [collections, activeTabId, drafts]);
 
+  const parsedActiveAbi = useMemo(
+    () => parseContractAbi(activeRequest?.abi || ''),
+    [activeRequest?.abi],
+  );
+
   // Helper: Get parsed functions list
   const activeFunctions = useMemo<AbiItem[]>(() => {
-    if (!activeRequest?.abi) return [];
-    const parsed = parseContractAbi(activeRequest.abi);
-    if (!parsed) return [];
+    if (!parsedActiveAbi) return [];
 
-    return parsed.filter(
-      (item) =>
-        item.type === 'function' &&
-        (activeRequest.type === 'READ'
-          ? item.stateMutability === 'view' ||
-            item.stateMutability === 'pure' ||
-            item.constant === true
-          : item.stateMutability !== 'view' &&
-            item.stateMutability !== 'pure' &&
-            item.constant !== true),
+    return parsedActiveAbi.filter((item) =>
+      activeRequest?.type === 'READ'
+        ? isReadContractFunction(item)
+        : isWriteContractFunction(item),
     );
-  }, [activeRequest]);
+  }, [activeRequest?.type, parsedActiveAbi]);
+
+  const abiFunctionCount =
+    parsedActiveAbi?.filter((item) => item.type === 'function').length ?? 0;
+  const hasFallbackAbiItem =
+    parsedActiveAbi?.some(
+      (item) => item.type === 'fallback' || item.type === 'receive',
+    ) ?? false;
 
   const formattedActiveAbi = useMemo(
     () => formatContractAbi(activeRequest?.abi || ''),
@@ -263,6 +272,48 @@ export const RequestSettings: React.FC = () => {
       ...currentTabs,
       [activeRequest.id]: value,
     }));
+  };
+
+  const updateContractAbi = (abi: string) => {
+    updateActiveRequest({
+      abi,
+      functionName: '',
+      args: {},
+    });
+  };
+
+  const handleContractAbiPaste = (
+    event: React.ClipboardEvent<HTMLTextAreaElement>,
+  ) => {
+    const clipboardValue = event.clipboardData.getData('text');
+    const formattedAbi = formatContractAbi(clipboardValue);
+    if (!formattedAbi) return;
+
+    event.preventDefault();
+    updateContractAbi(formattedAbi);
+  };
+
+  const pasteContractAbi = async () => {
+    try {
+      const clipboardValue = await navigator.clipboard.readText();
+      const formattedAbi = formatContractAbi(clipboardValue);
+      if (!formattedAbi) {
+        toast({
+          title: 'Invalid Contract ABI',
+          description: 'Clipboard content does not contain a valid ABI.',
+          type: 'error',
+        });
+        return;
+      }
+
+      updateContractAbi(formattedAbi);
+    } catch {
+      toast({
+        title: 'Clipboard Access Failed',
+        description: 'Allow clipboard access, then try pasting again.',
+        type: 'error',
+      });
+    }
   };
 
   const handleStringModeChange = (
@@ -616,18 +667,38 @@ export const RequestSettings: React.FC = () => {
                       </DropdownMenu>
                     </div>
                   </div>
-                  <Textarea
-                    placeholder="Paste contract ABI array (JSON format)"
-                    className="font-mono text-xs h-32"
-                    value={activeRequest.abi || ''}
-                    onChange={(e) =>
-                      updateActiveRequest({
-                        abi: e.target.value,
-                        functionName: '',
-                        args: {},
-                      })
-                    }
-                  />
+                  <div className="relative">
+                    <Textarea
+                      placeholder="Paste ABI JSON, artifact, explorer response, or human-readable signatures"
+                      className="h-32 pt-10 font-mono text-xs"
+                      value={activeRequest.abi || ''}
+                      onPaste={handleContractAbiPaste}
+                      onChange={(event) =>
+                        updateContractAbi(event.target.value)
+                      }
+                    />
+                    <div className="absolute right-2 top-2 z-40 flex items-center gap-1 rounded-lg bg-background/90 p-0.5 shadow-sm backdrop-blur-sm">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 rounded-md !px-2 text-[10px]"
+                        onClick={pasteContractAbi}
+                      >
+                        Paste
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 rounded-md !px-2 text-[10px]"
+                        disabled={!activeRequest.abi}
+                        onClick={() => updateContractAbi('')}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  </div>
                 </div>
 
                 <Dialog
@@ -682,11 +753,11 @@ export const RequestSettings: React.FC = () => {
                   </div>
                 ) : (
                   <div className="p-3 bg-primary-500/10 border border-primary-500/20 text-primary-600 rounded-xl text-xs">
-                    Please paste a valid ABI JSON array containing{' '}
-                    {activeRequest.type === 'READ'
-                      ? 'read (view/pure)'
-                      : 'write (payable/nonpayable)'}{' '}
-                    functions.
+                    {!parsedActiveAbi
+                      ? 'Please paste a valid contract ABI.'
+                      : abiFunctionCount === 0
+                        ? `ABI parsed successfully, but it contains no named functions${hasFallbackAbiItem ? ' and only exposes a fallback/receive entry point' : ''}. For a proxy contract, paste the implementation contract ABI.`
+                        : `This ABI does not contain ${activeRequest.type === 'READ' ? 'read' : 'write'} functions.`}
                   </div>
                 )}
 
@@ -755,12 +826,12 @@ export const RequestSettings: React.FC = () => {
                                 </div>
                               )}
                               {isStringInput && (
-                                <div className="w-24 shrink-0">
+                                <div className="w-28 shrink-0">
                                   <div className="flex w-full flex-col gap-1.5">
                                     <span className="ml-1 text-sm font-medium text-foreground/80">
                                       Mode
                                     </span>
-                                    <div className="flex h-12 rounded-xl bg-foreground/5 p-1">
+                                    <div className="grid h-12 w-full grid-cols-2 items-center overflow-hidden rounded-xl bg-foreground/5 p-1">
                                       <Button
                                         type="button"
                                         variant={
@@ -769,7 +840,9 @@ export const RequestSettings: React.FC = () => {
                                             : 'ghost'
                                         }
                                         size="sm"
-                                        className="h-10 flex-1 rounded-lg px-0 text-xs"
+                                        className="h-9 min-w-0 rounded-lg !px-1 text-xs shadow-none"
+                                        whileHover={{ scale: 1 }}
+                                        whileTap={{ scale: 1 }}
                                         onClick={() =>
                                           handleStringModeChange(
                                             inputName,
@@ -787,7 +860,9 @@ export const RequestSettings: React.FC = () => {
                                             : 'ghost'
                                         }
                                         size="sm"
-                                        className="h-10 flex-1 rounded-lg px-0 text-xs"
+                                        className="h-9 min-w-0 rounded-lg !px-1 text-xs shadow-none"
+                                        whileHover={{ scale: 1 }}
+                                        whileTap={{ scale: 1 }}
                                         onClick={() =>
                                           handleStringModeChange(
                                             inputName,

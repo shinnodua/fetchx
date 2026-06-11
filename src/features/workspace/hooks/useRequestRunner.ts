@@ -16,7 +16,8 @@ import {
 } from '../../../services/requestExecutor';
 import { useEnvironmentStore, useWorkspaceStore } from '../../../store';
 import { isRestMethod } from '../constants';
-import type { AbiItem, RequestItem } from '../types';
+import type { RequestItem } from '../types';
+import { parseContractAbi } from '../utils/contractAbi';
 import {
   formatIntegerContractArg,
   formatStringContractArg,
@@ -397,11 +398,11 @@ export const useRequestRunner = (
           throw new Error('Contract address is required.');
         }
 
-        let parsedAbi: AbiItem[] = [];
-        try {
-          parsedAbi = JSON.parse(resolvedRequest.abi || '[]');
-        } catch {
-          throw new Error('Invalid ABI format. Make sure it is valid JSON.');
+        const parsedAbi = parseContractAbi(resolvedRequest.abi || '');
+        if (!parsedAbi) {
+          throw new Error(
+            'Invalid ABI format. Paste ABI JSON or human-readable ABI signatures.',
+          );
         }
 
         const selectedFunc = parsedAbi.find(
