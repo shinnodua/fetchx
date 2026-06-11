@@ -1,4 +1,5 @@
 import { useCorsStore } from '../../store';
+import { API_BASE_URLS } from './config';
 import { callCorsProxy } from './proxyClient';
 import type { ApiRequest, ApiResponse } from './types';
 
@@ -30,11 +31,14 @@ export async function apiRequest(
   };
 
   const origin = getUrlOrigin(normalizedRequest.url);
+  const call3Origin = getUrlOrigin(API_BASE_URLS.call3);
+  const isCall3Origin = origin && call3Origin && origin === call3Origin;
 
   // Check if we should bypass direct request because origin is known to be blocked by CORS
   if (
     options.proxyOnBrowserBlock &&
     origin &&
+    !isCall3Origin &&
     useCorsStore.getState().isOriginBlocked(origin)
   ) {
     return await callCorsProxy(normalizedRequest);
@@ -43,7 +47,11 @@ export async function apiRequest(
   try {
     return await directApiRequest(normalizedRequest);
   } catch (error) {
-    if (!options.proxyOnBrowserBlock || !isBrowserFetchBlocked(error)) {
+    if (
+      !options.proxyOnBrowserBlock ||
+      isCall3Origin ||
+      !isBrowserFetchBlocked(error)
+    ) {
       throw error;
     }
 
@@ -136,6 +144,9 @@ function isBrowserFetchBlocked(error: unknown) {
     message.includes('cors') ||
     message.includes('cross-origin') ||
     message.includes('access-control-allow-origin') ||
-    message.includes('blocked by access control')
+    message.includes('blocked by access control') ||
+    message.includes('failed to fetch') ||
+    message.includes('networkerror') ||
+    message.includes('load failed')
   );
 }
