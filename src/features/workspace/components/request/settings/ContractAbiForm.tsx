@@ -160,14 +160,30 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
     const bytecode = value.trim();
     if (!isContractBytecode(bytecode)) return;
 
+    const address = activeRequest.target.trim();
+    if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+      toast({
+        title: 'Contract Address Required',
+        description:
+          'Enter a valid contract address before decoding contract bytecode.',
+        type: 'error',
+      });
+      return;
+    }
+
     const requestId = activeRequest.id;
-    const decodeKey = `${requestId}:${bytecode}`;
+    const network = activeRequest.network || '1';
+    const decodeKey = `${requestId}:${network}:${address}:${bytecode}`;
     if (decodingBytecodeKeysRef.current.has(decodeKey)) return;
 
     decodingBytecodeKeysRef.current.add(decodeKey);
     setAbiLoading(true);
     try {
-      const decodedAbi = await decodeContractBytecodeAbi(bytecode);
+      const decodedAbi = await decodeContractBytecodeAbi(
+        bytecode,
+        address,
+        network,
+      );
       const formattedAbi = formatContractAbi(decodedAbi);
       const workspaceState = useWorkspaceStore.getState();
       const currentAbi = workspaceState.drafts[requestId]?.abi?.trim();
