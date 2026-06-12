@@ -1,3 +1,4 @@
+import { decodeContractBytecodeAbi } from './bytecodeAbiApi';
 import { API_BASE_URLS, buildApiUrl } from './config';
 import { apiRequest } from './httpClient';
 
@@ -15,6 +16,7 @@ interface EtherscanSourceCodeResponse {
     | {
         ContractName?: string;
         ABI?: string;
+        deployed_bytecode?: string;
       }[]
     | string;
 }
@@ -22,6 +24,7 @@ interface EtherscanSourceCodeResponse {
 interface BlockscoutContractResponse {
   name?: string;
   abi?: unknown[];
+  deployed_bytecode?: string;
   implementations?: {
     address_hash?: string;
     name?: string | null;
@@ -108,7 +111,9 @@ async function fetchEtherscanContractInfo(
   let abi = contract.ABI || '';
 
   if (abi === 'Contract source code not verified' || !abi) {
-    abi = '';
+    abi = contract.deployed_bytecode
+      ? await decodeContractBytecodeAbi(contract.deployed_bytecode)
+      : '';
   }
 
   return {
@@ -149,7 +154,14 @@ async function fetchBlockscoutContractInfo(
     ? await fetchBlockscoutContract(implementationAddress, baseUrl)
     : proxyContract;
 
-  if (!Array.isArray(contract.abi) || contract.abi.length === 0) {
+  const abi =
+    Array.isArray(contract.abi) && contract.abi.length > 0
+      ? JSON.stringify(contract.abi, null, 2)
+      : contract.deployed_bytecode
+        ? await decodeContractBytecodeAbi(contract.deployed_bytecode)
+        : '';
+
+  if (!abi) {
     throw new Error('Contract ABI is not available from this explorer.');
   }
 
@@ -159,7 +171,7 @@ async function fetchBlockscoutContractInfo(
       proxyContract.implementations?.[0]?.name ||
       proxyContract.name ||
       'Imported Contract',
-    abi: JSON.stringify(contract.abi, null, 2),
+    abi,
     address,
     network,
   };

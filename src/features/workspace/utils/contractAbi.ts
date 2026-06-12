@@ -186,6 +186,16 @@ export const parseContractAbi = (value: string): AbiItem[] | null => {
   return parseAbiValue(value);
 };
 
+export const isContractBytecode = (value: string): boolean => {
+  const trimmed = value.trim();
+
+  return (
+    trimmed.length > 42 &&
+    trimmed.length % 2 === 0 &&
+    /^0x[0-9a-fA-F]+$/.test(trimmed)
+  );
+};
+
 export const isReadContractFunction = (item: AbiItem): boolean => {
   if (item.type !== 'function') return false;
   if (item.stateMutability === 'view' || item.stateMutability === 'pure') {

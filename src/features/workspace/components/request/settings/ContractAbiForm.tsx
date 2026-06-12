@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   Button,
   Dialog,
@@ -10,11 +10,17 @@ import {
   Textarea,
   useToast,
 } from '../../../../../components';
-import { fetchContractInfo } from '../../../../../services/api';
+import {
+  decodeContractBytecodeAbi,
+  fetchContractInfo,
+} from '../../../../../services/api';
 import { useAbiStore, useWorkspaceStore } from '../../../../../store';
 import { ERC20_ABI, ERC721_ABI, ERC1155_ABI } from '../../../constants';
 import type { RequestItem } from '../../../types';
-import { formatContractAbi } from '../../../utils/contractAbi';
+import {
+  formatContractAbi,
+  isContractBytecode,
+} from '../../../utils/contractAbi';
 import { ManageAbisDialog } from '../dialogs/ManageAbisDialog';
 
 interface ContractAbiFormProps {
@@ -33,6 +39,7 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
   const [contractNamesByRequestId, setContractNamesByRequestId] = useState<
     Record<string, string>
   >({});
+  const decodingBytecodeKeysRef = useRef(new Set<string>());
 
   const formattedActiveAbi = useMemo(
     () => formatContractAbi(activeRequest.abi || ''),
@@ -153,31 +160,105 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
     });
   };
 
+  const tryDecodeBytecode = async (value: string) => {
+    const bytecode = value.trim();
+    if (!isContractBytecode(bytecode)) return;
+
+    const requestId = activeRequest.id;
+    const decodeKey = `${requestId}:${bytecode}`;
+    if (decodingBytecodeKeysRef.current.has(decodeKey)) return;
+
+    decodingBytecodeKeysRef.current.add(decodeKey);
+    setAbiLoading(true);
+    try {
+      const decodedAbi = await decodeContractBytecodeAbi(bytecode);
+      const formattedAbi = formatContractAbi(decodedAbi);
+      const workspaceState = useWorkspaceStore.getState();
+      const currentAbi = workspaceState.drafts[requestId]?.abi?.trim();
+      if (workspaceState.activeTabId !== requestId || currentAbi !== bytecode) {
+        return;
+      }
+
+      if (!formattedAbi) {
+        toast({
+          title: 'ABI Decode Failed',
+          description:
+            'No contract functions could be inferred from this bytecode.',
+          type: 'error',
+        });
+        return;
+      }
+
+      workspaceState.updateActiveRequest({
+        abi: formattedAbi,
+        functionName: '',
+        args: {},
+      });
+      toast({
+        title: 'Bytecode ABI Decoded',
+        description: 'Loaded the ABI inferred from contract bytecode.',
+        type: 'success',
+      });
+    } catch (error) {
+      const workspaceState = useWorkspaceStore.getState();
+      if (
+        workspaceState.activeTabId === requestId &&
+        workspaceState.drafts[requestId]?.abi?.trim() === bytecode
+      ) {
+        toast({
+          title: 'ABI Decode Failed',
+          description:
+            error instanceof Error
+              ? error.message
+              : 'Could not decode the contract bytecode.',
+          type: 'error',
+        });
+      }
+    } finally {
+      decodingBytecodeKeysRef.current.delete(decodeKey);
+      setAbiLoading(false);
+    }
+  };
+
   const handleContractAbiPaste = (
     event: React.ClipboardEvent<HTMLTextAreaElement>,
   ) => {
     const clipboardValue = event.clipboardData.getData('text');
     const formattedAbi = formatContractAbi(clipboardValue);
-    if (!formattedAbi) return;
+    if (formattedAbi) {
+      event.preventDefault();
+      updateContractAbi(formattedAbi);
+      return;
+    }
 
-    event.preventDefault();
-    updateContractAbi(formattedAbi);
+    if (isContractBytecode(clipboardValue)) {
+      event.preventDefault();
+      updateContractAbi(clipboardValue.trim());
+      void tryDecodeBytecode(clipboardValue);
+    }
   };
 
   const pasteContractAbi = async () => {
     try {
       const clipboardValue = await navigator.clipboard.readText();
       const formattedAbi = formatContractAbi(clipboardValue);
-      if (!formattedAbi) {
-        toast({
-          title: 'Invalid Contract ABI',
-          description: 'Clipboard content does not contain a valid ABI.',
-          type: 'error',
-        });
+      if (formattedAbi) {
+        updateContractAbi(formattedAbi);
         return;
       }
 
-      updateContractAbi(formattedAbi);
+      if (isContractBytecode(clipboardValue)) {
+        updateContractAbi(clipboardValue.trim());
+        void tryDecodeBytecode(clipboardValue);
+        return;
+      }
+
+      toast({
+        title: 'Invalid Contract ABI',
+        description:
+          'Clipboard content does not contain a valid ABI or contract bytecode.',
+        type: 'error',
+      });
     } catch {
       toast({
         title: 'Clipboard Access Failed',
@@ -265,11 +346,12 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
       </div>
       <div className="relative">
         <Textarea
-          placeholder="Paste ABI JSON, artifact, explorer response, or human-readable signatures"
+          placeholder="Paste ABI JSON, contract bytecode, artifact, explorer response, or human-readable signatures"
           className="h-32 pt-10 font-mono text-xs"
           value={activeRequest.abi || ''}
           onPaste={handleContractAbiPaste}
           onChange={(event) => updateContractAbi(event.target.value)}
+          onBlur={(event) => void tryDecodeBytecode(event.target.value)}
         />
         <div className="absolute right-2 top-2 z-40 flex items-center gap-1 rounded-lg bg-background/90 p-0.5 shadow-sm backdrop-blur-sm">
           <Button
