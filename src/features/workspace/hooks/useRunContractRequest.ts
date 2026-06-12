@@ -201,7 +201,7 @@ export const useRunContractRequest = (
 
       if (resolvedRequest.type === 'READ') {
         addLog(activeTabId, 'Querying contract state...');
-        const result = await executeReadCall(
+        const readResult = await executeReadCall(
           resolvedRequest.target,
           parsedAbi,
           resolvedRequest.functionName || '',
@@ -212,23 +212,35 @@ export const useRunContractRequest = (
         const duration = Date.now() - start;
         addLog(activeTabId, `State call succeeded in ${duration}ms.`);
 
-        // Serialize output safely (BigInt to string)
-        const serializedData =
-          typeof result === 'bigint' ? result.toString() : result;
+        const responseData = readResult.decoded
+          ? readResult.decodedData
+          : readResult.rawData;
+        const serializedData = serializeBigInts(responseData);
         const redactedSerializedData = redactSensitiveData(
           serializedData,
           activeVariables,
         );
+        const responseLogs = [
+          `[${new Date().toLocaleTimeString()}] Query succeeded.`,
+        ];
+
+        if (readResult.decoded) {
+          responseLogs.push(
+            `[${new Date().toLocaleTimeString()}] Decoded result: ${JSON.stringify(redactedSerializedData)}`,
+          );
+        } else {
+          responseLogs.push(
+            `[${new Date().toLocaleTimeString()}] Raw result: ${readResult.rawData}`,
+            `[${new Date().toLocaleTimeString()}] Decode warning: ${readResult.decodeError}`,
+          );
+        }
 
         updateActiveRequest({
           response: {
             status: 'Success',
             data: redactedSerializedData,
             duration,
-            logs: [
-              `[${new Date().toLocaleTimeString()}] Query succeeded.`,
-              `[${new Date().toLocaleTimeString()}] Result: ${JSON.stringify(redactedSerializedData)}`,
-            ],
+            logs: responseLogs,
           },
         });
       } else {

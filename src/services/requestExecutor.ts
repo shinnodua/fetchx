@@ -1,14 +1,24 @@
-import type { Abi, TransactionReceipt } from 'viem';
+import {
+  type Abi,
+  decodeFunctionResult,
+  encodeFunctionData,
+  type Hex,
+  type TransactionReceipt,
+} from 'viem';
 import type { AbiItem } from '../features/workspace/types';
 import { executeRestApiCall } from './api';
 
 interface ContractClient {
-  readContract: (parameters: {
-    address: `0x${string}`;
-    abi: Abi;
-    functionName: string;
-    args: unknown[];
-  }) => Promise<unknown>;
+  request: (parameters: {
+    method: 'eth_call';
+    params: [
+      {
+        to: `0x${string}`;
+        data: Hex;
+      },
+      'latest',
+    ];
+  }) => Promise<Hex>;
   simulateContract: (parameters: {
     address: `0x${string}`;
     abi: Abi;
@@ -20,6 +30,18 @@ interface ContractClient {
     hash: `0x${string}`;
   }) => Promise<TransactionReceipt>;
 }
+
+export type ContractReadResult =
+  | {
+      rawData: Hex;
+      decoded: true;
+      decodedData: unknown;
+    }
+  | {
+      rawData: Hex;
+      decoded: false;
+      decodeError: string;
+    };
 
 type WriteContractAsync = (parameters: {
   address: `0x${string}`;
@@ -44,16 +66,49 @@ export async function executeReadCall(
   functionName: string,
   formattedArgs: unknown[],
   publicClient: ContractClient | undefined,
-) {
+): Promise<ContractReadResult> {
   if (!publicClient) {
     throw new Error('Public client not available. Select a supported network.');
   }
-  return await publicClient.readContract({
-    address: target as `0x${string}`,
-    abi: parsedAbi as unknown as Abi,
+
+  const abi = parsedAbi as unknown as Abi;
+  const data = encodeFunctionData({
+    abi,
     functionName,
     args: formattedArgs,
   });
+  const rawData = await publicClient.request({
+    method: 'eth_call',
+    params: [
+      {
+        to: target as `0x${string}`,
+        data,
+      },
+      'latest',
+    ],
+  });
+
+  try {
+    return {
+      rawData,
+      decoded: true,
+      decodedData: decodeFunctionResult({
+        abi,
+        functionName,
+        args: formattedArgs,
+        data: rawData,
+      }),
+    };
+  } catch (error) {
+    return {
+      rawData,
+      decoded: false,
+      decodeError:
+        error instanceof Error
+          ? error.message
+          : 'Unable to decode the contract response.',
+    };
+  }
 }
 
 /**
