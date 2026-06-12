@@ -21,7 +21,7 @@ export async function decodeContractBytecode(
     headers: {
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ bytecode, address, network }),
+    body: JSON.stringify({ bytecode, address, network, ai: true }),
   });
 
   if (response.status < 200 || response.status >= 300) {
