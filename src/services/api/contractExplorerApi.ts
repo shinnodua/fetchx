@@ -34,7 +34,7 @@ export async function fetchContractInfo(
     headers: {
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ address, network }),
+    body: JSON.stringify({ address, network, ai: true }),
   });
 
   if (response.status < 200 || response.status >= 300) {
