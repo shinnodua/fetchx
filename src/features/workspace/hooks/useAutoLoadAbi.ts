@@ -74,6 +74,7 @@ export const useAutoLoadAbi = (
               activeRequestName === 'Untitled Request'
                 ? info.name
                 : activeRequestName,
+            contractName: info.name,
           });
           toast({
             title: 'ABI Auto-Loaded',

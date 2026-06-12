@@ -32,7 +32,6 @@ export const WorkspacePage: React.FC = () => {
     activeTabId,
     drafts,
     collectionsPanelCollapsed,
-    setNewColOpen,
     addNewTab,
     updateActiveRequest,
     initializeDraft,
@@ -129,7 +128,6 @@ export const WorkspacePage: React.FC = () => {
                 collections={collections}
                 isLoading={isLoading}
                 selectedColId={selectedColId}
-                onCreateCollection={() => setNewColOpen(true)}
                 onRunRequest={handleRunRequest}
                 onSimulateRequest={handleSimulateRequest}
                 onSave={handleSaveActiveRequest}

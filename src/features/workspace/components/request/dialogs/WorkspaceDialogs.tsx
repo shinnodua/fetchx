@@ -98,6 +98,7 @@ export const WorkspaceDialogs: React.FC = () => {
         abi: info.abi,
         functionName: '',
         args: {},
+        contractName: info.name,
       });
 
       if (!info.abi) {

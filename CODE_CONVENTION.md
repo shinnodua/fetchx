@@ -113,6 +113,7 @@ Use these rules when deciding where code belongs:
 
 ### 4. Clean File Standards
 
+- A single source code file must not exceed 400 lines. Split files that approach this limit into focused components, hooks, utilities, services, types, or constants according to their responsibilities.
 - Keep imports intentional. Remove unused imports immediately.
 - Prefer named, narrow components over long inline JSX blocks.
 - Prefer explicit props over reaching into global stores from deep child components, unless the component is intentionally store-connected.

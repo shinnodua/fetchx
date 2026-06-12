@@ -13,6 +13,7 @@ export * from './environment/VariablesTable';
 export * from './request/ActiveRequestWorkspace';
 export * from './request/dialogs/ManageAbisDialog';
 export * from './request/dialogs/ManageRpcsDialog';
+export * from './request/dialogs/SaveAbiDialog';
 export * from './request/dialogs/WorkspaceDialogs';
 export * from './request/navigation/TabContextMenu';
 export * from './request/navigation/TabsHeader';

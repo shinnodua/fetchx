@@ -21,6 +21,7 @@ export interface RequestItem {
   abi?: string;
   functionName?: string;
   network?: string;
+  contractName?: string;
   customRpcId?: string;
   args?: Record<string, string>;
   headers?: { key: string; value: string }[];

@@ -2,11 +2,9 @@ import type React from 'react';
 import { useMemo, useRef, useState } from 'react';
 import {
   Button,
-  Dialog,
   DropdownMenu,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  Input,
   Textarea,
   useToast,
 } from '../../../../../components';
@@ -22,6 +20,7 @@ import {
   isContractBytecode,
 } from '../../../utils/contractAbi';
 import { ManageAbisDialog } from '../dialogs/ManageAbisDialog';
+import { SaveAbiDialog } from '../dialogs/SaveAbiDialog';
 
 interface ContractAbiFormProps {
   activeRequest: RequestItem;
@@ -36,9 +35,6 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
   const { savedAbis, saveAbi, setManageAbiOpen } = useAbiStore();
   const [isSaveAbiOpen, setIsSaveAbiOpen] = useState(false);
   const [savedAbiName, setSavedAbiName] = useState('');
-  const [contractNamesByRequestId, setContractNamesByRequestId] = useState<
-    Record<string, string>
-  >({});
   const decodingBytecodeKeysRef = useRef(new Set<string>());
 
   const formattedActiveAbi = useMemo(
@@ -57,6 +53,7 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
       abi: JSON.stringify(selectedAbi, null, 2),
       functionName: '',
       args: {},
+      contractName: `${preset} Preset`,
     });
     toast({
       title: 'ABI Preset Loaded',
@@ -70,6 +67,7 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
       abi,
       functionName: '',
       args: {},
+      contractName: name,
     });
     toast({
       title: 'Saved ABI Loaded',
@@ -81,7 +79,7 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
   const openSaveAbiDialog = () => {
     if (!formattedActiveAbi) return;
 
-    const contractName = contractNamesByRequestId[activeRequest.id];
+    const contractName = activeRequest.contractName;
     const defaultName =
       contractName ||
       (activeRequest.name !== 'Untitled Request' ? activeRequest.name : '') ||
@@ -128,11 +126,8 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
         abi: info.abi,
         functionName: '',
         args: {},
+        contractName: info.name,
       });
-      setContractNamesByRequestId((currentNames) => ({
-        ...currentNames,
-        [activeRequest.id]: info.name,
-      }));
       toast({
         title: 'ABI Loaded',
         description: `Loaded ABI for "${info.name}" successfully.`,
@@ -157,6 +152,7 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
       abi,
       functionName: '',
       args: {},
+      ...(abi.trim() === '' ? { contractName: undefined } : {}),
     });
   };
 
@@ -193,6 +189,7 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
         abi: formattedAbi,
         functionName: '',
         args: {},
+        contractName: 'Inferred ABI',
       });
       toast({
         title: 'Bytecode ABI Decoded',
@@ -310,7 +307,10 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
               </Button>
             }
           >
-            <DropdownMenuItem onClick={() => setManageAbiOpen(true)}>
+            <DropdownMenuItem
+              onClick={() => setManageAbiOpen(true)}
+              className="text-primary-500 hover:text-primary-600 font-medium"
+            >
               Manage ABI
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -344,6 +344,14 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
           </DropdownMenu>
         </div>
       </div>
+      {activeRequest.contractName && (
+        <div className="mb-2 flex items-center gap-1.5 rounded-lg border border-secondary-500/20 bg-secondary-500/5 px-2.5 py-1 text-xs text-secondary-700 dark:text-secondary-300">
+          <span className="font-semibold text-foreground/50">Contract:</span>
+          <span className="font-mono font-medium">
+            {activeRequest.contractName}
+          </span>
+        </div>
+      )}
       <div className="relative">
         <Textarea
           placeholder="Paste ABI JSON, contract bytecode, artifact, explorer response, or human-readable signatures"
@@ -376,38 +384,13 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
         </div>
       </div>
 
-      <Dialog
+      <SaveAbiDialog
         isOpen={isSaveAbiOpen}
         onClose={() => setIsSaveAbiOpen(false)}
-        title="Save Contract ABI"
-        description="Choose a name for this ABI preset. Saving with an existing name updates that preset."
-      >
-        <div className="space-y-4">
-          <Input
-            label="ABI Name"
-            value={savedAbiName}
-            onChange={(event) => setSavedAbiName(event.target.value)}
-            placeholder="Contract name or address"
-            autoFocus
-          />
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setIsSaveAbiOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              onClick={handleSaveAbi}
-              disabled={!savedAbiName.trim()}
-            >
-              Save ABI
-            </Button>
-          </div>
-        </div>
-      </Dialog>
+        savedAbiName={savedAbiName}
+        setSavedAbiName={setSavedAbiName}
+        onSave={handleSaveAbi}
+      />
       <ManageAbisDialog />
     </div>
   );

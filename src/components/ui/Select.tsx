@@ -7,6 +7,7 @@ export interface SelectOption {
   value: string;
   label: string;
   separatorAfter?: boolean;
+  className?: string;
 }
 
 export interface SelectProps {
@@ -18,6 +19,7 @@ export interface SelectProps {
   className?: string;
   dropdownClassName?: string;
   disabled?: boolean;
+  size?: 'sm' | 'md';
 }
 
 export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
@@ -31,6 +33,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
       className,
       dropdownClassName,
       disabled,
+      size = 'md',
     },
     ref,
   ) => {
@@ -77,7 +80,8 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
           ref={ref}
           onClick={() => !disabled && setIsOpen(!isOpen)}
           className={cn(
-            'flex h-[44px] w-full items-center justify-between rounded-xl border border-foreground/10 bg-background/50 px-4 py-2 text-sm text-foreground shadow-sm backdrop-blur-sm transition-all cursor-pointer',
+            'flex w-full items-center justify-between rounded-xl border border-foreground/10 bg-background/50 text-sm text-foreground shadow-sm backdrop-blur-sm transition-all cursor-pointer',
+            size === 'sm' ? 'h-10 px-3 py-1.5' : 'h-[44px] px-4 py-2',
             'hover:border-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500',
             disabled && 'cursor-not-allowed opacity-50',
             isOpen && 'border-primary-500 ring-2 ring-primary-500/50',
@@ -123,7 +127,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
                       'relative flex w-full cursor-pointer select-none items-center rounded-lg py-2.5 pl-3 pr-9 text-sm outline-none transition-colors hover:bg-foreground/5 focus:bg-foreground/5',
                       selectedValue === option.value
                         ? 'bg-primary-50 text-primary-900 font-medium dark:bg-primary-900/20 dark:text-primary-100'
-                        : 'text-foreground',
+                        : option.className || 'text-foreground',
                     )}
                   >
                     <span className="block truncate">{option.label}</span>

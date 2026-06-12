@@ -19,7 +19,6 @@ interface ActiveRequestWorkspaceProps {
   collections: CollectionItem[];
   isLoading: boolean;
   selectedColId: string;
-  onCreateCollection: () => void;
   onRunRequest: () => void;
   onSimulateRequest?: () => void;
   onSave: () => void;
@@ -35,7 +34,6 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
   collections,
   isLoading,
   selectedColId,
-  onCreateCollection,
   onRunRequest,
   onSimulateRequest,
   onSave,
@@ -76,17 +74,9 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
                   }))}
                   value={selectedColId || collections[0]?.id || ''}
                   onChange={onSelectedCollectionChange}
+                  size="sm"
                 />
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-10 px-2.5 rounded-xl text-xs shrink-0 flex items-center justify-center cursor-pointer border-foreground/10 hover:border-foreground/20"
-                onClick={onCreateCollection}
-                title="Create New Collection"
-              >
-                + New
-              </Button>
             </div>
           )}
 

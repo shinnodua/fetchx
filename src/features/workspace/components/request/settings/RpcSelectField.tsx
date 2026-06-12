@@ -25,6 +25,7 @@ export const RpcSelectField: React.FC<RpcSelectFieldProps> = ({
           value: MANAGE_RPCS_OPTION_VALUE,
           label: 'Manage RPCs',
           separatorAfter: true,
+          className: 'text-primary-500 hover:text-primary-600 font-medium',
         },
         ...getRpcSelectOptions(customRpcs),
       ]}
