@@ -1,4 +1,5 @@
 import { API_BASE_URLS, buildApiUrl } from './config';
+import { getApiErrorMessage } from './errors';
 import type { ApiRequest, ApiResponse, ProxyResponseBody } from './types';
 
 const CORS_PROXY_URL = buildApiUrl(API_BASE_URLS.call3, '/proxy');
@@ -55,6 +56,11 @@ export async function callCorsProxy(request: ApiRequest): Promise<ApiResponse> {
 }
 
 function getProxyErrorMessage(value: unknown, status: number): string {
+  const apiErrorMessage = getApiErrorMessage(value);
+  if (apiErrorMessage) {
+    return `Proxy request failed: ${apiErrorMessage}`;
+  }
+
   if (typeof value === 'object' && value !== null && 'error' in value) {
     const error = value.error;
     if (typeof error === 'string' && error.trim()) {

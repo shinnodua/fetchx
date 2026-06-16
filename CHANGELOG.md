@@ -11,6 +11,8 @@
   present.
 - Tightened browser-block detection so proxy fallback only runs for explicit CORS
   errors.
+- Preserved structured Call3 service error messages for API resource-limit
+  failures.
 - Increased the minimum pincode length for newly configured sensitive variables
   while preserving unlock compatibility for existing encrypted values.
 - Expanded sensitive-value redaction to cover raw, URL-encoded, form-encoded,

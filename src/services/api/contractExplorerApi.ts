@@ -1,4 +1,5 @@
 import { API_BASE_URLS, buildApiUrl } from './config';
+import { getApiErrorMessage } from './errors';
 import { apiRequest } from './httpClient';
 
 export interface ImportedContractInfo {
@@ -13,12 +14,6 @@ interface ContractInfoResponse {
   abi?: unknown;
   address?: unknown;
   network?: unknown;
-}
-
-interface ApiErrorResponse {
-  error?: {
-    message?: unknown;
-  };
 }
 
 /**
@@ -39,7 +34,7 @@ export async function fetchContractInfo(
 
   if (response.status < 200 || response.status >= 300) {
     throw new Error(
-      getErrorMessage(response.data) ||
+      getApiErrorMessage(response.data) ||
         `Contract lookup failed with status ${response.status}.`,
     );
   }
@@ -62,15 +57,4 @@ export async function fetchContractInfo(
     address: data.address,
     network: data.network,
   };
-}
-
-function getErrorMessage(value: unknown): string | null {
-  if (typeof value !== 'object' || value === null) {
-    return null;
-  }
-
-  const response = value as ApiErrorResponse;
-  return typeof response.error?.message === 'string'
-    ? response.error.message
-    : null;
 }

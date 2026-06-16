@@ -1,4 +1,5 @@
 import { API_BASE_URLS, buildApiUrl } from './config';
+import { getApiErrorMessage } from './errors';
 import { apiRequest } from './httpClient';
 
 export interface DecodedBytecodeAbi {
@@ -25,7 +26,10 @@ export async function decodeContractBytecode(
   });
 
   if (response.status < 200 || response.status >= 300) {
-    throw new Error(`Bytecode decoding failed with status ${response.status}.`);
+    throw new Error(
+      getApiErrorMessage(response.data) ||
+        `Bytecode decoding failed with status ${response.status}.`,
+    );
   }
 
   if (typeof response.data !== 'object' || response.data === null) {
