@@ -4,6 +4,8 @@ import type {
 } from '../types';
 
 const SENSITIVE_KEY_ITERATIONS = 210_000;
+export const LEGACY_SENSITIVE_PIN_MIN_LENGTH = 6;
+export const SENSITIVE_PIN_MIN_LENGTH = 10;
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
@@ -38,8 +40,17 @@ function getCrypto() {
   return globalThis.crypto;
 }
 
-export function validateSensitivePin(pin: string): boolean {
-  return /^\d{6,}$/.test(pin);
+export function getSensitivePinMinLength(
+  config?: SensitiveCryptoConfig | null,
+): number {
+  return config?.minPinLength ?? LEGACY_SENSITIVE_PIN_MIN_LENGTH;
+}
+
+export function validateSensitivePin(
+  pin: string,
+  minLength = SENSITIVE_PIN_MIN_LENGTH,
+): boolean {
+  return new RegExp(`^\\d{${minLength},}$`).test(pin);
 }
 
 export function createSensitiveCryptoConfig(): SensitiveCryptoConfig {
@@ -50,6 +61,7 @@ export function createSensitiveCryptoConfig(): SensitiveCryptoConfig {
     algorithm: 'AES-GCM',
     digest: 'SHA-256',
     iterations: SENSITIVE_KEY_ITERATIONS,
+    minPinLength: SENSITIVE_PIN_MIN_LENGTH,
     salt: bytesToBase64(salt),
   };
 }
@@ -58,8 +70,9 @@ export async function deriveSensitiveCryptoKey(
   pin: string,
   config: SensitiveCryptoConfig,
 ): Promise<CryptoKey> {
-  if (!validateSensitivePin(pin)) {
-    throw new Error('Pincode must be at least 6 numbers.');
+  const minLength = getSensitivePinMinLength(config);
+  if (!validateSensitivePin(pin, minLength)) {
+    throw new Error(`Pincode must be at least ${minLength} numbers.`);
   }
 
   const crypto = getCrypto();

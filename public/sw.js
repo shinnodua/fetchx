@@ -1,5 +1,26 @@
 const CACHE_NAME = 'call3-app-v1';
 const APP_SHELL = ['/', '/site.webmanifest', '/favicon.svg'];
+const CACHEABLE_STATIC_EXTENSIONS = new Set([
+  '.css',
+  '.ico',
+  '.js',
+  '.png',
+  '.svg',
+  '.webmanifest',
+  '.webp',
+  '.woff',
+  '.woff2',
+]);
+
+const isCacheableStaticAsset = (url) => {
+  if (url.search) return false;
+  if (APP_SHELL.includes(url.pathname)) return true;
+
+  const extensionMatch = url.pathname.match(/\.[a-z0-9]+$/i);
+  return extensionMatch
+    ? CACHEABLE_STATIC_EXTENSIONS.has(extensionMatch[0].toLowerCase())
+    : false;
+};
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -34,6 +55,8 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(fetch(request).catch(() => caches.match('/')));
     return;
   }
+
+  if (!isCacheableStaticAsset(requestUrl)) return;
 
   event.respondWith(
     caches.match(request).then((cachedResponse) => {

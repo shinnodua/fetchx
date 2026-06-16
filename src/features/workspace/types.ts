@@ -90,6 +90,7 @@ export interface SensitiveCryptoConfig {
   digest: 'SHA-256';
   iterations: number;
   salt: string;
+  minPinLength?: number;
 }
 
 export interface EnvironmentVariable {

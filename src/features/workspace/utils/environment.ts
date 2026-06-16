@@ -1,6 +1,7 @@
 import type { EnvironmentVariable } from '../types';
 
 const REDACTED_VALUE = '[REDACTED]';
+const textEncoder = new TextEncoder();
 
 export interface VariableResolution {
   redacted: string;
@@ -45,10 +46,40 @@ export function redactSensitiveValues(
   let redacted = text;
   for (const variable of variables) {
     if (!variable.sensitive || !variable.value) continue;
-    redacted = redacted.split(variable.value).join(REDACTED_VALUE);
+    for (const sensitiveVariant of getSensitiveValueVariants(variable.value)) {
+      redacted = redacted.split(sensitiveVariant).join(REDACTED_VALUE);
+    }
   }
 
   return redacted;
+}
+
+function getSensitiveValueVariants(value: string): string[] {
+  const variants = new Set([value]);
+  const encodedUriComponent = encodeURIComponent(value);
+  variants.add(encodedUriComponent);
+  variants.add(encodedUriComponent.replace(/%20/g, '+'));
+  variants.add(encodeURI(value));
+
+  const base64Value = base64Encode(value);
+  if (base64Value) variants.add(base64Value);
+
+  return Array.from(variants)
+    .filter(Boolean)
+    .sort((a, b) => b.length - a.length);
+}
+
+function base64Encode(value: string): string | null {
+  try {
+    const bytes = textEncoder.encode(value);
+    let binary = '';
+    for (const byte of bytes) {
+      binary += String.fromCharCode(byte);
+    }
+    return btoa(binary);
+  } catch {
+    return null;
+  }
 }
 
 export function redactSensitiveData(

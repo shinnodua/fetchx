@@ -2,6 +2,11 @@ import type React from 'react';
 import { useState } from 'react';
 import { Button, Input } from '../../../../components';
 import { useEnvironmentStore } from '../../../../store';
+import {
+  getSensitivePinMinLength,
+  SENSITIVE_PIN_MIN_LENGTH,
+  validateSensitivePin,
+} from '../../utils/sensitiveCrypto';
 
 interface PincodePanelProps {
   onLock: () => void;
@@ -18,6 +23,9 @@ export const PincodePanel: React.FC<PincodePanelProps> = ({ onLock }) => {
   } = useEnvironmentStore();
 
   const [pin, setPin] = useState('');
+  const minPinLength = sensitiveCryptoConfig
+    ? getSensitivePinMinLength(sensitiveCryptoConfig)
+    : SENSITIVE_PIN_MIN_LENGTH;
 
   const handleSubmit = async () => {
     const success = sensitiveCryptoConfig
@@ -46,7 +54,7 @@ export const PincodePanel: React.FC<PincodePanelProps> = ({ onLock }) => {
           type="password"
           inputMode="numeric"
           pattern="[0-9]*"
-          placeholder="At least 6 numbers"
+          placeholder={`At least ${minPinLength} numbers`}
           value={pin}
           onChange={(e) => setPin(e.target.value)}
           className="h-10 rounded-lg"
@@ -65,7 +73,7 @@ export const PincodePanel: React.FC<PincodePanelProps> = ({ onLock }) => {
             <Button
               variant="primary"
               onClick={handleSubmit}
-              disabled={!/^\d{6,}$/.test(pin)}
+              disabled={!validateSensitivePin(pin, minPinLength)}
               className="h-10 cursor-pointer"
             >
               {sensitiveCryptoConfig ? 'Unlock' : 'Set Pincode'}

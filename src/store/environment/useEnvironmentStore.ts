@@ -10,6 +10,7 @@ import {
   decryptSensitiveValue,
   deriveSensitiveCryptoKey,
   encryptSensitiveValue,
+  SENSITIVE_PIN_MIN_LENGTH,
   validateSensitivePin,
 } from '../../features/workspace/utils/sensitiveCrypto';
 import { createId } from '../workspace/workspaceStoreUtils';
@@ -147,8 +148,10 @@ export const useEnvironmentStore = create<EnvironmentState>()(
         })),
 
       setSensitivePin: async (pin) => {
-        if (!validateSensitivePin(pin)) {
-          set({ sensitiveCryptoError: 'Pincode must be at least 6 numbers.' });
+        if (!validateSensitivePin(pin, SENSITIVE_PIN_MIN_LENGTH)) {
+          set({
+            sensitiveCryptoError: `Pincode must be at least ${SENSITIVE_PIN_MIN_LENGTH} numbers.`,
+          });
           return false;
         }
 

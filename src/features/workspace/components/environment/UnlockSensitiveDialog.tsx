@@ -2,6 +2,11 @@ import type React from 'react';
 import { useState } from 'react';
 import { Button, Dialog, Input } from '../../../../components';
 import { useEnvironmentStore } from '../../../../store';
+import {
+  getSensitivePinMinLength,
+  SENSITIVE_PIN_MIN_LENGTH,
+  validateSensitivePin,
+} from '../../utils/sensitiveCrypto';
 
 interface UnlockSensitiveDialogProps {
   isOpen: boolean;
@@ -14,9 +19,13 @@ export const UnlockSensitiveDialog: React.FC<UnlockSensitiveDialogProps> = ({
   onClose,
   onUnlockSuccess,
 }) => {
-  const { unlockSensitiveValues } = useEnvironmentStore();
+  const { sensitiveCryptoConfig, unlockSensitiveValues } =
+    useEnvironmentStore();
   const [unlockPin, setUnlockPin] = useState('');
   const [unlockError, setUnlockError] = useState<string | null>(null);
+  const minPinLength = sensitiveCryptoConfig
+    ? getSensitivePinMinLength(sensitiveCryptoConfig)
+    : SENSITIVE_PIN_MIN_LENGTH;
 
   const handleClose = () => {
     setUnlockPin('');
@@ -50,7 +59,7 @@ export const UnlockSensitiveDialog: React.FC<UnlockSensitiveDialogProps> = ({
           type="password"
           inputMode="numeric"
           pattern="[0-9]*"
-          placeholder="Enter your 6+ digit pincode"
+          placeholder={`Enter your ${minPinLength}+ digit pincode`}
           value={unlockPin}
           onChange={(e) => {
             setUnlockPin(e.target.value);
@@ -74,7 +83,7 @@ export const UnlockSensitiveDialog: React.FC<UnlockSensitiveDialogProps> = ({
           <Button
             variant="primary"
             type="submit"
-            disabled={!/^\d{6,}$/.test(unlockPin)}
+            disabled={!validateSensitivePin(unlockPin, minPinLength)}
             className="cursor-pointer"
           >
             Unlock & Send
