@@ -1,5 +1,5 @@
 import { useCorsStore } from '../../store';
-import { API_BASE_URLS } from './config';
+import { API_BASE_URLS, isCall3ApiConfigured } from './config';
 import { callCorsProxy } from './proxyClient';
 import type { ApiRequest, ApiResponse } from './types';
 
@@ -180,12 +180,15 @@ export async function apiRequest(
   };
 
   const origin = getUrlOrigin(normalizedRequest.url);
-  const call3Origin = getUrlOrigin(API_BASE_URLS.call3);
+  const call3Origin = API_BASE_URLS.call3
+    ? getUrlOrigin(API_BASE_URLS.call3)
+    : null;
   const isCall3Origin = origin && call3Origin && origin === call3Origin;
 
   // Check if we should bypass direct request because origin is known to be blocked by CORS
   if (
     options.proxyOnBrowserBlock &&
+    isCall3ApiConfigured() &&
     origin &&
     !isCall3Origin &&
     useCorsStore.getState().isOriginBlocked(origin)
@@ -200,7 +203,8 @@ export async function apiRequest(
     if (
       !options.proxyOnBrowserBlock ||
       isCall3Origin ||
-      !isBrowserFetchBlocked(error)
+      !isBrowserFetchBlocked(error) ||
+      !isCall3ApiConfigured()
     ) {
       throw error;
     }

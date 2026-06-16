@@ -1,4 +1,4 @@
-import { API_BASE_URLS, buildApiUrl } from './config';
+import { buildCall3ApiUrl } from './config';
 import { getApiErrorMessage } from './errors';
 import { apiRequest } from './httpClient';
 
@@ -16,8 +16,13 @@ export async function decodeContractBytecode(
   address: string,
   network: string,
 ): Promise<DecodedBytecodeAbi> {
+  const url = buildCall3ApiUrl('decode-abi');
+  if (!url) {
+    throw new Error('Call3 API URL is not configured.');
+  }
+
   const response = await apiRequest({
-    url: buildApiUrl(API_BASE_URLS.call3, 'decode-abi'),
+    url,
     method: 'POST',
     headers: {
       'content-type': 'application/json',

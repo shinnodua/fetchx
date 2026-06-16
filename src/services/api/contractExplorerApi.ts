@@ -1,4 +1,4 @@
-import { API_BASE_URLS, buildApiUrl } from './config';
+import { buildCall3ApiUrl } from './config';
 import { getApiErrorMessage } from './errors';
 import { apiRequest } from './httpClient';
 
@@ -23,8 +23,13 @@ export async function fetchContractInfo(
   address: string,
   network: string,
 ): Promise<ImportedContractInfo> {
+  const url = buildCall3ApiUrl('contract-info');
+  if (!url) {
+    throw new Error('Call3 API URL is not configured.');
+  }
+
   const response = await apiRequest({
-    url: buildApiUrl(API_BASE_URLS.call3, 'contract-info'),
+    url,
     method: 'POST',
     headers: {
       'content-type': 'application/json',
