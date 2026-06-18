@@ -1,4 +1,8 @@
 import type { CollectionItem, RequestItem, SavedResponse } from '../types';
+import {
+  canParsePostmanCollection,
+  parsePostmanCollection,
+} from './postmanCollectionImport';
 
 export interface CollectionsExportPayload {
   version: 1;
@@ -159,6 +163,10 @@ export const parseCollectionsImportPayload = (
   content: string,
 ): CollectionItem[] => {
   const parsed: unknown = JSON.parse(content);
+  if (canParsePostmanCollection(parsed)) {
+    return parsePostmanCollection(parsed);
+  }
+
   const rawCollections =
     isRecord(parsed) && Array.isArray(parsed.collections)
       ? parsed.collections
