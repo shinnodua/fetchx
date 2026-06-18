@@ -16,9 +16,10 @@ export const isGoogleAnalyticsEnabled = Boolean(
   googleAnalyticsId && import.meta.env.PROD,
 );
 
-function gtag(...args: GtagArguments) {
+function gtag(..._args: GtagArguments) {
   window.dataLayer = window.dataLayer ?? [];
-  window.dataLayer.push(args);
+  // biome-ignore lint/complexity/noArguments: gtag.js expects this command shape.
+  window.dataLayer.push(arguments);
 }
 
 function createGoogleAnalyticsScript() {
