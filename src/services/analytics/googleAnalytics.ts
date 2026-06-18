@@ -92,6 +92,7 @@ export type AnalyticsAction =
   | 'export_collections'
   | 'import_collections'
   | 'add_collection'
+  | 'add_request'
   | 'delete_collection'
   | 'delete_request'
   | 'save_response'

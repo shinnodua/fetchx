@@ -22,6 +22,7 @@ import {
   formatPrimitiveValue,
   getPayloadText,
   getTypeLabel,
+  isPrimitive,
   isRecord,
 } from '../../../utils/responsePayload';
 
