@@ -18,6 +18,7 @@ export const useAutoLoadAbi = (
     (state) => state.activeEnvironmentId,
   );
 
+  const lastObservedAddressNetworkRef = useRef<Record<string, string>>({});
   const lastFetchedRef = useRef<Record<string, string>>({});
 
   const activeRequestTarget = activeRequest?.target;
@@ -26,14 +27,6 @@ export const useAutoLoadAbi = (
   const activeRequestName = activeRequest?.name;
 
   useEffect(() => {
-    if (
-      !activeRequestTarget ||
-      !isCall3ApiConfigured() ||
-      (activeRequestType !== 'READ' && activeRequestType !== 'WRITE')
-    ) {
-      return;
-    }
-
     const network = activeRequestNetwork || '1';
 
     // Get current active variables
@@ -45,9 +38,28 @@ export const useAutoLoadAbi = (
 
     // Resolve target in case it contains environment variables
     const resolvedTarget = resolveVariables(
-      activeRequestTarget,
+      activeRequestTarget || '',
       activeVariables,
     ).value.trim();
+    const addressNetworkKey = `${resolvedTarget}-${network}`;
+    const previousAddressNetworkKey =
+      lastObservedAddressNetworkRef.current[activeTabId];
+
+    lastObservedAddressNetworkRef.current[activeTabId] = addressNetworkKey;
+    if (
+      previousAddressNetworkKey === undefined ||
+      previousAddressNetworkKey === addressNetworkKey
+    ) {
+      return;
+    }
+
+    if (
+      !activeRequestTarget ||
+      !isCall3ApiConfigured() ||
+      (activeRequestType !== 'READ' && activeRequestType !== 'WRITE')
+    ) {
+      return;
+    }
 
     // Check if resolved target is a valid hex address
     const isValidAddress = /^0x[a-fA-F0-9]{40}$/.test(resolvedTarget);
