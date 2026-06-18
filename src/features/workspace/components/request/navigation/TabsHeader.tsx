@@ -12,6 +12,7 @@ import {
   DropdownMenu,
   DropdownMenuItem,
 } from '../../../../../components';
+import { trackEvent } from '../../../../../services/analytics/googleAnalytics';
 import { useWorkspaceStore } from '../../../../../store';
 import type { RequestItem } from '../../../types';
 import { getRequestIsDirty } from '../../../utils/requestDirty';
@@ -133,6 +134,7 @@ export const TabsHeader: React.FC = () => {
   };
 
   const handleAddNewRequest = () => {
+    trackEvent({ screen: 'workspace', action: 'new_request' });
     addNewTab();
   };
 

@@ -8,6 +8,7 @@ import {
   Textarea,
   useToast,
 } from '../../../../../components';
+import { trackEvent } from '../../../../../services/analytics/googleAnalytics';
 import { fetchContractInfo } from '../../../../../services/api';
 import { useRpcStore, useWorkspaceStore } from '../../../../../store';
 import { METHOD_OPTIONS } from '../../../constants';
@@ -169,7 +170,13 @@ export const WorkspaceDialogs: React.FC = () => {
           <Button variant="ghost" onClick={() => setNewColOpen(false)}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={() => addCollection(newColName)}>
+          <Button
+            variant="primary"
+            onClick={() => {
+              trackEvent({ screen: 'workspace', action: 'add_collection' });
+              addCollection(newColName);
+            }}
+          >
             Create
           </Button>
         </div>
@@ -206,7 +213,10 @@ export const WorkspaceDialogs: React.FC = () => {
           </Button>
           <Button
             variant="primary"
-            onClick={() => addRequest(targetColId, newReqName, newReqType)}
+            onClick={() => {
+              trackEvent({ screen: 'workspace', action: 'add_request' });
+              addRequest(targetColId, newReqName, newReqType);
+            }}
           >
             Add Request
           </Button>
@@ -244,7 +254,13 @@ export const WorkspaceDialogs: React.FC = () => {
           <Button variant="ghost" onClick={closeImportDialog}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleImportRequestSubmit}>
+          <Button
+            variant="primary"
+            onClick={() => {
+              trackEvent({ screen: 'workspace', action: 'import_request' });
+              handleImportRequestSubmit();
+            }}
+          >
             Import
           </Button>
         </div>
@@ -334,7 +350,10 @@ export const WorkspaceDialogs: React.FC = () => {
           </Button>
           <Button
             variant="primary"
-            onClick={handleImportContractSubmit}
+            onClick={() => {
+              trackEvent({ screen: 'workspace', action: 'import_contract' });
+              handleImportContractSubmit();
+            }}
             isLoading={isImportLoading}
           >
             Import

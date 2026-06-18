@@ -15,13 +15,13 @@ import {
   TabsTrigger,
   useToast,
 } from '../../../../../components';
+import { trackEvent } from '../../../../../services/analytics/googleAnalytics';
 import type { JsonPrimitive } from '../../../utils/responsePayload';
 import {
   createDefaultResponseName,
   formatPrimitiveValue,
   getPayloadText,
   getTypeLabel,
-  isPrimitive,
   isRecord,
 } from '../../../utils/responsePayload';
 
@@ -382,6 +382,7 @@ export const ResponsePayloadViewer: React.FC<ResponsePayloadViewerProps> = ({
   };
 
   const handleSaveResponse = () => {
+    trackEvent({ screen: 'workspace', action: 'save_response' });
     const didSave = onSave?.(responseName) ?? false;
     if (didSave) {
       setIsSaveDialogOpen(false);

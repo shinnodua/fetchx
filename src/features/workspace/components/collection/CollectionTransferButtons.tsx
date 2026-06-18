@@ -4,6 +4,7 @@ import { Button } from '../../../../components/ui/Button';
 import { Checkbox } from '../../../../components/ui/Checkbox';
 import { Dialog } from '../../../../components/ui/Dialog';
 import { useToast } from '../../../../components/ui/Toast';
+import { trackEvent } from '../../../../services/analytics/googleAnalytics';
 import { useWorkspaceStore } from '../../../../store';
 import type { CollectionItem } from '../../types';
 import {
@@ -58,6 +59,7 @@ export const CollectionTransferButtons: React.FC = () => {
       .slice(0, 10)}.json`;
     link.click();
     URL.revokeObjectURL(url);
+    trackEvent({ screen: 'collections', action: 'export_collections' });
     setExportOpen(false);
   };
 
@@ -109,6 +111,7 @@ export const CollectionTransferButtons: React.FC = () => {
     );
     if (filteredCollections.length === 0) return;
 
+    trackEvent({ screen: 'collections', action: 'import_collections' });
     importCollections(filteredCollections);
     toast({
       title: 'Collections imported',

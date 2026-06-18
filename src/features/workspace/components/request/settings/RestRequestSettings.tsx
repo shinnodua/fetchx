@@ -9,6 +9,7 @@ import {
   TabsTrigger,
   useToast,
 } from '../../../../../components';
+import { trackEvent } from '../../../../../services/analytics/googleAnalytics';
 import { useWorkspaceStore } from '../../../../../store';
 import { methodSupportsBody } from '../../../constants';
 import type { RequestItem } from '../../../types';
@@ -116,14 +117,15 @@ export const RestRequestSettings: React.FC<RestRequestSettingsProps> = ({
                 variant="outline"
                 size="sm"
                 className="h-7 px-2 text-[10px] rounded-lg"
-                onClick={() =>
+                onClick={() => {
+                  trackEvent({ screen: 'workspace', action: 'add_param' });
                   updateActiveRequest({
                     queryParams: [
                       ...(activeRequest.queryParams || []),
                       { key: '', value: '' },
                     ],
-                  })
-                }
+                  });
+                }}
               >
                 + Parameter
               </Button>
@@ -185,14 +187,15 @@ export const RestRequestSettings: React.FC<RestRequestSettingsProps> = ({
                 variant="outline"
                 size="sm"
                 className="h-7 px-2 text-[10px] rounded-lg"
-                onClick={() =>
+                onClick={() => {
+                  trackEvent({ screen: 'workspace', action: 'add_header' });
                   updateActiveRequest({
                     headers: [
                       ...(activeRequest.headers || []),
                       { key: '', value: '' },
                     ],
-                  })
-                }
+                  });
+                }}
               >
                 + Header
               </Button>

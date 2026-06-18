@@ -6,6 +6,7 @@ import {
   TrashIcon,
 } from '../../../../assets/svgs';
 import { Button, Checkbox, Input } from '../../../../components';
+import { trackEvent } from '../../../../services/analytics/googleAnalytics';
 import { useEnvironmentStore } from '../../../../store';
 import { createId } from '../../../../store/workspace/workspaceStoreUtils';
 import type { Environment, EnvironmentVariable } from '../../types';
@@ -180,7 +181,13 @@ export const VariablesTable: React.FC<VariablesTableProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleRemoveVariable(idx)}
+                      onClick={() => {
+                        trackEvent({
+                          screen: 'environments',
+                          action: 'remove_variable',
+                        });
+                        handleRemoveVariable(idx);
+                      }}
                       className="h-7 w-7 rounded p-0 text-foreground/40 hover:text-primary-500 cursor-pointer"
                       title="Remove Variable"
                     >
@@ -201,7 +208,10 @@ export const VariablesTable: React.FC<VariablesTableProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleAddVariable}
+            onClick={() => {
+              trackEvent({ screen: 'environments', action: 'add_variable' });
+              handleAddVariable();
+            }}
             className="h-8 px-2 text-xs text-primary-500 hover:text-primary-600 font-semibold cursor-pointer"
           >
             <PlusIcon

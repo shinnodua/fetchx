@@ -1,6 +1,7 @@
 import type React from 'react';
 import { PlusIcon, TrashIcon } from '../../../../assets/svgs';
 import { Button } from '../../../../components';
+import { trackEvent } from '../../../../services/analytics/googleAnalytics';
 import type { Environment } from '../../types';
 
 interface EnvironmentListProps {
@@ -46,7 +47,13 @@ export const EnvironmentList: React.FC<EnvironmentListProps> = ({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={(e) => onDeleteClick(env.id, e)}
+                    onClick={(e) => {
+                      trackEvent({
+                        screen: 'environments',
+                        action: 'delete_environment',
+                      });
+                      onDeleteClick(env.id, e);
+                    }}
                     className="h-5 w-5 rounded p-0 text-foreground/40 hover:text-primary-500 transition-opacity"
                     title="Delete Environment"
                   >
@@ -65,7 +72,10 @@ export const EnvironmentList: React.FC<EnvironmentListProps> = ({
       <Button
         variant="outline"
         size="sm"
-        onClick={onAddClick}
+        onClick={() => {
+          trackEvent({ screen: 'environments', action: 'add_environment' });
+          onAddClick();
+        }}
         className="w-full flex items-center justify-center gap-1.5 text-xs py-2 mt-4 cursor-pointer"
       >
         <PlusIcon

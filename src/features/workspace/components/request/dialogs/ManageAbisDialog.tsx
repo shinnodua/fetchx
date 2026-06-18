@@ -2,6 +2,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { TrashIcon } from '../../../../../assets/svgs';
 import { Button, Dialog } from '../../../../../components';
+import { trackEvent } from '../../../../../services/analytics/googleAnalytics';
 import { useAbiStore } from '../../../../../store';
 import type { SavedContractAbi } from '../../../types';
 
@@ -108,6 +109,7 @@ export const ManageAbisDialog: React.FC = () => {
             variant="primary"
             onClick={() => {
               if (abiToDelete) {
+                trackEvent({ screen: 'settings', action: 'delete_abi' });
                 deleteAbi(abiToDelete.id);
                 setAbiToDelete(null);
               }

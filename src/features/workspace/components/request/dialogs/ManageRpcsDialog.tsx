@@ -2,6 +2,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { TrashIcon } from '../../../../../assets/svgs';
 import { Button, Dialog, Input } from '../../../../../components';
+import { trackEvent } from '../../../../../services/analytics/googleAnalytics';
 import { useRpcStore } from '../../../../../store';
 import { DEFAULT_RPC_OPTIONS } from '../../../constants';
 import type { CustomRpc } from '../../../types';
@@ -232,6 +233,7 @@ export const ManageRpcsDialog: React.FC = () => {
             variant="primary"
             onClick={() => {
               if (rpcToDelete) {
+                trackEvent({ screen: 'settings', action: 'delete_rpc' });
                 deleteCustomRpc(rpcToDelete.id);
                 setRpcToDelete(null);
               }

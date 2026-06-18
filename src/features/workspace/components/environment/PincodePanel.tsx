@@ -1,6 +1,7 @@
 import type React from 'react';
 import { useState } from 'react';
 import { Button, Input } from '../../../../components';
+import { trackEvent } from '../../../../services/analytics/googleAnalytics';
 import { useEnvironmentStore } from '../../../../store';
 import {
   getSensitivePinMinLength,
@@ -38,6 +39,7 @@ export const PincodePanel: React.FC<PincodePanelProps> = ({ onLock }) => {
   };
 
   const handleLock = () => {
+    trackEvent({ screen: 'environments', action: 'lock_environment' });
     onLock();
     lockSensitiveValues();
   };
@@ -72,7 +74,13 @@ export const PincodePanel: React.FC<PincodePanelProps> = ({ onLock }) => {
           ) : (
             <Button
               variant="primary"
-              onClick={handleSubmit}
+              onClick={() => {
+                trackEvent({
+                  screen: 'environments',
+                  action: 'unlock_environment',
+                });
+                handleSubmit();
+              }}
               disabled={!validateSensitivePin(pin, minPinLength)}
               className="h-10 cursor-pointer"
             >

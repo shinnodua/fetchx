@@ -68,3 +68,53 @@ export function trackGoogleAnalyticsEvent(
 
   window.gtag('event', name, parameters);
 }
+
+export type AnalyticsScreen =
+  | 'workspace'
+  | 'settings'
+  | 'collections'
+  | 'environments'
+  | 'global';
+
+export type AnalyticsAction =
+  | 'send_request'
+  | 'save_request'
+  | 'new_request'
+  | 'load_abi'
+  | 'load_preset_abi'
+  | 'import_request'
+  | 'import_contract'
+  | 'toggle_theme'
+  | 'connect_wallet'
+  | 'change_network'
+  | 'network_switched'
+  | 'view_account'
+  | 'export_collections'
+  | 'import_collections'
+  | 'add_collection'
+  | 'delete_collection'
+  | 'delete_request'
+  | 'save_response'
+  | 'delete_response'
+  | 'add_environment'
+  | 'delete_environment'
+  | 'lock_environment'
+  | 'unlock_environment'
+  | 'add_variable'
+  | 'remove_variable'
+  | 'add_param'
+  | 'add_header'
+  | 'save_abi'
+  | 'delete_abi'
+  | 'delete_rpc';
+
+export interface StandardAnalyticsEvent {
+  screen: AnalyticsScreen;
+  action: AnalyticsAction;
+  [key: string]: unknown;
+}
+
+export function trackEvent(event: StandardAnalyticsEvent) {
+  const eventName = `${event.screen}_${event.action}`;
+  trackGoogleAnalyticsEvent(eventName, event);
+}

@@ -1,5 +1,6 @@
 import type React from 'react';
 import { Button, Dialog, Input } from '../../../../components';
+import { trackEvent } from '../../../../services/analytics/googleAnalytics';
 import type { RenameTarget } from './collectionPanelTypes';
 
 interface CollectionPanelDialogsProps {
@@ -103,6 +104,10 @@ export const CollectionPanelDialogs: React.FC<CollectionPanelDialogsProps> = ({
           variant="primary"
           onClick={() => {
             if (colToDelete) {
+              trackEvent({
+                screen: 'collections',
+                action: 'delete_collection',
+              });
               deleteCollection(colToDelete.id);
               setColToDelete(null);
             }
@@ -144,6 +149,7 @@ export const CollectionPanelDialogs: React.FC<CollectionPanelDialogsProps> = ({
           variant="primary"
           onClick={() => {
             if (reqToDelete) {
+              trackEvent({ screen: 'collections', action: 'delete_request' });
               deleteRequest(reqToDelete.id);
               setReqToDelete(null);
             }
@@ -185,6 +191,7 @@ export const CollectionPanelDialogs: React.FC<CollectionPanelDialogsProps> = ({
           variant="primary"
           onClick={() => {
             if (savedResponseToDelete) {
+              trackEvent({ screen: 'collections', action: 'delete_response' });
               deleteSavedResponse(
                 savedResponseToDelete.reqId,
                 savedResponseToDelete.id,

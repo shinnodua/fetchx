@@ -8,6 +8,7 @@ import {
   Textarea,
   useToast,
 } from '../../../../../components';
+import { trackEvent } from '../../../../../services/analytics/googleAnalytics';
 import {
   decodeContractBytecodeAbi,
   fetchContractInfo,
@@ -61,6 +62,7 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
       description: `Loaded standard ${preset} interface.`,
       type: 'success',
     });
+    trackEvent({ screen: 'workspace', action: 'load_preset_abi', preset });
   };
 
   const loadSavedAbi = (abi: string, name: string) => {
@@ -306,7 +308,10 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
             variant="ghost"
             size="sm"
             className="h-6 px-1.5 text-[10px] text-secondary-600 hover:text-secondary-700 cursor-pointer"
-            onClick={loadContractAbi}
+            onClick={() => {
+              trackEvent({ screen: 'workspace', action: 'load_abi' });
+              void loadContractAbi();
+            }}
             isLoading={abiLoading}
           >
             LOAD ABI

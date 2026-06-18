@@ -2,6 +2,7 @@ import { useConnectModal } from '@rainbow-me/rainbowkit';
 import type React from 'react';
 import { useAccount } from 'wagmi';
 import { Button, Input, Select } from '../../../../components';
+import { trackEvent } from '../../../../services/analytics/googleAnalytics';
 import { useRpcStore } from '../../../../store';
 import { cn } from '../../../../utils/cn';
 import { METHOD_OPTIONS } from '../../constants';
@@ -89,7 +90,10 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
                 ? 'shadow-md shadow-primary-500/10'
                 : 'opacity-50 pointer-events-none border-foreground/10',
             )}
-            onClick={onSave}
+            onClick={() => {
+              trackEvent({ screen: 'workspace', action: 'save_request' });
+              onSave();
+            }}
           >
             Save
           </Button>
@@ -133,7 +137,14 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
           <div className="w-full sm:w-56">
             <RpcSelectField
               value={selectedRpcId}
-              onChange={onUpdateActiveRequest}
+              onChange={(fields) => {
+                trackEvent({
+                  screen: 'workspace',
+                  action: 'change_network',
+                  network: fields.network,
+                });
+                onUpdateActiveRequest(fields);
+              }}
             />
           </div>
         )}
@@ -149,7 +160,14 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
             (activeRequest.type === 'WRITE' || activeRequest.type === 'SEND') &&
             !isConnected
               ? () => openConnectModal?.()
-              : onRunRequest
+              : () => {
+                  trackEvent({
+                    screen: 'workspace',
+                    action: 'send_request',
+                    method: activeRequest.type,
+                  });
+                  onRunRequest();
+                }
           }
           isLoading={isLoading}
         >
