@@ -54,6 +54,43 @@ problems; production releases require both.
 
 ## Publish a release
 
+### Publish from local computers
+
+Set the same version in `package.json`, `src-tauri/Cargo.toml`, and
+`src-tauri/tauri.conf.json`. Set `TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, 
+then build into the shared `desktop-artifacts` directory. On macOS, run:
+
+```bash
+bun run desktop:local:build:macos
+```
+
+On Windows, run:
+
+```powershell
+bun run desktop:local:build:windows
+```
+
+The macOS command collects Apple Silicon and Intel artifacts, while the Windows
+command collects the x64 NSIS artifact. The automatic
+`bun run desktop:local:build` command remains available when the operating
+system-specific command is not needed. Copy the resulting files into one
+`desktop-artifacts` directory. The publish command refuses to continue unless
+all three signed updater artifacts and the macOS and Windows installers exist.
+
+Set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`, then publish immutable
+artifacts and activate the release by uploading `channels/stable.json` last:
+
+```bash
+bun run desktop:local:publish
+```
+
+Use `--artifact-dir <path>` with either command to override the artifact
+directory, and `--notes "Release notes"` with the publish command. Set
+`R2_BUCKET` only when publishing to a bucket other than
+`call3-desktop-releases`.
+
+### Publish through GitHub Actions
+
 1. Update `CHANGELOG.md`.
 2. Set the same SemVer in `package.json`, `src-tauri/Cargo.toml`, and
    `src-tauri/tauri.conf.json`.

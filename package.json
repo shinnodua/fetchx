@@ -14,6 +14,10 @@
     "desktop:dev": "tauri dev",
     "desktop:build": "tauri build --config src-tauri/tauri.local.conf.json",
     "desktop:release": "bun run scripts/desktop-release.ts",
+    "desktop:local:build": "bun run scripts/desktop-local-release.ts build",
+    "desktop:local:build:macos": "bun run scripts/desktop-local-release.ts build-macos",
+    "desktop:local:build:windows": "bun run scripts/desktop-local-release.ts build-windows",
+    "desktop:local:publish": "bun run scripts/desktop-local-release.ts publish",
     "desktop:updates:dev": "wrangler dev --config infrastructure/desktop-updates/wrangler.jsonc",
     "desktop:updates:deploy": "wrangler deploy --config infrastructure/desktop-updates/wrangler.jsonc"
   },
