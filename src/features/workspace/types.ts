@@ -27,6 +27,8 @@ export interface RequestItem {
   headers?: { key: string; value: string }[];
   queryParams?: { key: string; value: string }[];
   body?: string;
+  bodyType?: 'raw' | 'form-data' | 'x-www-form-urlencoded';
+  formData?: { key: string; value: string }[];
   response?: RequestResponse | null;
   savedResponses?: SavedResponse[];
   savedResponsesCollapsed?: boolean;

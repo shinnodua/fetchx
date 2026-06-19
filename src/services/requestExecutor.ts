@@ -206,6 +206,16 @@ export async function executeRestCall(
   headers: { key: string; value: string }[] | undefined,
   queryParams: { key: string; value: string }[] | undefined,
   body: string | undefined,
+  bodyType: 'raw' | 'form-data' | 'x-www-form-urlencoded' | undefined,
+  formData: { key: string; value: string }[] | undefined,
 ) {
-  return await executeRestApiCall(type, target, headers, queryParams, body);
+  return await executeRestApiCall(
+    type,
+    target,
+    headers,
+    queryParams,
+    body,
+    bodyType,
+    formData,
+  );
 }

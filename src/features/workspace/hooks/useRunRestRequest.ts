@@ -28,6 +28,8 @@ export const useRunRestRequest = () => {
       resolvedRequest.headers || [],
       resolvedRequest.queryParams || [],
       resolvedRequest.body || '',
+      resolvedRequest.bodyType || 'raw',
+      resolvedRequest.formData || [],
     );
 
     const duration = Date.now() - start;

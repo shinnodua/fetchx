@@ -248,26 +248,137 @@ export const RestRequestSettings: React.FC<RestRequestSettingsProps> = ({
         </TabsContent>
 
         <TabsContent value="body" className="mt-0">
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-xs font-semibold text-foreground/75 block">
-                {activeRequest.type} Payload (JSON)
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 px-2 text-[10px] rounded-lg"
-                onClick={beautifyBody}
-              >
-                Beautify
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={
+                    !activeRequest.bodyType || activeRequest.bodyType === 'raw'
+                      ? 'primary'
+                      : 'ghost'
+                  }
+                  size="sm"
+                  className="h-7 px-3 text-xs rounded-md"
+                  onClick={() => updateActiveRequest({ bodyType: 'raw' })}
+                >
+                  Raw (JSON)
+                </Button>
+                <Button
+                  variant={
+                    activeRequest.bodyType === 'form-data' ? 'primary' : 'ghost'
+                  }
+                  size="sm"
+                  className="h-7 px-3 text-xs rounded-md"
+                  onClick={() => updateActiveRequest({ bodyType: 'form-data' })}
+                >
+                  Form Data
+                </Button>
+                <Button
+                  variant={
+                    activeRequest.bodyType === 'x-www-form-urlencoded'
+                      ? 'primary'
+                      : 'ghost'
+                  }
+                  size="sm"
+                  className="h-7 px-3 text-xs rounded-md"
+                  onClick={() =>
+                    updateActiveRequest({ bodyType: 'x-www-form-urlencoded' })
+                  }
+                >
+                  URL Encoded
+                </Button>
+              </div>
+
+              {(!activeRequest.bodyType ||
+                activeRequest.bodyType === 'raw') && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 px-2 text-[10px] rounded-lg"
+                  onClick={beautifyBody}
+                >
+                  Beautify
+                </Button>
+              )}
+              {activeRequest.bodyType && activeRequest.bodyType !== 'raw' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 px-2 text-[10px] rounded-lg"
+                  onClick={() => {
+                    updateActiveRequest({
+                      formData: [
+                        ...(activeRequest.formData || []),
+                        { key: '', value: '' },
+                      ],
+                    });
+                  }}
+                >
+                  + Form Field
+                </Button>
+              )}
             </div>
-            <EnvironmentAwareTextarea
-              className="font-mono text-xs h-64"
-              placeholder="Raw JSON Request Body"
-              value={activeRequest.body || ''}
-              onChange={(e) => updateActiveRequest({ body: e.target.value })}
-            />
+
+            {!activeRequest.bodyType || activeRequest.bodyType === 'raw' ? (
+              <EnvironmentAwareTextarea
+                className="font-mono text-xs h-64"
+                placeholder="Raw JSON Request Body"
+                value={activeRequest.body || ''}
+                onChange={(e) => updateActiveRequest({ body: e.target.value })}
+              />
+            ) : (
+              <div className="space-y-3">
+                {(activeRequest.formData || []).map((field, idx) => (
+                  <div
+                    // biome-ignore lint/suspicious/noArrayIndexKey: form fields have no unique natural identifier before keying
+                    key={idx}
+                    className="flex gap-2 items-center"
+                  >
+                    <EnvironmentAwareInput
+                      placeholder="Key"
+                      value={field.key}
+                      onChange={(e) => {
+                        const updated = [...(activeRequest.formData || [])];
+                        updated[idx].key = e.target.value;
+                        updateActiveRequest({ formData: updated });
+                      }}
+                    />
+                    <EnvironmentAwareInput
+                      placeholder="Value"
+                      value={field.value}
+                      onChange={(e) => {
+                        const updated = [...(activeRequest.formData || [])];
+                        updated[idx].value = e.target.value;
+                        updateActiveRequest({ formData: updated });
+                      }}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const updated = (activeRequest.formData || []).filter(
+                          (_, i) => i !== idx,
+                        );
+                        updateActiveRequest({ formData: updated });
+                      }}
+                      className="h-9 w-9 rounded p-0 text-primary-500/60 hover:text-primary-500 mt-0"
+                      title="Remove field"
+                    >
+                      <TrashIcon
+                        title="Remove field"
+                        className="w-4 h-4 shrink-0"
+                      />
+                    </Button>
+                  </div>
+                ))}
+                {(!activeRequest.formData ||
+                  activeRequest.formData.length === 0) && (
+                  <p className="text-xs text-foreground/50 italic py-2">
+                    No form data fields added yet.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </TabsContent>
       </div>
