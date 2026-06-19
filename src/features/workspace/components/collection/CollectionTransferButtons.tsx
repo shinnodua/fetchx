@@ -5,6 +5,11 @@ import { Checkbox } from '../../../../components/ui/Checkbox';
 import { Dialog } from '../../../../components/ui/Dialog';
 import { useToast } from '../../../../components/ui/Toast';
 import { trackEvent } from '../../../../services/analytics/googleAnalytics';
+import {
+  isDesktopApp,
+  openTextFile,
+  saveTextFile,
+} from '../../../../services/platform';
 import { useWorkspaceStore } from '../../../../store';
 import type { CollectionItem } from '../../types';
 import {
@@ -41,26 +46,66 @@ export const CollectionTransferButtons: React.FC = () => {
     );
   };
 
-  const handleExportCollections = () => {
+  const handleExportCollections = async () => {
     const selectedCollections = collections.filter((collection) =>
       selectedCollectionIds.includes(collection.id),
     );
     if (selectedCollections.length === 0) return;
 
     const payload = createCollectionsExportPayload(selectedCollections);
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {
-      type: 'application/json',
+    const exported = await saveTextFile(JSON.stringify(payload, null, 2), {
+      defaultPath: `call3-collections-${new Date()
+        .toISOString()
+        .slice(0, 10)}.json`,
+      extensions: ['json'],
+      name: 'Call3 collections',
     });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `call3-collections-${new Date()
-      .toISOString()
-      .slice(0, 10)}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+    if (!exported) return;
     trackEvent({ screen: 'collections', action: 'export_collections' });
     setExportOpen(false);
+  };
+
+  const prepareCollectionsImport = (content: string) => {
+    const importedCollections = parseCollectionsImportPayload(content);
+    if (importedCollections.length === 0) {
+      toast({
+        title: 'Import warning',
+        description: 'No collections found in the selected file.',
+        type: 'error',
+      });
+      return;
+    }
+    setPendingCollections(importedCollections);
+    setSelectedImportIds(importedCollections.map((col) => col.id));
+    setImportOpen(true);
+  };
+
+  const handleOpenImportFile = async () => {
+    if (!isDesktopApp()) {
+      importFileInputRef.current?.click();
+      return;
+    }
+
+    try {
+      const content = await openTextFile({
+        extensions: ['json'],
+        name: 'Call3 or Postman collections',
+      });
+      if (content) prepareCollectionsImport(content);
+    } catch (error) {
+      showImportError(error);
+    }
+  };
+
+  const showImportError = (error: unknown) => {
+    toast({
+      title: 'Import failed',
+      description:
+        error instanceof Error
+          ? error.message
+          : 'The selected file could not be imported.',
+      type: 'error',
+    });
   };
 
   const handleImportFileChange = async (
@@ -71,29 +116,9 @@ export const CollectionTransferButtons: React.FC = () => {
     if (!file) return;
 
     try {
-      const importedCollections = parseCollectionsImportPayload(
-        await file.text(),
-      );
-      if (importedCollections.length === 0) {
-        toast({
-          title: 'Import warning',
-          description: 'No collections found in the selected file.',
-          type: 'error',
-        });
-        return;
-      }
-      setPendingCollections(importedCollections);
-      setSelectedImportIds(importedCollections.map((col) => col.id));
-      setImportOpen(true);
+      prepareCollectionsImport(await file.text());
     } catch (error) {
-      toast({
-        title: 'Import failed',
-        description:
-          error instanceof Error
-            ? error.message
-            : 'The selected file could not be imported.',
-        type: 'error',
-      });
+      showImportError(error);
     }
   };
 
@@ -141,7 +166,7 @@ export const CollectionTransferButtons: React.FC = () => {
           variant="glass"
           size="sm"
           className="h-8 rounded-lg px-3 text-xs"
-          onClick={() => importFileInputRef.current?.click()}
+          onClick={handleOpenImportFile}
         >
           Import
         </Button>

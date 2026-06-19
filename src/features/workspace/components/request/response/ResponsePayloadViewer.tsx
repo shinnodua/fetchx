@@ -16,6 +16,7 @@ import {
   useToast,
 } from '../../../../../components';
 import { trackEvent } from '../../../../../services/analytics/googleAnalytics';
+import { openExternalUrl } from '../../../../../services/platform';
 import type { JsonPrimitive } from '../../../utils/responsePayload';
 import {
   createDefaultResponseName,
@@ -412,7 +413,7 @@ export const ResponsePayloadViewer: React.FC<ResponsePayloadViewerProps> = ({
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => window.open(explorerUrl, '_blank', 'noreferrer')}
+                onClick={() => openExternalUrl(explorerUrl)}
                 className="h-7 rounded-lg px-2 text-[10px] font-semibold uppercase tracking-wider text-primary-600 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200"
               >
                 Explorer

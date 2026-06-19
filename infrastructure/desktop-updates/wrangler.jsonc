@@ -1,0 +1,25 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "call3-desktop-updates",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-19",
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "updates.call3.dev",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "UPDATE_CHANNEL": "stable"
+  },
+  "r2_buckets": [
+    {
+      "binding": "DESKTOP_RELEASES",
+      "bucket_name": "call3-desktop-releases"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

@@ -1,3 +1,5 @@
+import { isDesktopApp } from '../platform';
+
 const googleAnalyticsId = import.meta.env.VITE_GA_MEASUREMENT_ID?.trim();
 
 type GtagArguments =
@@ -13,7 +15,7 @@ declare global {
 }
 
 export const isGoogleAnalyticsEnabled = Boolean(
-  googleAnalyticsId && import.meta.env.PROD,
+  googleAnalyticsId && import.meta.env.PROD && !isDesktopApp(),
 );
 
 function gtag(..._args: GtagArguments) {

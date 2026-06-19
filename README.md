@@ -33,6 +33,7 @@ Call3.dev is built for developers who need one focused workspace to:
 - Framer Motion
 - Biome
 - Wrangler for preview/deploy workflows
+- Tauri 2 for signed macOS and Windows desktop builds
 
 ## Getting Started
 
@@ -61,6 +62,19 @@ Call3.dev is built for developers who need one focused workspace to:
    bun run build
    ```
 
+## Desktop Application
+
+Call3 uses the same React application inside a Tauri 2 shell. Install Rust and
+the platform prerequisites, then run:
+
+```bash
+bun run desktop:dev
+```
+
+Create an unsigned local production bundle with `bun run desktop:build`.
+Signed release builds require a Tauri updater key plus platform credentials
+described in [DESKTOP_RELEASE.md](./DESKTOP_RELEASE.md).
+
 ## Useful Scripts
 
 - `bun run dev`: Start the local Vite development server.
@@ -69,3 +83,7 @@ Call3.dev is built for developers who need one focused workspace to:
 - `bun run build`: Type-check and build the production bundle.
 - `bun run preview`: Build and preview with Wrangler.
 - `bun run deploy`: Build and deploy with Wrangler.
+- `bun run desktop:dev`: Run Call3 inside the Tauri development shell.
+- `bun run desktop:build`: Build local native installers.
+- `bun run desktop:release`: Validate signing configuration and build a signed release.
+- `bun run desktop:updates:deploy`: Deploy the Cloudflare update Worker.

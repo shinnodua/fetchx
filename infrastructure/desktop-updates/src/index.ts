@@ -1,0 +1,109 @@
+interface R2ObjectBody {
+  text: () => Promise<string>;
+}
+
+interface R2Bucket {
+  get: (key: string) => Promise<R2ObjectBody | null>;
+}
+
+interface Env {
+  DESKTOP_RELEASES: R2Bucket;
+  UPDATE_CHANNEL: string;
+}
+
+interface PlatformRelease {
+  signature: string;
+  url: string;
+}
+
+interface ReleaseManifest {
+  notes?: string;
+  platforms: Record<string, PlatformRelease>;
+  pub_date?: string;
+  version: string;
+}
+
+const UPDATE_PATH =
+  /^\/v1\/update\/(darwin|windows)\/(aarch64|x86_64)\/([^/]+)$/;
+const SEMVER = /^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?$/;
+
+function compareVersions(left: string, right: string) {
+  const leftMatch = SEMVER.exec(left);
+  const rightMatch = SEMVER.exec(right);
+  if (!leftMatch || !rightMatch) return null;
+
+  for (let index = 1; index <= 3; index += 1) {
+    const difference = Number(leftMatch[index]) - Number(rightMatch[index]);
+    if (difference !== 0) return difference;
+  }
+
+  const leftPrerelease = leftMatch[4];
+  const rightPrerelease = rightMatch[4];
+  if (leftPrerelease === rightPrerelease) return 0;
+  if (!leftPrerelease) return 1;
+  if (!rightPrerelease) return -1;
+  return leftPrerelease.localeCompare(rightPrerelease);
+}
+
+function jsonResponse(body: unknown, status = 200) {
+  return Response.json(body, {
+    status,
+    headers: {
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+    },
+  });
+}
+
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    if (request.method !== 'GET') {
+      return new Response('Method Not Allowed', {
+        status: 405,
+        headers: { Allow: 'GET' },
+      });
+    }
+
+    const url = new URL(request.url);
+    if (url.pathname === '/health') {
+      return jsonResponse({ status: 'ok' });
+    }
+
+    const match = UPDATE_PATH.exec(url.pathname);
+    if (!match) return new Response('Not Found', { status: 404 });
+
+    const [, target, arch, currentVersion] = match;
+    const manifestObject = await env.DESKTOP_RELEASES.get(
+      `channels/${env.UPDATE_CHANNEL}.json`,
+    );
+    if (!manifestObject) {
+      return jsonResponse({ error: 'Release manifest is unavailable.' }, 503);
+    }
+
+    let manifest: ReleaseManifest;
+    try {
+      manifest = JSON.parse(await manifestObject.text()) as ReleaseManifest;
+    } catch {
+      return jsonResponse({ error: 'Release manifest is invalid.' }, 500);
+    }
+
+    const comparison = compareVersions(manifest.version, currentVersion);
+    if (comparison === null) {
+      return jsonResponse({ error: 'Invalid application version.' }, 400);
+    }
+    if (comparison <= 0) return new Response(null, { status: 204 });
+
+    const platform = manifest.platforms[`${target}-${arch}`];
+    if (!platform?.url || !platform.signature) {
+      return new Response(null, { status: 204 });
+    }
+
+    return jsonResponse({
+      version: manifest.version,
+      notes: manifest.notes,
+      pub_date: manifest.pub_date,
+      url: platform.url,
+      signature: platform.signature,
+    });
+  },
+};

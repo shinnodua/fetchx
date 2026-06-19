@@ -11,9 +11,7 @@ function RootComponent() {
     <AppShell>
       <GoogleAnalyticsPageTracker />
       <Outlet />
-      {import.meta.env.DEV && (
-        <TanStackRouterDevtools position="bottom-right" />
-      )}
+      {import.meta.env.DEV && <TanStackRouterDevtools position="bottom-left" />}
     </AppShell>
   );
 }

@@ -7,6 +7,7 @@ import './index.css';
 
 // Import the generated route tree
 import { routeTree } from './routeTree.gen';
+import { isDesktopApp } from './services/platform';
 
 // Create a new router instance
 const router = createRouter({ routeTree });
@@ -33,7 +34,7 @@ if (rootElement && !rootElement.innerHTML) {
   );
 }
 
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+if (!isDesktopApp() && 'serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => {
       // Installation support is progressive; the app remains usable without it.

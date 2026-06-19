@@ -8,6 +8,7 @@ import { Button } from '../ui/Button';
 
 interface AppHeaderProps {
   actions?: React.ReactNode;
+  desktopActions?: React.ReactNode;
   environmentSelector?: React.ReactNode;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
@@ -15,6 +16,7 @@ interface AppHeaderProps {
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
   actions,
+  desktopActions,
   environmentSelector,
   theme,
   onToggleTheme,
@@ -55,10 +57,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </Link>
         {actions}
       </div>
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:block">
-        <span className="rounded-md border border-primary-500/20 bg-primary-500/10 px-2.5 py-1 text-[11px] font-semibold text-primary-600 shadow-sm shadow-primary-500/10 dark:text-primary-300">
-          Web In Development
-        </span>
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:block">
+        {desktopActions}
       </div>
       <div className="flex items-center gap-2">
         {environmentSelector}

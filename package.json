@@ -1,7 +1,7 @@
 {
   "name": "call3",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +10,12 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "preview": "bun run build && wrangler dev",
-    "deploy": "bun run build && wrangler deploy"
+    "deploy": "bun run build && wrangler deploy",
+    "desktop:dev": "tauri dev",
+    "desktop:build": "tauri build --config src-tauri/tauri.local.conf.json",
+    "desktop:release": "bun run scripts/desktop-release.ts",
+    "desktop:updates:dev": "wrangler dev --config infrastructure/desktop-updates/wrangler.jsonc",
+    "desktop:updates:deploy": "wrangler deploy --config infrastructure/desktop-updates/wrangler.jsonc"
   },
   "dependencies": {
     "@heroui/react": "3.1.0",
@@ -20,8 +25,14 @@
     "@tanstack/react-router": "1.170.10",
     "@tanstack/router-devtools": "1.167.0",
     "@tanstack/router-plugin": "1.168.13",
-    "@walletconnect/ethereum-provider": "2.23.9",
+    "@tauri-apps/api": "2.11.1",
+    "@tauri-apps/plugin-dialog": "2.7.1",
+    "@tauri-apps/plugin-fs": "2.5.1",
+    "@tauri-apps/plugin-opener": "2.5.4",
+    "@tauri-apps/plugin-process": "2.3.1",
+    "@tauri-apps/plugin-updater": "2.10.1",
     "@wagmi/connectors": "8.0.15",
+    "@walletconnect/ethereum-provider": "2.23.9",
     "framer-motion": "12.40.0",
     "react": "19.2.6",
     "react-dom": "19.2.6",
@@ -32,6 +43,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.16",
+    "@tauri-apps/cli": "2.11.3",
     "@types/node": "24.12.3",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",

@@ -1,5 +1,6 @@
 export const API_BASE_URLS = {
   call3: normalizeOptionalBaseUrl(import.meta.env.VITE_API_URL_CALL3),
+  desktopDownloads: 'https://downloads.call3.dev',
 } as const;
 
 export function buildApiUrl(baseUrl: string, path = '') {
@@ -14,6 +15,10 @@ export function buildOptionalApiUrl(baseUrl: string | null, path = '') {
 
 export function buildCall3ApiUrl(path = '') {
   return buildOptionalApiUrl(API_BASE_URLS.call3, path);
+}
+
+export function buildDesktopDownloadsApiUrl(path = '') {
+  return buildApiUrl(API_BASE_URLS.desktopDownloads, path);
 }
 
 export function isCall3ApiConfigured() {

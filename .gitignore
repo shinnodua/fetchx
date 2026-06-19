@@ -10,7 +10,15 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+src-tauri/target
+desktop-artifact
+desktop-artifacts
 *.local
+
+# Desktop signing material
+*.key
+*.p12
+*.pfx
 
 # Editor directories and files
 .vscode/*

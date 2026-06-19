@@ -1,4 +1,4 @@
-import type { RequestItem } from '../types';
+import type { CollectionItem, RequestItem } from '../types';
 
 export const getRequestIsDirty = (
   draft: RequestItem | undefined,
@@ -53,3 +53,15 @@ export const getRequestIsDirty = (
     draft.abi !== original.abi
   );
 };
+
+export const getWorkspaceHasUnsavedChanges = (
+  collections: CollectionItem[],
+  tabs: string[],
+  drafts: Record<string, RequestItem>,
+) =>
+  tabs.some((tabId) => {
+    const original = collections
+      .flatMap((collection) => collection.requests)
+      .find((request) => request.id === tabId);
+    return getRequestIsDirty(drafts[tabId], original);
+  });
