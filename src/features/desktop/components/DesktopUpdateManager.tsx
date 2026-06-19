@@ -82,15 +82,16 @@ export function DesktopUpdateManager() {
 
   return (
     <>
-      <Button
-        variant="secondary"
-        size="sm"
-        className="h-8 px-5 rounded-lg text-xs font-bold cursor-pointer shadow-md shadow-primary-500/20"
-        isLoading={status === 'checking'}
-        onClick={() => checkForUpdate(true)}
-      >
-        Updates
-      </Button>
+      {update && (
+        <Button
+          variant="secondary"
+          size="sm"
+          className="h-8 px-5 rounded-lg text-xs font-bold cursor-pointer shadow-md shadow-primary-500/20"
+          onClick={() => setDialogOpen(true)}
+        >
+          Update Available
+        </Button>
+      )}
       <Dialog
         isOpen={dialogOpen}
         onClose={() => status !== 'downloading' && setDialogOpen(false)}
