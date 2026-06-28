@@ -30,15 +30,21 @@ Every code change must include or update unit tests that cover the behavior chan
 - Use `bun test` / `bun run test` for unit tests, and run the relevant tests before finishing.
 - If a task truly cannot be covered by a unit test, explain the reason clearly in the final response.
 
-### 5. Adhere to the Feature-Based Architecture
+### 5. Keep Documentation Updated
+Every code change must update the relevant docs when behavior, architecture, feature scope, configuration, or developer workflow changes.
+- When adding a new feature, create a matching document under `docs/features/<feature-name>/` and link it from `docs/README.md`.
+- When changing an existing feature, update the nearest existing document under `docs/` so future contributors can understand the current behavior.
+- If a change truly does not require docs, explain why in the final response.
+
+### 6. Adhere to the Feature-Based Architecture
 We organize source files around capabilities under `src/features/`. Route files under `src/routes/` are thin wrapper modules. Global stores and services go to `src/store/` and `src/services/`.
 - Before implementing or modifying code, read and follow **[CODE_CONVENTION.md](./CODE_CONVENTION.md)**. Code changes must comply with its architecture, file placement, component, styling, TypeScript, and Biome rules.
 - Detailed code convention guide: [CODE_CONVENTION.md](./CODE_CONVENTION.md)
 
-### 6. Skip Manual Verification unless Requested
+### 7. Skip Manual Verification unless Requested
 Do not run manual or browser-based verification steps unless they are explicitly requested in the user prompt.
 
-### 7. Clarify Unclear Requirements Before Implementing
+### 8. Clarify Unclear Requirements Before Implementing
 If any requirement is ambiguous, incomplete, contradictory, or could reasonably be interpreted in multiple ways, ask the user for clarification before making code changes. Do not assume intent when the implementation choice could affect behavior, architecture, user experience, dependencies, or data.
 
 ---
