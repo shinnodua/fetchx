@@ -24,15 +24,21 @@ This project uses Biome for linting and formatting.
 - You must run `bun run lint:fix` (or `biome check --write .`) to ensure the codebase remains clean, formatted, and free of lint errors before completing your turn.
 - Detailed skill guide: [.antigravity/skills/lint-and-fix.md](./.antigravity/skills/lint-and-fix.md)
 
-### 4. Adhere to the Feature-Based Architecture
+### 4. Add Unit Tests for Every Task
+Every code change must include or update unit tests that cover the behavior changed by the task.
+- Put unit tests in a `test/` folder at the same directory level as the source code under test, for example `src/features/workspace/utils/test/requestImport.test.ts` for `src/features/workspace/utils/requestImport.ts`.
+- Use `bun test` / `bun run test` for unit tests, and run the relevant tests before finishing.
+- If a task truly cannot be covered by a unit test, explain the reason clearly in the final response.
+
+### 5. Adhere to the Feature-Based Architecture
 We organize source files around capabilities under `src/features/`. Route files under `src/routes/` are thin wrapper modules. Global stores and services go to `src/store/` and `src/services/`.
 - Before implementing or modifying code, read and follow **[CODE_CONVENTION.md](./CODE_CONVENTION.md)**. Code changes must comply with its architecture, file placement, component, styling, TypeScript, and Biome rules.
 - Detailed code convention guide: [CODE_CONVENTION.md](./CODE_CONVENTION.md)
 
-### 5. Skip Manual Verification unless Requested
+### 6. Skip Manual Verification unless Requested
 Do not run manual or browser-based verification steps unless they are explicitly requested in the user prompt.
 
-### 6. Clarify Unclear Requirements Before Implementing
+### 7. Clarify Unclear Requirements Before Implementing
 If any requirement is ambiguous, incomplete, contradictory, or could reasonably be interpreted in multiple ways, ask the user for clarification before making code changes. Do not assume intent when the implementation choice could affect behavior, architecture, user experience, dependencies, or data.
 
 ---

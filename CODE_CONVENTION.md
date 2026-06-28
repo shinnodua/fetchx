@@ -177,3 +177,12 @@ Keep static assets organized by type:
 
 - **Zero "any" Types**: Explicit `any` declarations are forbidden. Use strict types, generic parameters, or `unknown` for dynamic payloads.
 - **Auto-Formatting**: Run `bun run lint:fix` to check compliance before completing a task.
+
+---
+
+## ✅ Unit Test Rules
+
+- Every code task must add or update unit tests for the behavior being changed.
+- Unit tests must live in a `test/` folder at the same directory level as the source code under test.
+- Name test files after the source file they cover, such as `responsePayload.test.ts` for `responsePayload.ts`.
+- Run `bun run test` for unit tests before finishing, or explain why a task cannot be unit tested.
