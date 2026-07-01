@@ -18,6 +18,7 @@ import {
   EnvironmentAwareInput,
   EnvironmentAwareTextarea,
 } from '../../environment/EnvironmentAwareField';
+import { JsonUiEditor } from './JsonUiEditor';
 
 interface RestRequestSettingsProps {
   activeRequest: RequestItem;
@@ -31,6 +32,9 @@ export const RestRequestSettings: React.FC<RestRequestSettingsProps> = ({
   const [restTabsByRequestId, setRestTabsByRequestId] = useState<
     Record<string, string>
   >({});
+  const [jsonModeByRequestId, setJsonModeByRequestId] = useState<
+    Record<string, 'text' | 'ui'>
+  >({});
 
   const supportsBody = methodSupportsBody(activeRequest.type);
   const savedRestTab = restTabsByRequestId[activeRequest.id];
@@ -41,10 +45,43 @@ export const RestRequestSettings: React.FC<RestRequestSettingsProps> = ({
         ? savedRestTab
         : 'queryParams';
 
+  const activeJsonMode = jsonModeByRequestId[activeRequest.id] || 'text';
+
   const handleRestTabChange = (value: string) => {
     setRestTabsByRequestId((currentTabs) => ({
       ...currentTabs,
       [activeRequest.id]: value,
+    }));
+  };
+
+  const handleJsonModeChange = (mode: 'text' | 'ui') => {
+    if (mode === 'ui') {
+      try {
+        const body = activeRequest.body?.trim();
+        if (body) {
+          const parsed = JSON.parse(body);
+          if (
+            typeof parsed !== 'object' ||
+            parsed === null ||
+            Array.isArray(parsed)
+          ) {
+            throw new Error('Only JSON objects are supported in UI mode.');
+          }
+        }
+      } catch (e: unknown) {
+        toast({
+          title: 'Invalid JSON',
+          description:
+            (e instanceof Error ? e.message : '') ||
+            'Fix the request body syntax before switching to UI mode.',
+          type: 'error',
+        });
+        return;
+      }
+    }
+    setJsonModeByRequestId((current) => ({
+      ...current,
+      [activeRequest.id]: mode,
     }));
   };
 
@@ -291,14 +328,36 @@ export const RestRequestSettings: React.FC<RestRequestSettingsProps> = ({
 
               {(!activeRequest.bodyType ||
                 activeRequest.bodyType === 'raw') && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 px-2 text-[10px] rounded-lg"
-                  onClick={beautifyBody}
-                >
-                  Beautify
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Tabs
+                    value={activeJsonMode}
+                    onValueChange={(val) => handleJsonModeChange(val as 'text' | 'ui')}
+                  >
+                    <TabsList className="h-7 rounded-md p-0.5">
+                      <TabsTrigger
+                        value="text"
+                        className="h-6 rounded-sm px-2.5 text-[10px]"
+                      >
+                        Text
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="ui"
+                        className="h-6 rounded-sm px-2.5 text-[10px]"
+                      >
+                        UI
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-[10px] rounded-lg"
+                    onClick={beautifyBody}
+                    disabled={activeJsonMode === 'ui'}
+                  >
+                    Beautify
+                  </Button>
+                </div>
               )}
               {activeRequest.bodyType && activeRequest.bodyType !== 'raw' && (
                 <Button
@@ -320,12 +379,21 @@ export const RestRequestSettings: React.FC<RestRequestSettingsProps> = ({
             </div>
 
             {!activeRequest.bodyType || activeRequest.bodyType === 'raw' ? (
-              <EnvironmentAwareTextarea
-                className="font-mono text-xs h-64"
-                placeholder="Raw JSON Request Body"
-                value={activeRequest.body || ''}
-                onChange={(e) => updateActiveRequest({ body: e.target.value })}
-              />
+              activeJsonMode === 'ui' ? (
+                <JsonUiEditor
+                  body={activeRequest.body}
+                  onChange={(body) => updateActiveRequest({ body })}
+                />
+              ) : (
+                <EnvironmentAwareTextarea
+                  className="font-mono text-xs h-64"
+                  placeholder="Raw JSON Request Body"
+                  value={activeRequest.body || ''}
+                  onChange={(e) =>
+                    updateActiveRequest({ body: e.target.value })
+                  }
+                />
+              )
             ) : (
               <div className="space-y-3">
                 {(activeRequest.formData || []).map((field, idx) => (
