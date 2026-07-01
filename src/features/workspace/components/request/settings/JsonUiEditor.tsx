@@ -21,7 +21,7 @@ export const JsonUiEditor: React.FC<JsonUiEditorProps> = ({
       return Object.entries(parsed).map(([k, v]) => ({
         id: crypto.randomUUID(),
         key: k,
-        value: typeof v === 'object' ? JSON.stringify(v) : String(v),
+        value: v !== undefined ? JSON.stringify(v) : '',
       }));
     } catch {
       return [];
@@ -38,20 +38,10 @@ export const JsonUiEditor: React.FC<JsonUiEditorProps> = ({
       let parsedValue: unknown = p.value;
       try {
         if (p.value !== '') {
-          // If it matches exactly a boolean, number, or JSON object/array
-          if (
-            p.value === 'true' ||
-            p.value === 'false' ||
-            p.value === 'null' ||
-            !Number.isNaN(Number(p.value)) ||
-            (p.value.startsWith('{') && p.value.endsWith('}')) ||
-            (p.value.startsWith('[') && p.value.endsWith(']'))
-          ) {
-            parsedValue = JSON.parse(p.value);
-          }
+          parsedValue = JSON.parse(p.value);
         }
       } catch {
-        // Leave as string if not valid JSON
+        // Fallback: if it's not valid JSON, treat it as a raw string
         parsedValue = p.value;
       }
       obj[p.key] = parsedValue;
