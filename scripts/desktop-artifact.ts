@@ -7,8 +7,10 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { basename, extname, join, resolve } from 'node:path';
+import { sha256File } from './desktop-release-security.ts';
 
 interface PlatformRelease {
+  sha256: string;
   signature: string;
   url: string;
 }
@@ -82,6 +84,7 @@ function collectArtifact() {
     platform,
     version,
     release: {
+      sha256: sha256File(updateFile),
       signature: readFileSync(`${updateFile}.sig`, 'utf8').trim(),
       url: `${baseUrl}/desktop/stable/${version}/${artifactName}`,
     },
@@ -98,7 +101,9 @@ function createManifest() {
   const version = requiredArgument('version');
   const notes = getArgument('notes') ?? `Call3 ${version}`;
   const fragments = walkFiles(inputDirectory)
-    .filter((file) => file.endsWith('.json'))
+    .filter(
+      (file) => file.endsWith('.json') && basename(file) !== 'stable.json',
+    )
     .map((file) => JSON.parse(readFileSync(file, 'utf8')) as ArtifactFragment);
 
   if (fragments.length === 0) throw new Error('No artifact fragments found.');

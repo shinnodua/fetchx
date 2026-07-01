@@ -25,6 +25,30 @@ Desktop-specific side effects should stay centralized in `src/services/platform/
 
 Desktop release/download API calls should stay in `src/services/api/desktopReleaseApi.ts`.
 
+## Update verification
+
+Desktop updates use Tauri 2 updater signatures. The backend can announce an
+available version, but the installed app trusts an update only after
+`@tauri-apps/plugin-updater` verifies the downloaded artifact with the public
+key embedded in `src-tauri/tauri.conf.json`.
+
+Release scripts enforce the required trust boundary:
+
+- `TAURI_SIGNING_PRIVATE_KEY` is required for release builds;
+- `plugins.updater.pubkey` must be a real base64-encoded minisign public key;
+- collected updater artifacts must have matching `.sig` files;
+- collected fragments include SHA-256 metadata for release auditing;
+- `channels/stable.json` is published only after all immutable artifacts are
+  uploaded.
+
+The Cloudflare Worker and R2 bucket do not hold signing keys. Treat them as an
+untrusted distribution path that the client verifies cryptographically before
+installation.
+
+macOS releases should also be signed with Developer ID and notarized. Windows
+installers should be signed with Authenticode. Those OS signatures complement
+the Tauri updater signature; they do not replace it.
+
 ## Extension rules
 
 - Keep web and desktop behavior separated at the platform service boundary.

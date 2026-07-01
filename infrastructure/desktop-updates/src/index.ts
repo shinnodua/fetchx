@@ -12,6 +12,7 @@ interface Env {
 }
 
 interface PlatformRelease {
+  sha256?: string;
   signature: string;
   url: string;
 }
@@ -94,7 +95,12 @@ export default {
     if (comparison <= 0) return new Response(null, { status: 204 });
 
     const platform = manifest.platforms[`${target}-${arch}`];
-    if (!platform?.url || !platform.signature) {
+    const updateUrl = platform?.url;
+    const updateSignature = platform?.signature;
+    if (
+      !updateUrl?.startsWith('https://downloads.call3.dev/') ||
+      !updateSignature?.trim()
+    ) {
       return new Response(null, { status: 204 });
     }
 
@@ -102,8 +108,8 @@ export default {
       version: manifest.version,
       notes: manifest.notes,
       pub_date: manifest.pub_date,
-      url: platform.url,
-      signature: platform.signature,
+      url: updateUrl,
+      signature: updateSignature,
     });
   },
 };

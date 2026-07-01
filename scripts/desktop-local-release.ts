@@ -1,17 +1,18 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
-
-interface ArtifactFragment {
-  platform: string;
-  release: { url: string };
-  version: string;
-}
+import {
+  type UpdaterArtifactFragment,
+  validateUpdaterFragment,
+  validateUpdaterPublicKey,
+  validateVersionAlignment,
+} from './desktop-release-security.ts';
 
 interface PackageJson {
   version: string;
 }
 
 interface TauriConfig {
+  plugins?: { updater?: { pubkey?: string } };
   version: string;
 }
 
@@ -176,11 +177,12 @@ async function publishRelease() {
 }
 
 function validateVersions() {
-  if (version !== tauriConfig.version || version !== cargoVersion) {
-    throw new Error(
-      'package.json, Cargo.toml, and tauri.conf.json versions must match.',
-    );
-  }
+  validateVersionAlignment({
+    cargoVersion,
+    packageVersion: version,
+    tauriVersion: tauriConfig.version,
+  });
+  validateUpdaterPublicKey(tauriConfig.plugins?.updater?.pubkey);
 }
 
 function validateReleaseArtifacts() {
@@ -194,18 +196,12 @@ function validateReleaseArtifacts() {
       throw new Error(`Missing release fragment: ${platform}.json`);
     }
 
-    const fragment = readJson<ArtifactFragment>(fragmentPath);
-    if (fragment.platform !== platform || fragment.version !== version) {
-      throw new Error(`${platform}.json does not match version ${version}.`);
-    }
-
-    const updaterName = basename(new URL(fragment.release.url).pathname);
-    if (
-      !existsSync(join(artifactDirectory, updaterName)) ||
-      !existsSync(join(artifactDirectory, `${updaterName}.sig`))
-    ) {
-      throw new Error(`Missing updater artifact or signature for ${platform}.`);
-    }
+    const fragment = readJson<UpdaterArtifactFragment>(fragmentPath);
+    validateUpdaterFragment(fragment, {
+      artifactDirectory,
+      expectedPlatform: platform,
+      expectedVersion: version,
+    });
   }
 
   const artifactNames = readdirSync(artifactDirectory);

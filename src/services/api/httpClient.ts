@@ -299,6 +299,7 @@ function isBrowserFetchBlocked(error: unknown) {
     message.includes('cors') ||
     message.includes('cross-origin') ||
     message.includes('access-control-allow-origin') ||
-    message.includes('blocked by access control')
+    message.includes('blocked by access control') ||
+    message.includes('failed to fetch')
   );
 }

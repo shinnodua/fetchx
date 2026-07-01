@@ -1,4 +1,8 @@
 import { readFileSync } from 'node:fs';
+import {
+  validateUpdaterPublicKey,
+  validateVersionAlignment,
+} from './desktop-release-security.ts';
 
 interface PackageJson {
   version: string;
@@ -24,19 +28,12 @@ const cargoToml = readFileSync(
 );
 const cargoVersion = /^version = "([^"]+)"$/m.exec(cargoToml)?.[1];
 
-if (
-  packageJson.version !== tauriConfig.version ||
-  packageJson.version !== cargoVersion
-) {
-  throw new Error(
-    'package.json, Cargo.toml, and tauri.conf.json versions must match.',
-  );
-}
-if (tauriConfig.plugins?.updater?.pubkey?.startsWith('REPLACE_WITH_')) {
-  throw new Error(
-    'Generate the Tauri updater key and replace the placeholder public key before releasing.',
-  );
-}
+validateVersionAlignment({
+  cargoVersion,
+  packageVersion: packageJson.version,
+  tauriVersion: tauriConfig.version,
+});
+validateUpdaterPublicKey(tauriConfig.plugins?.updater?.pubkey);
 if (!process.env.TAURI_SIGNING_PRIVATE_KEY) {
   throw new Error('TAURI_SIGNING_PRIVATE_KEY is required for a release build.');
 }
