@@ -57,3 +57,4 @@ Below are the step-by-step procedures to accomplish specific tasks:
 2. **[Design System Enforcement Skill](./.antigravity/skills/design-system-guideline.md)**: How to build UIs matching the design language.
 3. **[Lint and Format Skill](./.antigravity/skills/lint-and-fix.md)**: How to verify and clean up code syntax.
 4. **[Code Convention Guide](./CODE_CONVENTION.md)**: Detailed rules on repository layouts, stores, and services.
+5. **[Taste UI Implementation Skill](./.antigravity/skills/taste-ui.md)**: Guidelines for applying premium design taste and UI polish.

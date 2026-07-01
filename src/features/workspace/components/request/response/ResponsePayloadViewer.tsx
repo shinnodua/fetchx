@@ -36,7 +36,7 @@ interface ResponsePayloadViewerProps {
 type PayloadViewport = 'panel' | 'dialog';
 
 const inspectorRowClassName =
-  'grid w-full min-w-0 grid-cols-[minmax(8rem,0.45fr)_minmax(10rem,1fr)_auto] items-start gap-3 border-b border-foreground/10 px-3 py-2 font-mono text-xs last:border-b-0';
+  'grid w-full min-w-0 grid-cols-[minmax(8rem,0.45fr)_minmax(10rem,1fr)_auto] items-center gap-2 border-b border-foreground/10 px-3 py-1 font-mono text-xs last:border-b-0';
 
 const getScrollHeightClassName = (viewport: PayloadViewport) =>
   viewport === 'dialog' ? 'max-h-[calc(100vh-14rem)]' : 'max-h-80';
@@ -106,26 +106,26 @@ const InspectorLabel: React.FC<{
         size="sm"
         onClick={onToggle}
         aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${label}`}
-        className="h-6 w-6 shrink-0 rounded-md p-0 text-foreground/70 hover:bg-foreground/10 hover:text-foreground"
+        className="h-5 w-5 shrink-0 rounded-md p-0 text-foreground/70 hover:bg-foreground/10 hover:text-foreground"
       >
         {isExpanded ? (
           <ChevronDownIcon
             title="Collapse node"
-            className="block h-4 w-4 shrink-0 text-foreground"
+            className="block h-3.5 w-3.5 shrink-0 text-foreground"
             stroke="currentColor"
             strokeWidth={2.25}
           />
         ) : (
           <ChevronRightIcon
             title="Expand node"
-            className="block h-4 w-4 shrink-0 text-foreground"
+            className="block h-3.5 w-3.5 shrink-0 text-foreground"
             stroke="currentColor"
             strokeWidth={2.25}
           />
         )}
       </Button>
     ) : (
-      <span className="h-6 w-6 shrink-0" />
+      <span className="h-5 w-5 shrink-0" />
     )}
     <span className="truncate">{label}</span>
   </span>
@@ -136,9 +136,9 @@ const InspectorNode: React.FC<{
   value: unknown;
   depth?: number;
   path: string;
-  collapsedPaths: Set<string>;
+  expandedPaths: Set<string>;
   onToggle: (path: string) => void;
-}> = ({ label, value, depth = 0, path, collapsedPaths, onToggle }) => {
+}> = ({ label, value, depth = 0, path, expandedPaths, onToggle }) => {
   if (isPrimitive(value)) {
     return (
       <div className={inspectorRowClassName}>
@@ -152,7 +152,7 @@ const InspectorNode: React.FC<{
   }
 
   if (Array.isArray(value)) {
-    const isCollapsed = collapsedPaths.has(path);
+    const isExpanded = expandedPaths.has(path);
     const hasChildren = value.length > 0;
 
     return (
@@ -161,7 +161,7 @@ const InspectorNode: React.FC<{
           <InspectorLabel
             depth={depth}
             label={label ?? 'items'}
-            isExpanded={!isCollapsed}
+            isExpanded={isExpanded}
             onToggle={hasChildren ? () => onToggle(path) : undefined}
           />
           <span className="text-foreground/80">[{value.length} items]</span>
@@ -169,7 +169,7 @@ const InspectorNode: React.FC<{
             Array
           </span>
         </div>
-        {!isCollapsed &&
+        {isExpanded &&
           value.map((item, index) => {
             const itemPath = `${path}.${index}`;
 
@@ -180,7 +180,7 @@ const InspectorNode: React.FC<{
                 value={item}
                 depth={depth + 1}
                 path={itemPath}
-                collapsedPaths={collapsedPaths}
+                expandedPaths={expandedPaths}
                 onToggle={onToggle}
               />
             );
@@ -191,7 +191,7 @@ const InspectorNode: React.FC<{
 
   if (isRecord(value)) {
     const entries = Object.entries(value);
-    const isCollapsed = collapsedPaths.has(path);
+    const isExpanded = expandedPaths.has(path);
     const hasChildren = entries.length > 0;
 
     return (
@@ -200,7 +200,7 @@ const InspectorNode: React.FC<{
           <InspectorLabel
             depth={depth}
             label={label ?? 'object'}
-            isExpanded={!isCollapsed}
+            isExpanded={isExpanded}
             onToggle={hasChildren ? () => onToggle(path) : undefined}
           />
           <span className="text-foreground/80">{`{${entries.length} keys}`}</span>
@@ -208,7 +208,7 @@ const InspectorNode: React.FC<{
             Object
           </span>
         </div>
-        {!isCollapsed &&
+        {isExpanded &&
           entries.map(([key, childValue]) => (
             <InspectorNode
               key={`${path}.${key}`}
@@ -216,7 +216,7 @@ const InspectorNode: React.FC<{
               value={childValue}
               depth={depth + 1}
               path={`${path}.${key}`}
-              collapsedPaths={collapsedPaths}
+              expandedPaths={expandedPaths}
               onToggle={onToggle}
             />
           ))}
@@ -241,12 +241,12 @@ const PayloadPreview: React.FC<{
   data: unknown;
   viewport?: PayloadViewport;
 }> = ({ data, viewport = 'panel' }) => {
-  const [collapsedPaths, setCollapsedPaths] = useState<Set<string>>(
-    () => new Set(),
+  const [expandedPaths, setExpandedPaths] = useState<Set<string>>(
+    () => new Set(['root']),
   );
 
   const handleToggleNode = (path: string) => {
-    setCollapsedPaths((currentPaths) => {
+    setExpandedPaths((currentPaths) => {
       const nextPaths = new Set(currentPaths);
 
       if (nextPaths.has(path)) {
@@ -269,7 +269,7 @@ const PayloadPreview: React.FC<{
         className={`${getScrollHeightClassName(viewport)} w-full overflow-auto rounded-[inherit]`}
       >
         <div className="w-full min-w-0 flex flex-col">
-          <div className="sticky top-0 z-10 grid w-full min-w-0 grid-cols-[minmax(8rem,0.45fr)_minmax(10rem,1fr)_auto] gap-3 rounded-t-[inherit] border-b border-foreground/10 bg-background/95 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-foreground/45 backdrop-blur">
+          <div className="sticky top-0 z-10 grid w-full min-w-0 grid-cols-[minmax(8rem,0.45fr)_minmax(10rem,1fr)_auto] items-center gap-2 rounded-t-[inherit] border-b border-foreground/10 bg-background/95 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-foreground/45 backdrop-blur">
             <span>Key</span>
             <span>Value</span>
             <span className="text-right justify-self-end">Type</span>
@@ -277,7 +277,7 @@ const PayloadPreview: React.FC<{
           <InspectorNode
             value={data}
             path="root"
-            collapsedPaths={collapsedPaths}
+            expandedPaths={expandedPaths}
             onToggle={handleToggleNode}
           />
         </div>
