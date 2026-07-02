@@ -330,6 +330,7 @@ export const RestRequestSettings: React.FC<RestRequestSettingsProps> = ({
                 activeRequest.bodyType === 'raw') && (
                 <div className="flex items-center gap-2">
                   <Tabs
+                    defaultValue="text"
                     value={activeJsonMode}
                     onValueChange={(val) => handleJsonModeChange(val as 'text' | 'ui')}
                   >
