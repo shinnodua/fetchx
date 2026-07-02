@@ -22,10 +22,17 @@ The desktop feature owns desktop-specific presentation and user flows:
 Desktop-specific side effects should stay centralized in `src/services/platform/`. Feature components should call platform service functions instead of scattering Tauri checks throughout the workspace or shared UI.
 
 Desktop release/download API calls should stay in `src/services/api/desktopReleaseApi.ts`.
+Website download URLs must resolve to immutable
+`https://downloads.call3.dev/desktop/stable/<version>/...` release artifacts.
 
 Browser download prompts are shown by detected desktop OS only. The macOS
 download prompt must not be shown on iPhone or iPad browsers, including iPadOS
 desktop-mode browsers that report a Macintosh-like user agent.
+Footer desktop download actions should keep a comfortable press area so the
+download button is easy to click on desktop and touch devices. The footer
+should also stay on its own stacking layer so workspace overlays cannot cover
+part of the download button. Empty fixed overlay viewports, such as the toast
+viewport, must not intercept pointer events over footer actions.
 
 Desktop window close is native. Do not intercept Tauri `onCloseRequested` for
 unsaved-change prompts because it can prevent the window close button from

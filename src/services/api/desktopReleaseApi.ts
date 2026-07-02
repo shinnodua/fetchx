@@ -15,6 +15,7 @@ interface NavigatorUserAgentData {
 const DOWNLOAD_TARGETS = {
   windows: { target: 'windows', arch: 'x86_64' },
 } as const;
+const DESKTOP_RELEASE_ARTIFACT_PATH = /^\/desktop\/stable\/[^/]+\/[^/]+$/;
 
 export async function getDesktopDownloadUrl(
   platform: DesktopDownloadPlatform,
@@ -45,7 +46,7 @@ export async function getDesktopDownloadUrl(
   const serviceOrigin = new URL(API_BASE_URLS.desktopDownloads).origin;
   if (
     downloadUrl.origin !== serviceOrigin ||
-    !downloadUrl.pathname.startsWith('/v1/download/desktop/')
+    !DESKTOP_RELEASE_ARTIFACT_PATH.test(downloadUrl.pathname)
   ) {
     throw new Error(
       'Desktop release service returned an invalid download URL.',

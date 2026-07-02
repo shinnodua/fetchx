@@ -14,6 +14,8 @@ import { useToast } from '../ui/Toast';
 
 const socialLinkClassName =
   'inline-flex h-8 w-8 items-center justify-center rounded-lg text-foreground/60 transition-colors hover:bg-foreground/10 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500/50';
+export const desktopDownloadButtonClassName =
+  'relative z-10 h-10 min-h-10 px-4 text-sm leading-none rounded-lg border-foreground/10 text-foreground/70 hover:bg-foreground/5 hover:text-foreground';
 
 export const AppFooter: React.FC = () => {
   const { toast } = useToast();
@@ -21,7 +23,7 @@ export const AppFooter: React.FC = () => {
   const [downloadingPlatform, setDownloadingPlatform] =
     useState<DesktopDownloadPlatform | null>(null);
   const [platform, setPlatform] = useState<'mac' | 'windows' | 'other'>(
-    'other',
+    getDesktopDownloadDevicePlatform,
   );
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export const AppFooter: React.FC = () => {
   };
 
   return (
-    <footer className="shrink-0 flex items-center justify-between border-t border-foreground/10 bg-background/80 px-4 py-2 backdrop-blur-md">
+    <footer className="relative z-50 shrink-0 flex items-center justify-between border-t border-foreground/10 bg-background/80 px-4 py-2 backdrop-blur-md">
       <div className="flex-1" />
       <div className="flex items-center justify-center gap-3 flex-1">
         <a
@@ -70,14 +72,14 @@ export const AppFooter: React.FC = () => {
           <span className="sr-only">X</span>
         </a>
       </div>
-      <div className="flex items-center justify-end gap-2 flex-1">
+      <div className="relative z-10 flex flex-1 items-center justify-end gap-2">
         {!isDesktop && (
           <>
             {platform === 'mac' && (
               <Button
                 variant="glass"
                 size="sm"
-                className="h-7 px-3 text-[11px] rounded-lg border-foreground/10 text-foreground/70 hover:bg-foreground/5 hover:text-foreground"
+                className={desktopDownloadButtonClassName}
                 isLoading={downloadingPlatform === 'mac'}
                 onClick={() => downloadDesktopApp('mac')}
               >
@@ -88,7 +90,7 @@ export const AppFooter: React.FC = () => {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-7 px-3 text-[11px] rounded-lg border-foreground/10 text-foreground/70 hover:bg-foreground/5 hover:text-foreground"
+                className={desktopDownloadButtonClassName}
                 isLoading={downloadingPlatform === 'windows'}
                 onClick={() => downloadDesktopApp('windows')}
               >
