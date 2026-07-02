@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { DEFAULT_COLLECTIONS } from '../../features/workspace/constants';
 import { createWorkspaceActions } from './workspaceStoreActions';
 import type { WorkspaceState } from './workspaceStoreTypes';
+import { clearWorkspaceResponseLogs } from './workspaceStoreUtils';
 
 export const useWorkspaceStore = create<WorkspaceState>()(
   persist(
@@ -36,7 +37,13 @@ export const useWorkspaceStore = create<WorkspaceState>()(
     {
       name: 'call3-workspace-storage',
       onRehydrateStorage: () => () => {
+        const { collections, drafts } = useWorkspaceStore.getState();
+        const loglessWorkspace = clearWorkspaceResponseLogs(
+          collections,
+          drafts,
+        );
         useWorkspaceStore.setState({
+          ...loglessWorkspace,
           abiLoading: false,
         });
       },

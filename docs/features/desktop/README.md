@@ -25,6 +25,10 @@ Desktop-specific side effects should stay centralized in `src/services/platform/
 
 Desktop release/download API calls should stay in `src/services/api/desktopReleaseApi.ts`.
 
+Browser download prompts are shown by detected desktop OS only. The macOS
+download prompt must not be shown on iPhone or iPad browsers, including iPadOS
+desktop-mode browsers that report a Macintosh-like user agent.
+
 ## Update verification
 
 Desktop updates use Tauri 2 updater signatures. The backend can announce an

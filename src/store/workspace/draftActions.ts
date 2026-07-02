@@ -6,6 +6,7 @@ import {
   createId,
   createRequest,
   findRequestById,
+  mergeResponseLogs,
 } from './workspaceStoreUtils';
 
 type WorkspaceSet = Parameters<StateCreator<WorkspaceState>>[0];
@@ -24,6 +25,12 @@ export const createDraftActions = (set: WorkspaceSet, _get: WorkspaceGet) => ({
           [reqId]: {
             ...currentDraft,
             ...fields,
+            response:
+              fields.response && currentDraft.response
+                ? mergeResponseLogs(currentDraft.response, fields.response)
+                : fields.response !== undefined
+                  ? fields.response
+                  : currentDraft.response,
             headers:
               fields.headers !== undefined
                 ? fields.headers

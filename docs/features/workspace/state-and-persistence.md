@@ -87,7 +87,9 @@ For existing requests:
 - the request draft response logs when a draft exists;
 - the saved request response logs when a saved request exists.
 
-This keeps logs visible while the request is open and preserves logs for saved requests where applicable.
+Response updates append their final summary logs to the existing response logs instead of replacing the console history. This keeps all runs for the request visible in Console Logs during the current page session.
+
+Console Logs are treated as session-only debug output. Persisted workspace state is rehydrated without response logs, so refreshing the page or reopening the tab starts the log history clean while preserving the rest of the workspace state.
 
 ## Saved responses
 

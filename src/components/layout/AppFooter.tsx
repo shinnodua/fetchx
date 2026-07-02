@@ -5,7 +5,10 @@ import {
   type DesktopDownloadPlatform,
   getDesktopDownloadUrl,
 } from '../../services/api';
-import { isDesktopApp } from '../../services/platform';
+import {
+  getDesktopDownloadDevicePlatform,
+  isDesktopApp,
+} from '../../services/platform';
 import { Button } from '../ui/Button';
 import { useToast } from '../ui/Toast';
 
@@ -22,11 +25,7 @@ export const AppFooter: React.FC = () => {
   );
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const userAgent = window.navigator.userAgent.toLowerCase();
-      if (userAgent.includes('mac')) setPlatform('mac');
-      else if (userAgent.includes('win')) setPlatform('windows');
-    }
+    setPlatform(getDesktopDownloadDevicePlatform());
   }, []);
 
   const downloadDesktopApp = async (target: DesktopDownloadPlatform) => {

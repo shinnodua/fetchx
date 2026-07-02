@@ -5,6 +5,7 @@ import type {
   RequestItem,
 } from '../../../features/workspace/types';
 import {
+  clearWorkspaceResponseLogs,
   cloneRequest,
   createAvailableName,
   createCopyName,
@@ -13,6 +14,7 @@ import {
   createNewRequestId,
   createRequest,
   findRequestById,
+  mergeResponseLogs,
   resetDraftForClosedTab,
 } from '../workspaceStoreUtils';
 
@@ -70,6 +72,59 @@ describe('workspace store utilities', () => {
     ]);
     expect(findRequestById(collections, 'r-1')).toBe(request);
     expect(findRequestById(collections, 'missing')).toBeUndefined();
+  });
+
+  test('merges response logs across request runs', () => {
+    const mergedResponse = mergeResponseLogs(
+      {
+        status: 'Pending',
+        data: null,
+        duration: 0,
+        logs: ['[10:00:00] Sending request'],
+      },
+      {
+        status: '200 OK',
+        data: { ok: true },
+        duration: 25,
+        logs: ['[10:00:01] Response received'],
+      },
+    );
+
+    expect(mergedResponse).toMatchObject({
+      status: '200 OK',
+      data: { ok: true },
+      duration: 25,
+      logs: ['[10:00:00] Sending request', '[10:00:01] Response received'],
+    });
+  });
+
+  test('clears response logs from persisted workspace state', () => {
+    const draft = createRequest('r-2', 'Draft', 'GET', {
+      response: {
+        status: '200 OK',
+        data: null,
+        duration: 1,
+        logs: ['persisted draft log'],
+      },
+    });
+    const savedRequest = createRequest('r-3', 'Saved', 'GET', {
+      response: {
+        status: '200 OK',
+        data: null,
+        duration: 1,
+        logs: ['persisted saved log'],
+      },
+    });
+
+    const loglessWorkspace = clearWorkspaceResponseLogs(
+      [{ id: 'c-2', name: 'Collection', requests: [savedRequest] }],
+      { [draft.id]: draft },
+    );
+
+    expect(loglessWorkspace.drafts[draft.id].response?.logs).toEqual([]);
+    expect(loglessWorkspace.collections[0].requests[0].response?.logs).toEqual(
+      [],
+    );
   });
 
   test('resets drafts when tabs close', () => {

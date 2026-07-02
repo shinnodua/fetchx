@@ -332,7 +332,9 @@ export const RestRequestSettings: React.FC<RestRequestSettingsProps> = ({
                   <Tabs
                     defaultValue="text"
                     value={activeJsonMode}
-                    onValueChange={(val) => handleJsonModeChange(val as 'text' | 'ui')}
+                    onValueChange={(val) =>
+                      handleJsonModeChange(val as 'text' | 'ui')
+                    }
                   >
                     <TabsList className="h-7 rounded-md p-0.5">
                       <TabsTrigger

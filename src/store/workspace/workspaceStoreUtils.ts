@@ -2,6 +2,7 @@ import { ERC20_ABI } from '../../features/workspace/constants';
 import type {
   CollectionItem,
   RequestItem,
+  RequestResponse,
 } from '../../features/workspace/types';
 
 export const createId = (prefix: 'c' | 'r' | 'env' | 'v' | 'res') =>
@@ -83,6 +84,42 @@ export const findRequestById = (
 
   return undefined;
 };
+
+export const mergeResponseLogs = (
+  currentResponse: RequestResponse | null | undefined,
+  nextResponse: RequestResponse,
+): RequestResponse => ({
+  ...nextResponse,
+  logs: [...(currentResponse?.logs || []), ...(nextResponse.logs || [])],
+});
+
+const clearRequestResponseLogs = (request: RequestItem): RequestItem => {
+  if (!request.response?.logs.length) return request;
+
+  return {
+    ...request,
+    response: {
+      ...request.response,
+      logs: [],
+    },
+  };
+};
+
+export const clearWorkspaceResponseLogs = (
+  collections: CollectionItem[],
+  drafts: Record<string, RequestItem>,
+) => ({
+  collections: collections.map((collection) => ({
+    ...collection,
+    requests: collection.requests.map(clearRequestResponseLogs),
+  })),
+  drafts: Object.fromEntries(
+    Object.entries(drafts).map(([reqId, draft]) => [
+      reqId,
+      clearRequestResponseLogs(draft),
+    ]),
+  ),
+});
 
 export const resetDraftForClosedTab = (
   reqId: string,

@@ -4,6 +4,14 @@ import type {
   SaveTextFileOptions,
 } from './types';
 
+export type DesktopDownloadDevicePlatform = 'mac' | 'windows' | 'other';
+
+interface DesktopDownloadNavigator {
+  maxTouchPoints?: number;
+  platform?: string;
+  userAgent?: string;
+}
+
 declare global {
   interface Window {
     __TAURI_INTERNALS__?: unknown;
@@ -12,6 +20,35 @@ declare global {
 
 export const isDesktopApp = () =>
   typeof window !== 'undefined' && Boolean(window.__TAURI_INTERNALS__);
+
+export const getDesktopDownloadDevicePlatform = (
+  navigatorSource: DesktopDownloadNavigator | undefined = typeof navigator ===
+  'undefined'
+    ? undefined
+    : navigator,
+): DesktopDownloadDevicePlatform => {
+  if (!navigatorSource) return 'other';
+
+  const platform = navigatorSource.platform?.toLowerCase() || '';
+  const userAgent = navigatorSource.userAgent?.toLowerCase() || '';
+  const maxTouchPoints = navigatorSource.maxTouchPoints || 0;
+  const isIosDevice =
+    /iphone|ipad|ipod/.test(userAgent) ||
+    (platform === 'macintel' && maxTouchPoints > 1);
+
+  if (
+    !isIosDevice &&
+    (platform.startsWith('mac') || userAgent.includes('macintosh'))
+  ) {
+    return 'mac';
+  }
+
+  if (platform.startsWith('win') || userAgent.includes('windows')) {
+    return 'windows';
+  }
+
+  return 'other';
+};
 
 export async function openExternalUrl(url: string) {
   if (isDesktopApp()) {

@@ -92,4 +92,6 @@ Credential-like fields include common names such as authorization, password, sec
 - response received;
 - duration.
 
+Final response logs append to the existing Console Logs history for the request, so repeated runs remain visible until the page is refreshed or the tab is closed.
+
 Response data is redacted against active sensitive environment values before it is stored in UI state.
