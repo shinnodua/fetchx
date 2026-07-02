@@ -65,3 +65,6 @@ export const getWorkspaceHasUnsavedChanges = (
       .find((request) => request.id === tabId);
     return getRequestIsDirty(drafts[tabId], original);
   });
+
+export const shouldUseBrowserUnsavedChangesWarning = (isDesktop: boolean) =>
+  !isDesktop;

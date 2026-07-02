@@ -5,7 +5,6 @@ The desktop feature contains UI behavior that only exists for the Tauri desktop 
 ## Source map
 
 - `src/features/desktop/components/DesktopUpdateManager.tsx`
-- `src/features/desktop/components/DesktopCloseGuard.tsx`
 - `src/features/desktop/components/index.ts`
 - `src/services/platform/`
 - `src/services/api/desktopReleaseApi.ts`
@@ -16,7 +15,6 @@ The desktop feature owns desktop-specific presentation and user flows:
 
 - checking for available desktop updates;
 - surfacing update status;
-- handling desktop close protection where needed;
 - delegating platform detection, updater actions, relaunch behavior, and native file/window operations to `src/services/platform`.
 
 ## Service boundary
@@ -28,6 +26,11 @@ Desktop release/download API calls should stay in `src/services/api/desktopRelea
 Browser download prompts are shown by detected desktop OS only. The macOS
 download prompt must not be shown on iPhone or iPad browsers, including iPadOS
 desktop-mode browsers that report a Macintosh-like user agent.
+
+Desktop window close is native. Do not intercept Tauri `onCloseRequested` for
+unsaved-change prompts because it can prevent the window close button from
+closing the app. Browser `beforeunload` unsaved-change prompts are not
+registered inside the Tauri shell for the same reason.
 
 ## Update verification
 

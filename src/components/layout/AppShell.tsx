@@ -1,10 +1,7 @@
 import { useLocation } from '@tanstack/react-router';
 import type React from 'react';
 import { useEffect } from 'react';
-import {
-  DesktopCloseGuard,
-  DesktopUpdateManager,
-} from '../../features/desktop/components';
+import { DesktopUpdateManager } from '../../features/desktop/components';
 import {
   CollectionTransferButtons,
   EnvironmentSelector,
@@ -35,7 +32,6 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         theme={theme}
         onToggleTheme={toggleTheme}
       />
-      <DesktopCloseGuard />
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
         {children}
       </main>

@@ -1,11 +1,17 @@
 import { useEffect } from 'react';
+import { isDesktopApp } from '../../../services/platform';
 import { useWorkspaceStore } from '../../../store';
-import { getWorkspaceHasUnsavedChanges } from '../utils/requestDirty';
+import {
+  getWorkspaceHasUnsavedChanges,
+  shouldUseBrowserUnsavedChangesWarning,
+} from '../utils/requestDirty';
 
 export const useUnsavedChangesWarning = () => {
   const { collections, tabs, drafts } = useWorkspaceStore();
 
   useEffect(() => {
+    if (!shouldUseBrowserUnsavedChangesWarning(isDesktopApp())) return;
+
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       const hasUnsaved = getWorkspaceHasUnsavedChanges(
         collections,

@@ -4,6 +4,7 @@ import type { CollectionItem, RequestItem } from '../../types';
 import {
   getRequestIsDirty,
   getWorkspaceHasUnsavedChanges,
+  shouldUseBrowserUnsavedChangesWarning,
 } from '../requestDirty';
 
 const baseRequest: RequestItem = {
@@ -62,5 +63,10 @@ describe('request dirty utilities', () => {
         'r-1': baseRequest,
       }),
     ).toBe(false);
+  });
+
+  test('uses browser unload warning only outside desktop app shell', () => {
+    expect(shouldUseBrowserUnsavedChangesWarning(false)).toBe(true);
+    expect(shouldUseBrowserUnsavedChangesWarning(true)).toBe(false);
   });
 });
