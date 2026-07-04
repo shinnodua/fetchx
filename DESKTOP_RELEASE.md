@@ -86,8 +86,9 @@ command collects the x64 NSIS artifact. Intel macOS builds are not part of the
 supported desktop release matrix. The automatic
 `bun run desktop:local:build` command remains available when the operating
 system-specific command is not needed. Copy the resulting files into one
-`desktop-artifacts` directory. The publish command refuses to continue unless
-both signed updater artifacts and the macOS and Windows installers exist.
+`desktop-artifacts` directory when publishing both platforms together. The
+publish command can also release only the platform artifacts that exist in the
+selected artifact directory, so macOS and Windows can be published separately.
 
 Set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`, then publish immutable
 artifacts and activate the release by uploading `channels/stable.json` last:

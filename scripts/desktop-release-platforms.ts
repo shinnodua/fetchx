@@ -1,4 +1,7 @@
-export const REQUIRED_PLATFORMS = ['darwin-aarch64', 'windows-x86_64'] as const;
+const WINDOW = 'windows-x86_64';
+const MACOS = 'darwin-aarch64';
+
+export const REQUIRED_PLATFORMS = [MACOS, WINDOW] as const;
 
 export type ReleasePlatform = (typeof REQUIRED_PLATFORMS)[number];
 
@@ -30,4 +33,8 @@ export function getBuildTargets(
     ];
   }
   throw new Error('Local desktop releases support macOS and Windows only.');
+}
+
+export function isReleasePlatform(value: string): value is ReleasePlatform {
+  return REQUIRED_PLATFORMS.some((platform) => platform === value);
 }

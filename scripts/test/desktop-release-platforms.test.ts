@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import {
   getBuildTargets,
+  isReleasePlatform,
   REQUIRED_PLATFORMS,
 } from '../desktop-release-platforms.ts';
 
@@ -27,5 +28,12 @@ describe('desktop release platforms', () => {
         target: 'x86_64-pc-windows-msvc',
       },
     ]);
+  });
+
+  test('identifies supported release platform fragments', () => {
+    expect(isReleasePlatform('darwin-aarch64')).toBe(true);
+    expect(isReleasePlatform('windows-x86_64')).toBe(true);
+    expect(isReleasePlatform('darwin-x86_64')).toBe(false);
+    expect(isReleasePlatform('stable')).toBe(false);
   });
 });

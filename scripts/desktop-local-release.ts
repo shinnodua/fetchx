@@ -3,7 +3,9 @@ import { basename, join, resolve } from 'node:path';
 import {
   type BuildTarget,
   getBuildTargets,
+  isReleasePlatform,
   REQUIRED_PLATFORMS,
+  type ReleasePlatform,
 } from './desktop-release-platforms.ts';
 import {
   type UpdaterArtifactFragment,
@@ -203,12 +205,15 @@ function validateReleaseArtifacts() {
     throw new Error(`Artifact directory does not exist: ${artifactDirectory}`);
   }
 
-  for (const platform of REQUIRED_PLATFORMS) {
-    const fragmentPath = join(artifactDirectory, `${platform}.json`);
-    if (!existsSync(fragmentPath)) {
-      throw new Error(`Missing release fragment: ${platform}.json`);
-    }
+  const platforms = releasePlatformsInArtifactDirectory();
+  if (platforms.length === 0) {
+    throw new Error(
+      `At least one release fragment is required: ${REQUIRED_PLATFORMS.map((platform) => `${platform}.json`).join(', ')}`,
+    );
+  }
 
+  for (const platform of platforms) {
+    const fragmentPath = join(artifactDirectory, `${platform}.json`);
     const fragment = readJson<UpdaterArtifactFragment>(fragmentPath);
     validateUpdaterFragment(fragment, {
       artifactDirectory,
@@ -218,16 +223,29 @@ function validateReleaseArtifacts() {
   }
 
   const artifactNames = readdirSync(artifactDirectory);
-  if (!artifactNames.some((name) => name.endsWith('.dmg'))) {
+  if (
+    platforms.includes('darwin-aarch64') &&
+    !artifactNames.some((name) => name.endsWith('.dmg'))
+  ) {
     throw new Error(
       'The Apple Silicon macOS DMG installer is required before publishing.',
     );
   }
-  if (!artifactNames.some((name) => name.endsWith('-setup.exe'))) {
+  if (
+    platforms.includes('windows-x86_64') &&
+    !artifactNames.some((name) => name.endsWith('-setup.exe'))
+  ) {
     throw new Error(
       'The Windows NSIS installer is required before publishing.',
     );
   }
+}
+
+function releasePlatformsInArtifactDirectory(): ReleasePlatform[] {
+  return readdirSync(artifactDirectory)
+    .filter((name) => name.endsWith('.json') && name !== 'stable.json')
+    .map((name) => name.replace(/\.json$/, ''))
+    .filter(isReleasePlatform);
 }
 
 function formatOperatingSystem(operatingSystem: NodeJS.Platform) {
