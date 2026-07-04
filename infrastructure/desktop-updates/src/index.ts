@@ -15,6 +15,7 @@ interface PlatformRelease {
   sha256?: string;
   signature: string;
   url: string;
+  download_url?: string;
 }
 
 interface ReleaseManifest {
@@ -96,6 +97,15 @@ export default {
 
     const platform = manifest.platforms[`${target}-${arch}`];
     const updateUrl = platform?.url;
+    let downloadUrl = platform?.download_url || updateUrl;
+
+    // Fallback for macOS: compute DMG URL if not explicitly provided
+    if (!platform?.download_url && updateUrl && target === 'darwin') {
+      const baseUrl = updateUrl.substring(0, updateUrl.lastIndexOf('/'));
+      const dmgArch = arch === 'x86_64' ? 'x64' : arch;
+      downloadUrl = `${baseUrl}/Call3_${manifest.version}_${dmgArch}.dmg`;
+    }
+
     const updateSignature = platform?.signature;
     if (
       !updateUrl?.startsWith('https://downloads.call3.dev/') ||
@@ -110,6 +120,7 @@ export default {
       pub_date: manifest.pub_date,
       url: updateUrl,
       signature: updateSignature,
+      download_url: downloadUrl,
     });
   },
 };

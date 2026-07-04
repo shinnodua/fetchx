@@ -13,6 +13,7 @@ interface PlatformRelease {
   sha256: string;
   signature: string;
   url: string;
+  download_url?: string;
 }
 
 interface ArtifactFragment {
@@ -75,9 +76,16 @@ function collectArtifact() {
   const installers = files.filter(
     (file) => file.endsWith('.dmg') || file.endsWith('-setup.exe'),
   );
+  let downloadUrl: string | undefined;
   for (const installer of installers) {
-    if (installer === updateFile) continue;
-    cpSync(installer, join(outputDirectory, basename(installer)));
+    if (installer === updateFile) {
+      if (!downloadUrl)
+        downloadUrl = `${baseUrl}/desktop/stable/${version}/${artifactName}`;
+      continue;
+    }
+    const installerName = basename(installer);
+    cpSync(installer, join(outputDirectory, installerName));
+    downloadUrl = `${baseUrl}/desktop/stable/${version}/${installerName}`;
   }
 
   const fragment: ArtifactFragment = {
@@ -87,6 +95,7 @@ function collectArtifact() {
       sha256: sha256File(updateFile),
       signature: readFileSync(`${updateFile}.sig`, 'utf8').trim(),
       url: `${baseUrl}/desktop/stable/${version}/${artifactName}`,
+      download_url: downloadUrl,
     },
   };
   writeFileSync(

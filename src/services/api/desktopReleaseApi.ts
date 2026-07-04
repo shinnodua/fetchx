@@ -6,6 +6,7 @@ export type DesktopDownloadPlatform = 'mac' | 'windows';
 
 interface DesktopUpdateResponse {
   url?: unknown;
+  download_url?: unknown;
 }
 
 interface NavigatorUserAgentData {
@@ -25,7 +26,10 @@ export async function getDesktopDownloadUrl(
     `v1/update/${target.target}/${target.arch}/0.0.0`,
   );
 
-  const response = await apiRequest({ url: updateUrl, method: 'GET' });
+  const response = await apiRequest(
+    { url: updateUrl, method: 'GET' },
+    { proxyOnBrowserBlock: true },
+  );
   if (response.status < 200 || response.status >= 300) {
     throw new Error(
       getApiErrorMessage(response.data) ||
@@ -34,15 +38,18 @@ export async function getDesktopDownloadUrl(
   }
 
   const data = response.data as DesktopUpdateResponse;
+  const targetUrl =
+    typeof data.download_url === 'string' ? data.download_url : data.url;
+
   if (
     typeof data !== 'object' ||
     data === null ||
-    typeof data.url !== 'string'
+    typeof targetUrl !== 'string'
   ) {
     throw new Error('Desktop release service returned an invalid response.');
   }
 
-  const downloadUrl = new URL(data.url);
+  const downloadUrl = new URL(targetUrl);
   const serviceOrigin = new URL(API_BASE_URLS.desktopDownloads).origin;
   if (
     downloadUrl.origin !== serviceOrigin ||

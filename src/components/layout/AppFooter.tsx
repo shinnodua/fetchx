@@ -34,7 +34,7 @@ export const AppFooter: React.FC = () => {
     setDownloadingPlatform(target);
     try {
       const downloadUrl = await getDesktopDownloadUrl(target);
-      window.location.assign(downloadUrl);
+      window.open(downloadUrl, '_blank', 'noopener,noreferrer');
     } catch (error) {
       toast({
         title: 'Desktop download unavailable',
