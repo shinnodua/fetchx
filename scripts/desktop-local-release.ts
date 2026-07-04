@@ -1,6 +1,11 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import {
+  type BuildTarget,
+  getBuildTargets,
+  REQUIRED_PLATFORMS,
+} from './desktop-release-platforms.ts';
+import {
   type UpdaterArtifactFragment,
   validateUpdaterFragment,
   validateUpdaterPublicKey,
@@ -16,18 +21,7 @@ interface TauriConfig {
   version: string;
 }
 
-interface BuildTarget {
-  bundles: string;
-  platform: string;
-  target: string;
-}
-
 const ROOT_DIRECTORY = resolve(import.meta.dir, '..');
-const REQUIRED_PLATFORMS = [
-  'darwin-aarch64',
-  'darwin-x86_64',
-  'windows-x86_64',
-] as const;
 const DOWNLOAD_BASE_URL = 'https://downloads.call3.dev';
 const DEFAULT_BUCKET = 'call3-desktop-releases';
 
@@ -89,30 +83,8 @@ async function buildForOperatingSystem(operatingSystem: NodeJS.Platform) {
   await run(['bun', 'run', 'lint']);
   for (const target of targets) {
     await run(['rustup', 'target', 'add', target.target]);
-    await run([
-      'bun',
-      'tauri',
-      'build',
-      '--target',
-      target.target,
-      '--bundles',
-      target.bundles,
-    ]);
-    await run([
-      'bun',
-      'scripts/desktop-artifact.ts',
-      'collect',
-      '--platform',
-      target.platform,
-      '--target-dir',
-      `src-tauri/target/${target.target}/release/bundle`,
-      '--output-dir',
-      artifactDirectory,
-      '--base-url',
-      DOWNLOAD_BASE_URL,
-      '--version',
-      version,
-    ]);
+    await run(tauriBuildCommand(target, operatingSystem));
+    await collectTargetArtifacts(target);
   }
 
   console.log(
@@ -121,6 +93,47 @@ async function buildForOperatingSystem(operatingSystem: NodeJS.Platform) {
   console.log(
     'Combine this directory with artifacts built on the other operating system before publishing.',
   );
+}
+
+function tauriBuildCommand(
+  target: BuildTarget,
+  operatingSystem: NodeJS.Platform,
+) {
+  const command = [
+    'bun',
+    'tauri',
+    'build',
+    '--target',
+    target.target,
+    '--bundles',
+    target.bundles,
+  ];
+
+  if (operatingSystem === 'darwin') {
+    command.push('--skip-stapling');
+  }
+
+  return command;
+}
+
+async function collectTargetArtifacts(target: BuildTarget) {
+  const targetBundleDirectory = `src-tauri/target/${target.target}/release/bundle`;
+
+  await run([
+    'bun',
+    'scripts/desktop-artifact.ts',
+    'collect',
+    '--platform',
+    target.platform,
+    '--target-dir',
+    targetBundleDirectory,
+    '--output-dir',
+    artifactDirectory,
+    '--base-url',
+    DOWNLOAD_BASE_URL,
+    '--version',
+    version,
+  ]);
 }
 
 async function publishRelease() {
@@ -205,9 +218,9 @@ function validateReleaseArtifacts() {
   }
 
   const artifactNames = readdirSync(artifactDirectory);
-  if (artifactNames.filter((name) => name.endsWith('.dmg')).length < 2) {
+  if (!artifactNames.some((name) => name.endsWith('.dmg'))) {
     throw new Error(
-      'Both macOS DMG installers are required before publishing.',
+      'The Apple Silicon macOS DMG installer is required before publishing.',
     );
   }
   if (!artifactNames.some((name) => name.endsWith('-setup.exe'))) {
@@ -215,33 +228,6 @@ function validateReleaseArtifacts() {
       'The Windows NSIS installer is required before publishing.',
     );
   }
-}
-
-function getBuildTargets(operatingSystem: NodeJS.Platform): BuildTarget[] {
-  if (operatingSystem === 'darwin') {
-    return [
-      {
-        target: 'aarch64-apple-darwin',
-        platform: 'darwin-aarch64',
-        bundles: 'app,dmg',
-      },
-      {
-        target: 'x86_64-apple-darwin',
-        platform: 'darwin-x86_64',
-        bundles: 'app,dmg',
-      },
-    ];
-  }
-  if (operatingSystem === 'win32') {
-    return [
-      {
-        target: 'x86_64-pc-windows-msvc',
-        platform: 'windows-x86_64',
-        bundles: 'nsis',
-      },
-    ];
-  }
-  throw new Error('Local desktop releases support macOS and Windows only.');
 }
 
 function formatOperatingSystem(operatingSystem: NodeJS.Platform) {

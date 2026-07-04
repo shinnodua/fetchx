@@ -60,9 +60,20 @@ Set the same version in `package.json`, `src-tauri/Cargo.toml`, and
 `src-tauri/tauri.conf.json`. Set `TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, 
 then build into the shared `desktop-artifacts` directory. On macOS, run:
 
+Inject secrets first
+```bash
+export $(cat .build.env.local | xargs)
+```
+
+Then build:
 ```bash
 bun run desktop:local:build:macos
 ```
+
+The local macOS build uses Tauri's `--skip-stapling` option so Apple
+notarization is submitted without blocking artifact collection. This keeps
+signed updater artifacts and DMG installers available in `desktop-artifacts`
+even when Apple's notarization queue is slow.
 
 On Windows, run:
 
@@ -70,12 +81,13 @@ On Windows, run:
 bun run desktop:local:build:windows
 ```
 
-The macOS command collects Apple Silicon and Intel artifacts, while the Windows
-command collects the x64 NSIS artifact. The automatic
+The macOS command collects the Apple Silicon artifact, while the Windows
+command collects the x64 NSIS artifact. Intel macOS builds are not part of the
+supported desktop release matrix. The automatic
 `bun run desktop:local:build` command remains available when the operating
 system-specific command is not needed. Copy the resulting files into one
 `desktop-artifacts` directory. The publish command refuses to continue unless
-all three signed updater artifacts and the macOS and Windows installers exist.
+both signed updater artifacts and the macOS and Windows installers exist.
 
 Set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`, then publish immutable
 artifacts and activate the release by uploading `channels/stable.json` last:
