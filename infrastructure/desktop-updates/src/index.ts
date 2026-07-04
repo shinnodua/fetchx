@@ -47,10 +47,17 @@ function compareVersions(left: string, right: string) {
   return leftPrerelease.localeCompare(rightPrerelease);
 }
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': '*',
+};
+
 function jsonResponse(body: unknown, status = 200) {
   return Response.json(body, {
     status,
     headers: {
+      ...CORS_HEADERS,
       'Cache-Control': 'no-store',
       'X-Content-Type-Options': 'nosniff',
     },
@@ -59,10 +66,14 @@ function jsonResponse(body: unknown, status = 200) {
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { headers: CORS_HEADERS });
+    }
+
     if (request.method !== 'GET') {
       return new Response('Method Not Allowed', {
         status: 405,
-        headers: { Allow: 'GET' },
+        headers: { Allow: 'GET, OPTIONS', ...CORS_HEADERS },
       });
     }
 
@@ -72,7 +83,7 @@ export default {
     }
 
     const match = UPDATE_PATH.exec(url.pathname);
-    if (!match) return new Response('Not Found', { status: 404 });
+    if (!match) return new Response('Not Found', { status: 404, headers: CORS_HEADERS });
 
     const [, target, arch, currentVersion] = match;
     const manifestObject = await env.DESKTOP_RELEASES.get(
@@ -93,7 +104,7 @@ export default {
     if (comparison === null) {
       return jsonResponse({ error: 'Invalid application version.' }, 400);
     }
-    if (comparison <= 0) return new Response(null, { status: 204 });
+    if (comparison <= 0) return new Response(null, { status: 204, headers: CORS_HEADERS });
 
     const platform = manifest.platforms[`${target}-${arch}`];
     const updateUrl = platform?.url;
@@ -111,7 +122,7 @@ export default {
       !updateUrl?.startsWith('https://downloads.call3.dev/') ||
       !updateSignature?.trim()
     ) {
-      return new Response(null, { status: 204 });
+      return new Response(null, { status: 204, headers: CORS_HEADERS });
     }
 
     return jsonResponse({

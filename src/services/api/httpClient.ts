@@ -300,6 +300,8 @@ function isBrowserFetchBlocked(error: unknown) {
     message.includes('cross-origin') ||
     message.includes('access-control-allow-origin') ||
     message.includes('blocked by access control') ||
-    message.includes('failed to fetch')
+    message.includes('failed to fetch') ||
+    message.includes('load failed') ||
+    message.includes('networkerror')
   );
 }
