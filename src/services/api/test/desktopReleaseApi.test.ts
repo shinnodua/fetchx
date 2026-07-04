@@ -25,7 +25,7 @@ describe('desktop release API', () => {
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://downloads.call3.dev/v1/update/windows/x86_64/0.0.0',
+      'https://updates.call3.dev/v1/update/windows/x86_64/0.0.0',
       { headers: {}, method: 'GET' },
     );
   });

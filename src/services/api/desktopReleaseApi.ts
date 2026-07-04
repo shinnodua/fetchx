@@ -1,4 +1,4 @@
-import { API_BASE_URLS, buildDesktopDownloadsApiUrl } from './config';
+import { API_BASE_URLS, buildDesktopUpdatesApiUrl } from './config';
 import { getApiErrorMessage } from './errors';
 import { apiRequest } from './httpClient';
 
@@ -21,7 +21,7 @@ export async function getDesktopDownloadUrl(
   platform: DesktopDownloadPlatform,
 ): Promise<string> {
   const target = await getDownloadTarget(platform);
-  const updateUrl = buildDesktopDownloadsApiUrl(
+  const updateUrl = buildDesktopUpdatesApiUrl(
     `v1/update/${target.target}/${target.arch}/0.0.0`,
   );
 
