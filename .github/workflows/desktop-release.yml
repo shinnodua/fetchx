@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'app-v*'
+      - 'mac-v*'
+      - 'win-v*'
 
 permissions:
   contents: read
@@ -13,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
+      matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -21,7 +24,23 @@ jobs:
       - id: version
         shell: bash
         run: |
-          TAG_VERSION="${GITHUB_REF_NAME#app-v}"
+          if [[ "$GITHUB_REF_NAME" == app-v* ]]; then
+            TAG_VERSION="${GITHUB_REF_NAME#app-v}"
+            BUILD_MAC=true
+            BUILD_WIN=true
+          elif [[ "$GITHUB_REF_NAME" == mac-v* ]]; then
+            TAG_VERSION="${GITHUB_REF_NAME#mac-v}"
+            BUILD_MAC=true
+            BUILD_WIN=false
+          elif [[ "$GITHUB_REF_NAME" == win-v* ]]; then
+            TAG_VERSION="${GITHUB_REF_NAME#win-v}"
+            BUILD_MAC=false
+            BUILD_WIN=true
+          else
+            echo "Unknown tag format: $GITHUB_REF_NAME"
+            exit 1
+          fi
+          
           PACKAGE_VERSION="$(bun -p "require('./package.json').version")"
           TAURI_VERSION="$(bun -p "require('./src-tauri/tauri.conf.json').version")"
           CARGO_VERSION="$(sed -n 's/^version = "\([^"]*\)"/\1/p' src-tauri/Cargo.toml | head -n 1)"
@@ -29,21 +48,27 @@ jobs:
           test "$TAG_VERSION" = "$TAURI_VERSION"
           test "$TAG_VERSION" = "$CARGO_VERSION"
           echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+          
+          echo "build_mac=$BUILD_MAC" >> "$GITHUB_ENV"
+          echo "build_win=$BUILD_WIN" >> "$GITHUB_ENV"
+
+      - id: matrix
+        shell: bash
+        run: |
+          MATRIX_JSON="[]"
+          if [ "$build_mac" = true ]; then
+            MATRIX_JSON=$(echo "$MATRIX_JSON" | jq -c '. + [{"runner":"macos-14","target":"aarch64-apple-darwin","platform":"darwin-aarch64","bundles":"app,dmg"}]')
+          fi
+          if [ "$build_win" = true ]; then
+            MATRIX_JSON=$(echo "$MATRIX_JSON" | jq -c '. + [{"runner":"windows-latest","target":"x86_64-pc-windows-msvc","platform":"windows-x86_64","bundles":"nsis"}]')
+          fi
+          echo "matrix={\"include\":$MATRIX_JSON}" >> "$GITHUB_OUTPUT"
 
   build:
     needs: validate
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - runner: macos-14
-            target: aarch64-apple-darwin
-            platform: darwin-aarch64
-            bundles: app,dmg
-          - runner: windows-latest
-            target: x86_64-pc-windows-msvc
-            platform: windows-x86_64
-            bundles: nsis
+      matrix: ${{ fromJson(needs.validate.outputs.matrix) }}
     runs-on: ${{ matrix.runner }}
     env:
       APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -129,6 +154,10 @@ jobs:
         with:
           path: desktop-artifacts
           merge-multiple: true
+      - name: Fetch existing manifest
+        shell: bash
+        run: |
+          bun wrangler r2 object get "$R2_BUCKET/channels/stable.json" --file existing-stable.json || echo "No existing manifest found."
       - name: Create release manifest
         run: >-
           bun scripts/desktop-artifact.ts manifest
@@ -136,6 +165,7 @@ jobs:
           --output stable.json
           --version "$RELEASE_VERSION"
           --notes "Call3 $RELEASE_VERSION"
+          --merge-manifest existing-stable.json
       - name: Upload immutable release artifacts
         shell: bash
         run: |

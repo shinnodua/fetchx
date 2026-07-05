@@ -27,6 +27,7 @@ export const TabsHeader: React.FC = () => {
     drafts,
     collectionsPanelCollapsed,
     setActiveTabId,
+    duplicateRequest,
     closeTab,
     closeTabs,
     reorderTabs,
@@ -358,6 +359,7 @@ export const TabsHeader: React.FC = () => {
           request={contextMenuReq}
           tabs={tabs}
           menuRef={contextMenuRef}
+          duplicateRequest={duplicateRequest}
           closeTab={closeTab}
           closeTabWithPrompt={closeTabWithPrompt}
           closeTabs={closeTabs}

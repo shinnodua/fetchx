@@ -22,6 +22,13 @@ interface ArtifactFragment {
   version: string;
 }
 
+interface ReleaseManifest {
+  version: string;
+  notes?: string;
+  pub_date?: string;
+  platforms: Record<string, PlatformRelease>;
+}
+
 const getArgument = (name: string) => {
   const index = process.argv.indexOf(`--${name}`);
   return index === -1 ? undefined : process.argv[index + 1];
@@ -109,6 +116,7 @@ function createManifest() {
   const outputFile = resolve(requiredArgument('output'));
   const version = requiredArgument('version');
   const notes = getArgument('notes') ?? `Call3 ${version}`;
+  const mergeManifestFile = getArgument('merge-manifest');
   const fragments = walkFiles(inputDirectory)
     .filter(
       (file) => file.endsWith('.json') && basename(file) !== 'stable.json',
@@ -123,6 +131,19 @@ function createManifest() {
   const platforms = Object.fromEntries(
     fragments.map((fragment) => [fragment.platform, fragment.release]),
   );
+
+  let mergedPlatforms = { ...platforms };
+  if (mergeManifestFile && existsSync(resolve(mergeManifestFile))) {
+    try {
+      const oldManifest = JSON.parse(readFileSync(resolve(mergeManifestFile), 'utf8')) as ReleaseManifest;
+      if (oldManifest.version === version && oldManifest.platforms) {
+        mergedPlatforms = { ...oldManifest.platforms, ...mergedPlatforms };
+      }
+    } catch (e) {
+      console.warn(`Failed to merge manifest: ${e}`);
+    }
+  }
+
   writeFileSync(
     outputFile,
     `${JSON.stringify(
@@ -130,7 +151,7 @@ function createManifest() {
         version,
         notes,
         pub_date: new Date().toISOString(),
-        platforms,
+        platforms: mergedPlatforms,
       },
       null,
       2,

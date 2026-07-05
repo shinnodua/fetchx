@@ -25,6 +25,7 @@ interface TabContextMenuProps {
   request: RequestItem | null;
   tabs: string[];
   menuRef: React.RefObject<HTMLDivElement | null>;
+  duplicateRequest: (tabId: string) => void;
   closeTab: (tabId: string) => void;
   closeTabWithPrompt: (tabId: string) => void;
   closeTabs: (tabIds: string[]) => void;
@@ -40,6 +41,7 @@ export const TabContextMenu: React.FC<TabContextMenuProps> = ({
   request,
   tabs,
   menuRef,
+  duplicateRequest,
   closeTab,
   closeTabWithPrompt,
   closeTabs,
@@ -225,6 +227,13 @@ export const TabContextMenu: React.FC<TabContextMenuProps> = ({
           >
             Reveal in Sidebar
           </DropdownMenuItem>
+          {request && (
+            <DropdownMenuItem
+              onClick={() => runMenuAction(() => duplicateRequest(tabId))}
+            >
+              Duplicate
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={(event) => {
