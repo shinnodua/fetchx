@@ -135,7 +135,9 @@ function createManifest() {
   let mergedPlatforms = { ...platforms };
   if (mergeManifestFile && existsSync(resolve(mergeManifestFile))) {
     try {
-      const oldManifest = JSON.parse(readFileSync(resolve(mergeManifestFile), 'utf8')) as ReleaseManifest;
+      const oldManifest = JSON.parse(
+        readFileSync(resolve(mergeManifestFile), 'utf8'),
+      ) as ReleaseManifest;
       if (oldManifest.version === version && oldManifest.platforms) {
         mergedPlatforms = { ...oldManifest.platforms, ...mergedPlatforms };
       }
