@@ -158,7 +158,7 @@ jobs:
       - name: Fetch existing manifest
         shell: bash
         run: |
-          bun wrangler r2 object get "$R2_BUCKET/channels/stable.json" --file existing-stable.json || echo "No existing manifest found."
+          bun wrangler r2 object get "$R2_BUCKET/channels/stable.json" --file existing-stable.json --remote || echo "No existing manifest found."
       - name: Create release manifest
         run: >-
           bun scripts/desktop-artifact.ts manifest
