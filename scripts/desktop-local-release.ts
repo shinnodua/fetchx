@@ -143,8 +143,29 @@ async function publishRelease() {
   requireEnvironmentVariable('CLOUDFLARE_API_TOKEN');
   validateReleaseArtifacts();
 
+  const bucket = process.env.R2_BUCKET ?? DEFAULT_BUCKET;
+  const existingManifestPath = join(artifactDirectory, 'existing-stable.json');
+
+  try {
+    await run([
+      'bun',
+      'wrangler',
+      'r2',
+      'object',
+      'get',
+      `${bucket}/channels/stable.json`,
+      '--file',
+      existingManifestPath,
+      '--remote',
+    ]);
+  } catch {
+    console.log(
+      'No existing manifest found on R2 to merge, or failed to fetch.',
+    );
+  }
+
   const manifestPath = join(artifactDirectory, 'stable.json');
-  await run([
+  const manifestCommand = [
     'bun',
     'scripts/desktop-artifact.ts',
     'manifest',
@@ -156,9 +177,14 @@ async function publishRelease() {
     version,
     '--notes',
     getArgument('notes') ?? `Call3 ${version}`,
-  ]);
+  ];
 
-  const bucket = process.env.R2_BUCKET ?? DEFAULT_BUCKET;
+  if (existsSync(existingManifestPath)) {
+    manifestCommand.push('--merge-manifest', existingManifestPath);
+  }
+
+  await run(manifestCommand);
+
   const releaseFiles = readdirSync(artifactDirectory, { withFileTypes: true })
     .filter((entry) => entry.isFile() && !entry.name.endsWith('.json'))
     .map((entry) => join(artifactDirectory, entry.name));
