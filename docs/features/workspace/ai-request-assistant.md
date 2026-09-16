@@ -4,7 +4,7 @@ The AI request assistant lets desktop users chat with a local AI agent to create
 
 ## User Flow
 
-The workspace includes a prominent bottom-left AI Assistant launcher. Opening it shows the request assistant panel above the footer. The panel uses a Flamingo-tinted, translucent surface with distinct header and composer bands, so it remains visually separate from the request workspace in light and dark themes:
+The workspace includes a prominent bottom-left AI Assistant launcher. Opening it shows the request assistant panel above the footer. The panel uses a Flamingo-tinted, translucent surface with distinct header and composer bands, so it remains visually separate from the request workspace in light and dark themes. It scales and fades in from the launcher, then reverses that motion when dismissed; reduced-motion preferences disable the transition:
 
 - If no agent is connected, the panel shows a connect action.
 - Connect opens a dedicated local-agent dialog and runs discovery through the desktop platform bridge.

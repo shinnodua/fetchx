@@ -1,3 +1,4 @@
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChatIcon, SpinnerIcon } from '../../../../assets/svgs';
@@ -71,6 +72,12 @@ export const requestAssistantMessageClassName =
 export const requestAssistantPanelClassName =
   'fixed bottom-20 right-5 z-[60] flex h-[min(680px,calc(100dvh-7rem))] w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-primary-200/80 bg-primary-50/80 shadow-2xl shadow-primary-900/20 backdrop-blur-xl dark:border-primary-800/80 dark:bg-primary-900/25';
 
+export const requestAssistantPanelMotion = {
+  animate: { opacity: 1, scale: 1, y: 0 },
+  exit: { opacity: 0, scale: 0.96, y: 12 },
+  initial: { opacity: 0, scale: 0.96, y: 12 },
+};
+
 const workingMessageContent =
   'Working on your request. This can take a moment.';
 
@@ -88,6 +95,7 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
   launcherLabel,
   onRequestCreated,
 }) => {
+  const prefersReducedMotion = useReducedMotion();
   const { toast } = useToast();
   const addCustomRequest = useWorkspaceStore((state) => state.addCustomRequest);
   const addCollection = useWorkspaceStore((state) => state.addCollection);
@@ -142,6 +150,11 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
     Boolean(selectedAgent),
     isSending,
     Boolean(pendingDuplicateRequest),
+  );
+  const isPanelVisible = isRequestAssistantPanelVisible(
+    isOpen,
+    isConnectDialogOpen,
+    isClearHistoryDialogOpen,
   );
 
   useEffect(() => {
@@ -483,213 +496,223 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
         {launcherLabel && <span>{launcherLabel}</span>}
       </Button>
 
-      {isRequestAssistantPanelVisible(
-        isOpen,
-        isConnectDialogOpen,
-        isClearHistoryDialogOpen,
-      ) && (
-        <div className={requestAssistantPanelClassName}>
-          <div className="flex items-start justify-between gap-3 border-b border-primary-200/70 bg-primary-100/45 p-4 dark:border-primary-800/60 dark:bg-primary-900/30">
-            <div className="min-w-0 space-y-1">
-              <div className="flex items-center gap-2">
-                <h2 className="truncate text-sm font-semibold">
-                  Request Assistant
-                </h2>
-                <Badge variant={selectedAgent ? 'secondary' : 'ghost'}>
-                  {selectedAgent ? 'Connected' : 'Offline'}
-                </Badge>
+      <AnimatePresence>
+        {isPanelVisible && (
+          <motion.div
+            {...requestAssistantPanelMotion}
+            transition={{
+              duration: prefersReducedMotion ? 0 : 0.18,
+              ease: 'easeOut',
+            }}
+            className={requestAssistantPanelClassName}
+          >
+            <div className="flex items-start justify-between gap-3 border-b border-primary-200/70 bg-primary-100/45 p-4 dark:border-primary-800/60 dark:bg-primary-900/30">
+              <div className="min-w-0 space-y-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="truncate text-sm font-semibold">
+                    Request Assistant
+                  </h2>
+                  <Badge variant={selectedAgent ? 'secondary' : 'ghost'}>
+                    {selectedAgent ? 'Connected' : 'Offline'}
+                  </Badge>
+                </div>
+                <p className="text-xs leading-5 text-foreground/55">
+                  Create requests and collections, or save the active request to
+                  a collection with a local agent.
+                </p>
               </div>
-              <p className="text-xs leading-5 text-foreground/55">
-                Create requests and collections, or save the active request to a
-                collection with a local agent.
-              </p>
-            </div>
-            <div className="flex shrink-0 items-center gap-1">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsClearHistoryDialogOpen(true)}
-                disabled={
-                  messages.length === 0 ||
-                  isSending ||
-                  Boolean(pendingDuplicateRequest)
-                }
-                className="h-9 px-2 text-xs"
-                title="Clear chat history"
-              >
-                Clear
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsOpen(false)}
-                className="h-9 w-9 rounded-lg border border-foreground/15 bg-foreground/[0.04] p-0 text-foreground hover:bg-foreground/10 hover:text-foreground"
-                title="Close request assistant"
-                aria-label="Close request assistant"
-              >
-                <span
-                  aria-hidden="true"
-                  className="relative block h-4 w-4 text-foreground"
-                >
-                  <span className="absolute left-1/2 top-1/2 h-0.5 w-4 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full bg-current" />
-                  <span className="absolute left-1/2 top-1/2 h-0.5 w-4 -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-full bg-current" />
-                </span>
-              </Button>
-            </div>
-          </div>
-
-          <div className="border-b border-primary-200/70 bg-background/45 p-4 backdrop-blur-sm dark:border-primary-800/60">
-            {agents.length > 0 ? (
-              <div className="flex items-end gap-2">
-                <Select
-                  size="sm"
-                  label="Agent"
-                  value={selectedAgentId}
-                  options={agents.map((agent) => ({
-                    value: agent.id,
-                    label: agent.name,
-                  }))}
-                  onChange={setSelectedAgentId}
-                />
+              <div className="flex shrink-0 items-center gap-1">
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={handleOpenConnectDialog}
-                  className="h-10 shrink-0 border border-foreground/10"
+                  onClick={() => setIsClearHistoryDialogOpen(true)}
+                  disabled={
+                    messages.length === 0 ||
+                    isSending ||
+                    Boolean(pendingDuplicateRequest)
+                  }
+                  className="h-9 px-2 text-xs"
+                  title="Clear chat history"
                 >
-                  Manage
+                  Clear
                 </Button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="rounded-xl border border-foreground/10 bg-foreground/[0.03] p-3 text-xs leading-5 text-foreground/65">
-                  Call3 looks for supported CLIs on PATH and localhost agent
-                  services on this device.
-                </div>
                 <Button
                   type="button"
-                  variant="primary"
-                  className="w-full"
-                  onClick={handleOpenConnectDialog}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsOpen(false)}
+                  className="h-9 w-9 rounded-lg border border-foreground/15 bg-foreground/[0.04] p-0 text-foreground hover:bg-foreground/10 hover:text-foreground"
+                  title="Close request assistant"
+                  aria-label="Close request assistant"
                 >
-                  Connect Local Agent
+                  <span
+                    aria-hidden="true"
+                    className="relative block h-4 w-4 text-foreground"
+                  >
+                    <span className="absolute left-1/2 top-1/2 h-0.5 w-4 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full bg-current" />
+                    <span className="absolute left-1/2 top-1/2 h-0.5 w-4 -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-full bg-current" />
+                  </span>
                 </Button>
               </div>
-            )}
-          </div>
+            </div>
 
-          <div className="flex-1 space-y-3 overflow-y-auto bg-background/35 p-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                role={
-                  isRequestAssistantWorkingMessage(message)
-                    ? 'status'
-                    : undefined
-                }
-                aria-live={
-                  isRequestAssistantWorkingMessage(message)
-                    ? 'polite'
-                    : undefined
-                }
-                className={cn(
-                  requestAssistantMessageClassName,
-                  isRequestAssistantWorkingMessage(message) &&
-                    'flex items-center gap-2',
-                  message.role === 'user'
-                    ? 'ml-auto bg-primary-500 text-white'
-                    : message.role === 'assistant'
-                      ? 'bg-secondary-50 text-secondary-900 dark:bg-secondary-900/30 dark:text-secondary-100'
-                      : 'bg-foreground/[0.04] text-foreground/65',
-                )}
-              >
-                {isRequestAssistantWorkingMessage(message) && (
-                  <SpinnerIcon
-                    title="Working"
-                    className="h-4 w-4 shrink-0 animate-spin text-secondary-600 motion-reduce:animate-none dark:text-secondary-300"
+            <div className="border-b border-primary-200/70 bg-background/45 p-4 backdrop-blur-sm dark:border-primary-800/60">
+              {agents.length > 0 ? (
+                <div className="flex items-end gap-2">
+                  <Select
+                    size="sm"
+                    label="Agent"
+                    value={selectedAgentId}
+                    options={agents.map((agent) => ({
+                      value: agent.id,
+                      label: agent.name,
+                    }))}
+                    onChange={setSelectedAgentId}
                   />
-                )}
-                <span>{message.content}</span>
-              </div>
-            ))}
-            <div ref={chatEndRef} />
-          </div>
-
-          <div className="border-t border-primary-200/70 bg-secondary-50/55 p-4 dark:border-primary-800/60 dark:bg-secondary-900/15">
-            {pendingDuplicateRequest && (
-              <div className="mb-3 rounded-xl border border-primary-500/25 bg-primary-50/60 p-3 dark:bg-primary-900/15">
-                <p className="break-all text-xs leading-5 text-foreground/70">
-                  {pendingDuplicateRequest.existingRequest.target}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleOpenConnectDialog}
+                    className="h-10 shrink-0 border border-foreground/10"
+                  >
+                    Manage
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="rounded-xl border border-foreground/10 bg-foreground/[0.03] p-3 text-xs leading-5 text-foreground/65">
+                    Call3 looks for supported CLIs on PATH and localhost agent
+                    services on this device.
+                  </div>
                   <Button
                     type="button"
                     variant="primary"
-                    size="sm"
-                    onClick={handleUpdateDuplicateRequest}
+                    className="w-full"
+                    onClick={handleOpenConnectDialog}
                   >
-                    Update existing
+                    Connect Local Agent
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1 space-y-3 overflow-y-auto bg-background/35 p-4">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  role={
+                    isRequestAssistantWorkingMessage(message)
+                      ? 'status'
+                      : undefined
+                  }
+                  aria-live={
+                    isRequestAssistantWorkingMessage(message)
+                      ? 'polite'
+                      : undefined
+                  }
+                  className={cn(
+                    requestAssistantMessageClassName,
+                    isRequestAssistantWorkingMessage(message) &&
+                      'flex items-center gap-2',
+                    message.role === 'user'
+                      ? 'ml-auto bg-primary-500 text-white'
+                      : message.role === 'assistant'
+                        ? 'bg-secondary-50 text-secondary-900 dark:bg-secondary-900/30 dark:text-secondary-100'
+                        : 'bg-foreground/[0.04] text-foreground/65',
+                  )}
+                >
+                  {isRequestAssistantWorkingMessage(message) && (
+                    <SpinnerIcon
+                      title="Working"
+                      className="h-4 w-4 shrink-0 animate-spin text-secondary-600 motion-reduce:animate-none dark:text-secondary-300"
+                    />
+                  )}
+                  <span>{message.content}</span>
+                </div>
+              ))}
+              <div ref={chatEndRef} />
+            </div>
+
+            <div className="border-t border-primary-200/70 bg-secondary-50/55 p-4 dark:border-primary-800/60 dark:bg-secondary-900/15">
+              {pendingDuplicateRequest && (
+                <div className="mb-3 rounded-xl border border-primary-500/25 bg-primary-50/60 p-3 dark:bg-primary-900/15">
+                  <p className="break-all text-xs leading-5 text-foreground/70">
+                    {pendingDuplicateRequest.existingRequest.target}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      onClick={handleUpdateDuplicateRequest}
+                    >
+                      Update existing
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCreateDuplicateRequest}
+                    >
+                      Create new
+                    </Button>
+                  </div>
+                </div>
+              )}
+              <Textarea
+                value={composerValue}
+                onChange={(event) => setComposerValue(event.target.value)}
+                disabled={composerState.disabled}
+                placeholder={
+                  selectedAgent
+                    ? 'Ask for a request or collection, e.g. “Create an Auth collection with a login request.”'
+                    : 'Connect a local agent first.'
+                }
+                className="min-h-[88px] resize-none"
+                onKeyDown={(event) => {
+                  if (
+                    event.key === 'Enter' &&
+                    (event.metaKey || event.ctrlKey)
+                  ) {
+                    event.preventDefault();
+                    void handleSend();
+                  }
+                }}
+              />
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <span aria-live="polite" className="text-xs text-foreground/45">
+                  {composerState.status}
+                </span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setIsOpen(false)}
+                    className="h-10 px-3"
+                  >
+                    Close
                   </Button>
                   <Button
                     type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCreateDuplicateRequest}
+                    variant="primary"
+                    onClick={handleSend}
+                    disabled={
+                      composerState.disabled ||
+                      !composerValue.trim() ||
+                      isSending
+                    }
+                    isLoading={isSending}
                   >
-                    Create new
+                    Send
                   </Button>
                 </div>
               </div>
-            )}
-            <Textarea
-              value={composerValue}
-              onChange={(event) => setComposerValue(event.target.value)}
-              disabled={composerState.disabled}
-              placeholder={
-                selectedAgent
-                  ? 'Ask for a request or collection, e.g. “Create an Auth collection with a login request.”'
-                  : 'Connect a local agent first.'
-              }
-              className="min-h-[88px] resize-none"
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-                  event.preventDefault();
-                  void handleSend();
-                }
-              }}
-            />
-            <div className="mt-3 flex items-center justify-between gap-3">
-              <span aria-live="polite" className="text-xs text-foreground/45">
-                {composerState.status}
-              </span>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setIsOpen(false)}
-                  className="h-10 px-3"
-                >
-                  Close
-                </Button>
-                <Button
-                  type="button"
-                  variant="primary"
-                  onClick={handleSend}
-                  disabled={
-                    composerState.disabled || !composerValue.trim() || isSending
-                  }
-                  isLoading={isSending}
-                >
-                  Send
-                </Button>
-              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <LocalAgentConnectionDialog
         agents={agents}

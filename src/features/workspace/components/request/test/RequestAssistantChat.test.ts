@@ -4,6 +4,7 @@ import {
   isRequestAssistantWorkingMessage,
   requestAssistantMessageClassName,
   requestAssistantPanelClassName,
+  requestAssistantPanelMotion,
   shouldScrollRequestAssistantChatToEnd,
 } from '../RequestAssistantChat';
 
@@ -18,6 +19,24 @@ describe('RequestAssistantChat', () => {
     expect(requestAssistantPanelClassName).toContain('bg-primary-50/80');
     expect(requestAssistantPanelClassName).toContain('border-primary-200/80');
     expect(requestAssistantPanelClassName).toContain('backdrop-blur-xl');
+  });
+
+  test('animates the panel from and toward its launcher', () => {
+    expect(requestAssistantPanelMotion.initial).toEqual({
+      opacity: 0,
+      scale: 0.96,
+      y: 12,
+    });
+    expect(requestAssistantPanelMotion.animate).toEqual({
+      opacity: 1,
+      scale: 1,
+      y: 0,
+    });
+    expect(requestAssistantPanelMotion.exit).toEqual({
+      opacity: 0,
+      scale: 0.96,
+      y: 12,
+    });
   });
 
   test('identifies the in-progress message for its processing animation', () => {
