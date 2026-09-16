@@ -1,6 +1,6 @@
 [package]
 name = "call3"
-version = "0.1.0"
+version = "0.1.1"
 description = "A desktop API and smart-contract workspace"
 authors = ["Call3.dev"]
 license = "MIT"

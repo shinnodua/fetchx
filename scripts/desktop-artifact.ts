@@ -7,6 +7,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { basename, extname, join, resolve } from 'node:path';
+import { isReleasePlatform } from './desktop-release-platforms.ts';
 import { sha256File } from './desktop-release-security.ts';
 
 interface PlatformRelease {
@@ -27,6 +28,14 @@ interface ReleaseManifest {
   notes?: string;
   pub_date?: string;
   platforms: Record<string, PlatformRelease>;
+}
+
+interface CreateManifestOptions {
+  inputDirectory: string;
+  mergeManifestFile?: string;
+  notes?: string;
+  outputFile: string;
+  version: string;
 }
 
 const getArgument = (name: string) => {
@@ -111,15 +120,19 @@ function collectArtifact() {
   );
 }
 
-function createManifest() {
-  const inputDirectory = resolve(requiredArgument('input-dir'));
-  const outputFile = resolve(requiredArgument('output'));
-  const version = requiredArgument('version');
-  const notes = getArgument('notes') ?? `Call3 ${version}`;
-  const mergeManifestFile = getArgument('merge-manifest');
+export function createManifest({
+  inputDirectory: requestedInputDirectory,
+  mergeManifestFile,
+  notes,
+  outputFile: requestedOutputFile,
+  version,
+}: CreateManifestOptions) {
+  const inputDirectory = resolve(requestedInputDirectory);
+  const outputFile = resolve(requestedOutputFile);
   const fragments = walkFiles(inputDirectory)
     .filter(
-      (file) => file.endsWith('.json') && basename(file) !== 'stable.json',
+      (file) =>
+        file.endsWith('.json') && isReleasePlatform(basename(file, '.json')),
     )
     .map((file) => JSON.parse(readFileSync(file, 'utf8')) as ArtifactFragment);
 
@@ -151,7 +164,7 @@ function createManifest() {
     `${JSON.stringify(
       {
         version,
-        notes,
+        notes: notes ?? `Call3 ${version}`,
         pub_date: new Date().toISOString(),
         platforms: mergedPlatforms,
       },
@@ -161,7 +174,16 @@ function createManifest() {
   );
 }
 
-const command = process.argv[2];
-if (command === 'collect') collectArtifact();
-else if (command === 'manifest') createManifest();
-else throw new Error('Expected the collect or manifest command.');
+if (import.meta.main) {
+  const command = process.argv[2];
+  if (command === 'collect') collectArtifact();
+  else if (command === 'manifest') {
+    createManifest({
+      inputDirectory: requiredArgument('input-dir'),
+      mergeManifestFile: getArgument('merge-manifest'),
+      notes: getArgument('notes'),
+      outputFile: requiredArgument('output'),
+      version: requiredArgument('version'),
+    });
+  } else throw new Error('Expected the collect or manifest command.');
+}

@@ -55,6 +55,12 @@ Release scripts enforce the required trust boundary:
 - `channels/stable.json` is published only after all immutable artifacts are
   uploaded.
 
+When assembling a release manifest, only platform fragment files such as
+`darwin-aarch64.json` and `windows-x86_64.json` are considered release inputs.
+The fetched `existing-stable.json` manifest is used only to merge artifacts
+from another build of the same release version; it is never validated as a
+new artifact fragment.
+
 The Cloudflare Worker and R2 bucket do not hold signing keys. Treat them as an
 untrusted distribution path that the client verifies cryptographically before
 installation.
