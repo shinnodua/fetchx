@@ -14,7 +14,7 @@ function withTempDirectory(callback: (directory: string) => void) {
 }
 
 describe('desktop artifact manifest creation', () => {
-  test('ignores a prior stable manifest when validating new release fragments', () => {
+  test('preserves prior platform entries without validating them as new fragments', () => {
     withTempDirectory((directory) => {
       const outputFile = join(directory, 'stable.json');
       const existingManifestFile = join(directory, 'existing-stable.json');
@@ -56,6 +56,9 @@ describe('desktop artifact manifest creation', () => {
         platforms: {
           'darwin-aarch64': {
             sha256: 'new-macos-checksum',
+          },
+          'windows-x86_64': {
+            sha256: 'old-windows-checksum',
           },
         },
         version: '0.1.1',

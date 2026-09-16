@@ -151,7 +151,7 @@ export function createManifest({
       const oldManifest = JSON.parse(
         readFileSync(resolve(mergeManifestFile), 'utf8'),
       ) as ReleaseManifest;
-      if (oldManifest.version === version && oldManifest.platforms) {
+      if (oldManifest.platforms) {
         mergedPlatforms = { ...oldManifest.platforms, ...mergedPlatforms };
       }
     } catch (e) {
