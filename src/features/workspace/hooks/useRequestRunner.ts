@@ -11,6 +11,7 @@ import {
 } from '../utils/environment';
 import {
   createImportedRequestName,
+  createPastedUrlRequestUpdate,
   parseRequestImportContent,
 } from '../utils/requestImport';
 import { getWalletErrorMessage } from '../utils/walletError';
@@ -58,11 +59,10 @@ export const useRequestRunner = (
 
     const isCurl = lowerText.startsWith('curl');
     const isFetch = lowerText.startsWith('fetch');
-    const isUrlWithParams =
-      (lowerText.startsWith('http://') || lowerText.startsWith('https://')) &&
-      pastedText.includes('?');
+    const isUrl =
+      lowerText.startsWith('http://') || lowerText.startsWith('https://');
 
-    if (!isCurl && !isFetch && !isUrlWithParams) return;
+    if (!isCurl && !isFetch && !isUrl) return;
 
     event.preventDefault();
 
@@ -77,14 +77,16 @@ export const useRequestRunner = (
         return;
       }
 
-      if (isUrlWithParams) {
-        updateActiveRequest({
-          target: parsed.target,
-          queryParams: parsed.queryParams || [],
-        });
+      if (isUrl) {
+        updateActiveRequest(
+          createPastedUrlRequestUpdate(
+            activeRequest?.type || 'GET',
+            pastedText,
+          ),
+        );
         toast({
-          title: 'URL Parameters Parsed',
-          description: 'URL and query parameters updated successfully.',
+          title: 'Request Imported',
+          description: 'URL, title, and query parameters updated successfully.',
           type: 'success',
         });
         return;

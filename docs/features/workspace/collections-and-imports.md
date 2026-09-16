@@ -98,11 +98,13 @@ The target input paste flow uses `parseRequestImportContent`.
 
 Supported content:
 
-- URL with query string;
+- HTTP(S) URL;
 - cURL command;
 - fetch snippet.
 
-For URLs with query strings, paste updates only target and query params.
+For HTTP(S) URLs, paste updates the target, query params, and generates a
+request name using the selected request method (for example,
+`POST api.example.com/users`).
 
 For cURL/fetch snippets, paste updates:
 

@@ -108,4 +108,32 @@ describe('workspace draft actions', () => {
       '[10:00:01] Response received',
     ]);
   });
+
+  test('moves a saved request into the selected collection', () => {
+    const request = createRequest('r-1', 'Profile', 'GET');
+    let state: WorkspaceState = {
+      ...createTestWorkspaceState(),
+      activeTabId: request.id,
+      collections: [
+        { id: 'source', name: 'Source', requests: [request] },
+        { id: 'target', name: 'Target', requests: [] },
+      ],
+      drafts: {
+        [request.id]: { ...request, target: 'https://api.example.com/profile' },
+      },
+    };
+    const set = ((partial) => {
+      const nextState =
+        typeof partial === 'function' ? partial(state) : partial;
+      state = { ...state, ...nextState };
+    }) as WorkspaceSet;
+    const get = (() => state) as WorkspaceGet;
+
+    createDraftActions(set, get).saveDraft(request.id, 'target');
+
+    expect(state.collections[0].requests).toEqual([]);
+    expect(state.collections[1].requests).toMatchObject([
+      { id: request.id, target: 'https://api.example.com/profile' },
+    ]);
+  });
 });

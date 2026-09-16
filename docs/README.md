@@ -5,6 +5,7 @@ This folder documents the product features and the shared implementation boundar
 ## Feature docs
 
 - [Workspace](./features/workspace/README.md): request builder, collections, environments, ABI loading, request execution, saved responses, imports, and persistence.
+- [AI request assistant](./features/workspace/ai-request-assistant.md): local-agent chat flow for creating or updating request drafts.
 - [Desktop](./features/desktop/README.md): desktop-only update and close-guard feature surface.
 - [Design system showcase](./features/design-system/README.md): route and components for the Flamingo design system demo.
 

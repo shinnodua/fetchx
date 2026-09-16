@@ -180,6 +180,18 @@ Keep static assets organized by type:
 
 ---
 
+## 🦀 Rust and Tauri Rules
+
+- Keep `src-tauri/src/lib.rs` as the application bootstrap: plugin registration, setup, command registration, and the `run` entry point only.
+- Organize desktop capabilities into focused modules under `src-tauri/src/<feature>/`. Tauri command functions should be thin adapters that validate or dispatch work to feature modules.
+- Separate Tauri serialization types, command orchestration, process execution, local networking, and response parsing when a capability needs more than one responsibility. Keep Rust source files below the 400-line limit.
+- Keep native integrations local-first. Validate and constrain endpoints before opening sockets or processes; do not introduce unrestricted remote network access from the desktop shell.
+- Use `Result<T, String>` consistently for native command flows when the string is user-safe error text surfaced through Tauri. Preserve context at the command boundary.
+- Put Rust unit tests in a `test/` folder adjacent to the feature module they cover. Test pure parsing and command construction without calling installed local CLIs or live endpoints.
+- For Rust changes, run `cargo fmt --check`, `cargo clippy --all-targets --all-features -- -D warnings`, and `cargo test` from `src-tauri/` before finishing.
+
+---
+
 ## ✅ Unit Test Rules
 
 - Every code task must add or update unit tests for the behavior being changed.

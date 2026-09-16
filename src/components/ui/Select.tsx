@@ -1,6 +1,10 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useRef, useState } from 'react';
-import { CheckSolidIcon, ChevronDownIcon } from '../../assets/svgs';
+import {
+  CheckSolidIcon,
+  ChevronDownIcon,
+  SpinnerIcon,
+} from '../../assets/svgs';
 import { cn } from '../../utils/cn';
 
 export interface SelectOption {
@@ -19,8 +23,17 @@ export interface SelectProps {
   className?: string;
   dropdownClassName?: string;
   disabled?: boolean;
+  isLoading?: boolean;
+  loadingLabel?: string;
   size?: 'sm' | 'md';
 }
+
+export const getSelectTriggerLabel = (
+  selectedOption: SelectOption | undefined,
+  isLoading: boolean,
+  loadingLabel: string,
+  placeholder: string,
+) => (isLoading ? loadingLabel : (selectedOption?.label ?? placeholder));
 
 export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
   (
@@ -33,6 +46,8 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
       className,
       dropdownClassName,
       disabled,
+      isLoading = false,
+      loadingLabel = 'Loading…',
       size = 'md',
     },
     ref,
@@ -45,6 +60,12 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
 
     const selectedValue = value !== undefined ? value : internalValue;
     const selectedOption = options.find((opt) => opt.value === selectedValue);
+    const triggerLabel = getSelectTriggerLabel(
+      selectedOption,
+      isLoading,
+      loadingLabel,
+      placeholder,
+    );
 
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
@@ -78,33 +99,43 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
         )}
         <div
           ref={ref}
-          onClick={() => !disabled && setIsOpen(!isOpen)}
+          onClick={() => !disabled && !isLoading && setIsOpen(!isOpen)}
           className={cn(
             'flex w-full items-center justify-between rounded-xl border border-foreground/10 bg-background/50 text-sm text-foreground shadow-sm backdrop-blur-sm transition-all cursor-pointer',
             size === 'sm' ? 'h-10 px-3 py-1.5' : 'h-[44px] px-4 py-2',
             'hover:border-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500',
-            disabled && 'cursor-not-allowed opacity-50',
+            (disabled || isLoading) && 'cursor-not-allowed opacity-50',
             isOpen && 'border-primary-500 ring-2 ring-primary-500/50',
           )}
-          tabIndex={disabled ? -1 : 0}
+          tabIndex={disabled || isLoading ? -1 : 0}
+          aria-busy={isLoading}
         >
           <span
             className={cn(
               'block truncate min-w-0 mr-2 flex-1 text-left',
-              selectedOption ? 'text-foreground' : 'text-foreground/40',
+              selectedOption || isLoading
+                ? 'text-foreground'
+                : 'text-foreground/40',
             )}
           >
-            {selectedOption ? selectedOption.label : placeholder}
+            {triggerLabel}
           </span>
-          <motion.span
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            className="h-4 w-4 text-foreground/50"
-          >
-            <ChevronDownIcon
-              title="Toggle select options"
-              className="h-4 w-4"
+          {isLoading ? (
+            <SpinnerIcon
+              title={loadingLabel}
+              className="h-4 w-4 shrink-0 animate-spin text-primary-600"
             />
-          </motion.span>
+          ) : (
+            <motion.span
+              animate={{ rotate: isOpen ? 180 : 0 }}
+              className="h-4 w-4 text-foreground/50"
+            >
+              <ChevronDownIcon
+                title="Toggle select options"
+                className="h-4 w-4"
+              />
+            </motion.span>
+          )}
         </div>
 
         <AnimatePresence>

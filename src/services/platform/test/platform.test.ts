@@ -1,6 +1,10 @@
 import { describe, expect, test } from 'bun:test';
 
-import { getDesktopDownloadDevicePlatform } from '../platform';
+import {
+  discoverLocalAiAgents,
+  getDesktopDownloadDevicePlatform,
+  localAiAgentCommandNames,
+} from '../platform';
 
 describe('platform utilities', () => {
   test('detects macOS devices for desktop downloads', () => {
@@ -43,5 +47,17 @@ describe('platform utilities', () => {
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
       }),
     ).toBe('windows');
+  });
+
+  test('does not discover local AI agents in the web app shell', async () => {
+    expect(await discoverLocalAiAgents()).toEqual([]);
+  });
+
+  test('uses the desktop command names registered by the local-agent bridge', () => {
+    expect(localAiAgentCommandNames).toEqual({
+      chat: 'chat_with_ai_agent',
+      discover: 'discover_ai_agents',
+      discoverModels: 'discover_ai_agent_models',
+    });
   });
 });

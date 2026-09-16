@@ -310,8 +310,7 @@ export const TabsHeader: React.FC = () => {
         })}
       </div>
 
-      {/* Dropdown Menu for Add/Import Request - Outside scrollable container */}
-      <div className="flex shrink-0 items-center border-l border-foreground/10 px-2">
+      <div className="flex shrink-0 items-center gap-1 border-l border-foreground/10 px-2">
         <DropdownMenu
           align="right"
           className="w-56"

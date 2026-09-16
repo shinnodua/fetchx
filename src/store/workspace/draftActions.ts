@@ -96,6 +96,11 @@ export const createDraftActions = (set: WorkspaceSet, _get: WorkspaceGet) => ({
       const draft = state.drafts[reqId];
       if (!draft) return {};
 
+      const targetCollection = state.collections.find(
+        (collection) => collection.id === colId,
+      );
+      if (!targetCollection) return {};
+
       const isNew = reqId.startsWith('r-new-');
       const savedId = isNew ? createId('r') : reqId;
       const savedReq: RequestItem = { ...draft, id: savedId };
@@ -105,12 +110,14 @@ export const createDraftActions = (set: WorkspaceSet, _get: WorkspaceGet) => ({
               ? { ...collection, requests: [...collection.requests, savedReq] }
               : collection,
           )
-        : state.collections.map((collection) => ({
-            ...collection,
-            requests: collection.requests.map((request) =>
-              request.id === reqId ? savedReq : request,
-            ),
-          }));
+        : state.collections.map((collection) => {
+            const requests = collection.requests.filter(
+              (request) => request.id !== reqId,
+            );
+            return collection.id === colId
+              ? { ...collection, requests: [...requests, savedReq] }
+              : { ...collection, requests };
+          });
 
       const updatedDrafts = { ...state.drafts };
       const updatedTabs = isNew

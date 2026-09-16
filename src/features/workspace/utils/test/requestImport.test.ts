@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 
 import {
   createImportedRequestName,
+  createPastedUrlRequestUpdate,
   parseCurl,
   parseRequestImportContent,
 } from '../requestImport';
@@ -67,6 +68,27 @@ describe('request import utilities', () => {
       ],
       queryParams: [{ key: 'page', value: '1' }],
       body: 'title=Hello',
+    });
+  });
+
+  test('generates a name when a URL is pasted into an existing REST request', () => {
+    expect(
+      createPastedUrlRequestUpdate(
+        'POST',
+        'https://api.example.com/users?include=roles',
+      ),
+    ).toEqual({
+      name: 'POST api.example.com/users',
+      target: 'https://api.example.com/users',
+      queryParams: [{ key: 'include', value: 'roles' }],
+    });
+
+    expect(
+      createPastedUrlRequestUpdate('GET', 'https://api.example.com/health'),
+    ).toEqual({
+      name: 'GET api.example.com/health',
+      target: 'https://api.example.com/health',
+      queryParams: [],
     });
   });
 

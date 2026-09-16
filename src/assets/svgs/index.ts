@@ -1,3 +1,4 @@
+export * from './ChatIcon';
 export * from './CheckIcon';
 export * from './CheckSolidIcon';
 export * from './ChevronDownIcon';

@@ -1,16 +1,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type Theme = 'light' | 'dark';
+
+export const DEFAULT_THEME: Theme = 'light';
+
 interface AppState {
-  theme: 'light' | 'dark';
-  setTheme: (theme: 'light' | 'dark') => void;
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
 }
 
 export const useStore = create<AppState>()(
   persist(
     (set) => ({
-      theme: 'dark',
+      theme: DEFAULT_THEME,
       setTheme: (theme) => set({ theme }),
       toggleTheme: () =>
         set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
@@ -22,6 +26,8 @@ export const useStore = create<AppState>()(
 );
 
 export * from './abi/useAbiStore';
+export * from './assistant/useAiAssistantChatStore';
+export * from './assistant/useAiAssistantStore';
 export * from './cors/useCorsStore';
 export * from './environment/useEnvironmentStore';
 export * from './rpc/useRpcStore';

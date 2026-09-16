@@ -9,14 +9,23 @@ Global shared state lives under `src/store/`.
 - `rpc/useRpcStore.ts`: custom RPC endpoints and manage-RPC dialog state.
 - `abi/useAbiStore.ts`: saved contract ABIs and manage-ABI dialog state.
 - `cors/useCorsStore.ts`: origins known to be browser-blocked and eligible for direct-skip proxy retry.
-- `index.ts`: store exports and shared store barrel.
+- `assistant/useAiAssistantStore.ts`: selected local agent identifier.
+- `assistant/useAiAssistantChatStore.ts`: persistent local AI assistant chat history.
+- `index.ts`: store exports, shared store barrel, and persisted app-level UI state such as theme.
 
 ## Persistence keys
 
+- App: `app-storage`
 - Workspace: `call3-workspace-storage`
 - Environment: `call3-environment-storage`
 - RPC: `call3-rpc-storage`
 - ABI: `call3-abi-storage`
+- AI assistant: `call3-ai-assistant-storage`
+- AI assistant chat: `call3-ai-assistant-chat-storage`
+
+## App store
+
+The app store owns the current light/dark theme. New installs default to the light theme, and explicit user theme choices are persisted under `app-storage`.
 
 ## Workspace store
 

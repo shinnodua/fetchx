@@ -45,6 +45,20 @@ export const createImportedRequestName = (method: string, target: string) => {
   return name;
 };
 
+export const createPastedUrlRequestUpdate = (
+  method: string,
+  pastedUrl: string,
+): Pick<RequestItem, 'name' | 'target' | 'queryParams'> => {
+  const parsed = parseRequestImportContent(pastedUrl);
+  const target = parsed.target || pastedUrl;
+
+  return {
+    name: createImportedRequestName(method, target),
+    target,
+    queryParams: parsed.queryParams || [],
+  };
+};
+
 const tokenizeCurl = (curl: string) => {
   const cleanCurl = curl
     .replace(/\\\r?\n/g, ' ')

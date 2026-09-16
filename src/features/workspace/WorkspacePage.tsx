@@ -1,10 +1,11 @@
 import type React from 'react';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useWorkspaceStore } from '../../store';
 import {
   ActiveRequestWorkspace,
   CollectionsPanel,
   EnvironmentDialog,
+  RequestAssistantChat,
   TabsHeader,
   UnlockSensitiveDialog,
   WorkspaceDialogs,
@@ -24,6 +25,10 @@ export const WorkspacePage: React.FC = () => {
   // Global hooks
   useAutoCollapseSidebar();
   useUnsavedChangesWarning();
+  const [
+    shouldRunCreatedAssistantRequest,
+    setShouldRunCreatedAssistantRequest,
+  ] = useState(false);
 
   // Store bindings
   const {
@@ -89,6 +94,13 @@ export const WorkspacePage: React.FC = () => {
     handleSimulateRequest,
   } = useRequestRunner(activeRequest, activeTabId, publicClient);
 
+  useEffect(() => {
+    if (!shouldRunCreatedAssistantRequest || !activeRequest) return;
+
+    setShouldRunCreatedAssistantRequest(false);
+    void handleRunRequest();
+  }, [activeRequest, handleRunRequest, shouldRunCreatedAssistantRequest]);
+
   const validTabs = useMemo(() => {
     return tabs.filter((tabId) => {
       if (drafts[tabId]) return true;
@@ -139,6 +151,13 @@ export const WorkspacePage: React.FC = () => {
           </div>
         )}
       </main>
+
+      <RequestAssistantChat
+        activeRequest={activeRequest}
+        onRequestCreated={setShouldRunCreatedAssistantRequest}
+        launcherLabel="AI Assistant"
+        launcherClassName="absolute bottom-4 right-4 z-[55] shadow-xl shadow-primary-500/25 ring-2 ring-background"
+      />
 
       <WorkspaceDialogs />
       <EnvironmentDialog />

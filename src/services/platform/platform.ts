@@ -1,10 +1,19 @@
 import type {
+  AiAgentChatResult,
   DesktopUpdate,
+  LocalAiAgent,
+  LocalAiAgentModel,
   OpenTextFileOptions,
   SaveTextFileOptions,
 } from './types';
 
 export type DesktopDownloadDevicePlatform = 'mac' | 'windows' | 'other';
+
+export const localAiAgentCommandNames = {
+  chat: 'chat_with_ai_agent',
+  discover: 'discover_ai_agents',
+  discoverModels: 'discover_ai_agent_models',
+} as const;
 
 interface DesktopDownloadNavigator {
   maxTouchPoints?: number;
@@ -138,4 +147,35 @@ export async function relaunchDesktopApp() {
   if (!isDesktopApp()) return;
   const { relaunch } = await import('@tauri-apps/plugin-process');
   await relaunch();
+}
+
+export async function discoverLocalAiAgents(): Promise<LocalAiAgent[]> {
+  if (!isDesktopApp()) return [];
+
+  const { invoke } = await import('@tauri-apps/api/core');
+  return invoke<LocalAiAgent[]>(localAiAgentCommandNames.discover);
+}
+
+export async function chatWithLocalAiAgent(input: {
+  agent: LocalAiAgent;
+  model?: string;
+  prompt: string;
+}): Promise<AiAgentChatResult> {
+  if (!isDesktopApp()) {
+    throw new Error('Local AI agents are available in the desktop app.');
+  }
+
+  const { invoke } = await import('@tauri-apps/api/core');
+  return invoke<AiAgentChatResult>(localAiAgentCommandNames.chat, { input });
+}
+
+export async function discoverLocalAiAgentModels(
+  agent: LocalAiAgent,
+): Promise<LocalAiAgentModel[]> {
+  if (!isDesktopApp()) return [];
+
+  const { invoke } = await import('@tauri-apps/api/core');
+  return invoke<LocalAiAgentModel[]>(localAiAgentCommandNames.discoverModels, {
+    agent,
+  });
 }
