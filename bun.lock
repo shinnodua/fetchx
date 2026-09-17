@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "call3",
+      "name": "fetchx",
       "dependencies": {
         "@heroui/react": "3.1.0",
         "@rainbow-me/rainbowkit": "2.2.11",

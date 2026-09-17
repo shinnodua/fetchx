@@ -54,7 +54,7 @@ export const useAbiStore = create<AbiState>()(
         })),
     }),
     {
-      name: 'call3-abi-storage',
+      name: 'fetchx-abi-storage',
     },
   ),
 );

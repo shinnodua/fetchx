@@ -20,7 +20,7 @@ Workspace state is persisted through Zustand.
 The workspace store persists under:
 
 ```text
-call3-workspace-storage
+fetchx-workspace-storage
 ```
 
 On rehydrate, transient `abiLoading` is reset to `false`.

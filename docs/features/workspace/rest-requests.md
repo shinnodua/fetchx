@@ -64,7 +64,7 @@ useRequestRunner.handleRunRequest
 
 REST requests are direct-first. The browser attempts to call the target URL directly before any proxy is used.
 
-The Call3 proxy fallback is only enabled with `proxyOnBrowserBlock: true`, and only when the caught browser error is explicitly classified as CORS/access-control related by `isBrowserFetchBlocked`.
+The Fetchx proxy fallback is only enabled with `proxyOnBrowserBlock: true`, and only when the caught browser error is explicitly classified as CORS/access-control related by `isBrowserFetchBlocked`.
 
 Do not route all REST traffic through the proxy by default.
 

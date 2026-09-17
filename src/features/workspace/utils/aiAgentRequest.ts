@@ -243,8 +243,8 @@ export function buildAiAgentPrompt(input: {
     ? JSON.stringify(input.activeRequest, null, 2)
     : 'null';
 
-  return `You are an API and smart-contract request assistant inside Call3.
-Turn the user's chat message into a Call3 request or collection action.
+  return `You are an API and smart-contract request assistant inside Fetchx.
+Turn the user's chat message into a Fetchx request or collection action.
 
 Rules:
 - Return only JSON. Do not wrap it in markdown.

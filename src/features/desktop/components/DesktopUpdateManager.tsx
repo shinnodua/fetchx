@@ -27,7 +27,7 @@ export function DesktopUpdateManager() {
         setStatus(nextUpdate ? 'available' : 'idle');
         setDialogOpen(Boolean(nextUpdate));
         if (!nextUpdate && showCurrentMessage) {
-          toast({ title: 'Call3 is up to date', type: 'success' });
+          toast({ title: 'Fetchx is up to date', type: 'success' });
         }
       } catch (error) {
         setStatus('idle');
@@ -58,7 +58,7 @@ export function DesktopUpdateManager() {
     if (getWorkspaceHasUnsavedChanges(collections, tabs, drafts)) {
       toast({
         title: 'Save or discard your changes first',
-        description: 'Call3 needs to restart after installing the update.',
+        description: 'Fetchx needs to restart after installing the update.',
         type: 'warning',
       });
       return;
@@ -95,7 +95,7 @@ export function DesktopUpdateManager() {
       <Dialog
         isOpen={dialogOpen}
         onClose={() => status !== 'downloading' && setDialogOpen(false)}
-        title={update ? `Call3 ${update.version} is available` : 'App update'}
+        title={update ? `Fetchx ${update.version} is available` : 'App update'}
         description={
           update?.publishedAt ? `Published ${update.publishedAt}` : undefined
         }

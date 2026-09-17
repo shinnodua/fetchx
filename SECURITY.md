@@ -10,7 +10,7 @@ Please report security issues privately before opening a public issue. Use one
 of these channels:
 
 - GitHub Security Advisories, if available for this repository.
-- Email the maintainer at: security@call3.dev
+- Email the maintainer at: security@fetchx.dev
 
 Include:
 
@@ -45,7 +45,7 @@ Out of scope:
 
 ## Backend API Note
 
-This frontend may call a Call3 backend API through `VITE_API_URL_CALL3`.
+This frontend may call a Fetchx backend API through `VITE_API_URL_FETCHX`.
 Security findings for backend endpoints such as proxying, contract metadata
 lookup, or bytecode decoding should clearly identify the endpoint and whether
 the behavior is reproducible without modifying this frontend.

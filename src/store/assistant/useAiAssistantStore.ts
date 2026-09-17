@@ -23,7 +23,7 @@ export const useAiAssistantStore = create<AiAssistantState>()(
         })),
     }),
     {
-      name: 'call3-ai-assistant-storage',
+      name: 'fetchx-ai-assistant-storage',
       partialize: (state) => ({
         selectedAgentId: state.selectedAgentId,
         selectedAgentModels: state.selectedAgentModels,

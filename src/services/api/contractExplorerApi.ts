@@ -1,4 +1,4 @@
-import { buildCall3ApiUrl } from './config';
+import { buildFetchxApiUrl } from './config';
 import { getApiErrorMessage } from './errors';
 import { apiRequest } from './httpClient';
 
@@ -17,15 +17,15 @@ interface ContractInfoResponse {
 }
 
 /**
- * Fetches normalized contract metadata through call3-service.
+ * Fetches normalized contract metadata through fetchx-service.
  */
 export async function fetchContractInfo(
   address: string,
   network: string,
 ): Promise<ImportedContractInfo> {
-  const url = buildCall3ApiUrl('contract-info');
+  const url = buildFetchxApiUrl('contract-info');
   if (!url) {
-    throw new Error('Call3 API URL is not configured.');
+    throw new Error('Fetchx API URL is not configured.');
   }
 
   const response = await apiRequest({

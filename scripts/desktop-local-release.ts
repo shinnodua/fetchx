@@ -24,8 +24,8 @@ interface TauriConfig {
 }
 
 const ROOT_DIRECTORY = resolve(import.meta.dir, '..');
-const DOWNLOAD_BASE_URL = 'https://downloads.call3.dev';
-const DEFAULT_BUCKET = 'call3-desktop-releases';
+const DOWNLOAD_BASE_URL = 'https://downloads.fetchx.dev';
+const DEFAULT_BUCKET = 'fetchx-desktop-releases';
 
 const action = process.argv[2];
 const packageJson = readJson<PackageJson>(join(ROOT_DIRECTORY, 'package.json'));
@@ -57,7 +57,7 @@ else {
 }
 
 function printHelp() {
-  console.log(`Call3 local desktop release
+  console.log(`Fetchx local desktop release
 
 Commands:
   bun run desktop:local:build [--artifact-dir <path>]
@@ -176,7 +176,7 @@ async function publishRelease() {
     '--version',
     version,
     '--notes',
-    getArgument('notes') ?? `Call3 ${version}`,
+    getArgument('notes') ?? `Fetchx ${version}`,
   ];
 
   if (existsSync(existingManifestPath)) {
@@ -214,7 +214,7 @@ async function publishRelease() {
     manifestPath,
     '--remote',
   ]);
-  console.log(`\nPublished Call3 ${version} to ${bucket}.`);
+  console.log(`\nPublished Fetchx ${version} to ${bucket}.`);
 }
 
 function validateVersions() {

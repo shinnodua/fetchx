@@ -12,7 +12,7 @@ import { trackEvent } from '../../../../../services/analytics/googleAnalytics';
 import {
   decodeContractBytecodeAbi,
   fetchContractInfo,
-  isCall3ApiConfigured,
+  isFetchxApiConfigured,
 } from '../../../../../services/api';
 import { useAbiStore, useWorkspaceStore } from '../../../../../store';
 import { ERC20_ABI, ERC721_ABI, ERC1155_ABI } from '../../../constants';
@@ -162,7 +162,7 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
   const tryDecodeBytecode = async (value: string) => {
     const bytecode = value.trim();
     if (!isContractBytecode(bytecode)) return;
-    if (!isCall3ApiConfigured()) return;
+    if (!isFetchxApiConfigured()) return;
 
     const address = activeRequest.target.trim();
     if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {

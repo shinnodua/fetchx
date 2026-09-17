@@ -80,8 +80,8 @@ export function validateUpdaterFragment(
       `${expectedPlatform}.json does not match version ${expectedVersion}.`,
     );
   }
-  if (!fragment.release.url.startsWith('https://downloads.call3.dev/')) {
-    throw new Error(`${expectedPlatform}.json must use downloads.call3.dev.`);
+  if (!fragment.release.url.startsWith('https://downloads.fetchx.dev/')) {
+    throw new Error(`${expectedPlatform}.json must use downloads.fetchx.dev.`);
   }
   if (!fragment.release.signature.trim()) {
     throw new Error(

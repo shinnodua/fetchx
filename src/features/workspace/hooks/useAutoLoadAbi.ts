@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useToast } from '../../../components';
-import { fetchContractInfo, isCall3ApiConfigured } from '../../../services/api';
+import {
+  fetchContractInfo,
+  isFetchxApiConfigured,
+} from '../../../services/api';
 import { useEnvironmentStore, useWorkspaceStore } from '../../../store';
 import type { RequestItem } from '../types';
 import { resolveVariables } from '../utils/environment';
@@ -55,7 +58,7 @@ export const useAutoLoadAbi = (
 
     if (
       !activeRequestTarget ||
-      !isCall3ApiConfigured() ||
+      !isFetchxApiConfigured() ||
       (activeRequestType !== 'READ' && activeRequestType !== 'WRITE')
     ) {
       return;

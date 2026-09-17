@@ -34,7 +34,7 @@ export const useAiAssistantChatStore = create<AiAssistantChatState>()(
       clearChatHistory: () => set({ messages: [] }),
     }),
     {
-      name: 'call3-ai-assistant-chat-storage',
+      name: 'fetchx-ai-assistant-chat-storage',
       partialize: (state) => ({
         messages: state.messages.filter((message) => !message.isPending),
       }),

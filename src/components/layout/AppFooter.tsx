@@ -52,20 +52,20 @@ export const AppFooter: React.FC = () => {
       <div className="flex-1" />
       <div className="flex items-center justify-center gap-3 flex-1">
         <a
-          href="https://github.com/shinnodua/call3"
+          href="https://github.com/shinnodua/fetchx"
           target="_blank"
           rel="noreferrer"
-          aria-label="Open Call3.dev on GitHub"
+          aria-label="Open fetchx.dev on GitHub"
           className={socialLinkClassName}
         >
           <GitHubIcon title="GitHub icon" className="h-4 w-4" />
           <span className="sr-only">GitHub</span>
         </a>
         <a
-          href="https://x.com/call3_dev"
+          href="https://x.com/fetchx_dev"
           target="_blank"
           rel="noreferrer"
-          aria-label="Open Call3.dev on X"
+          aria-label="Open fetchx.dev on X"
           className={socialLinkClassName}
         >
           <XIcon title="X icon" className="h-3.5 w-3.5" />

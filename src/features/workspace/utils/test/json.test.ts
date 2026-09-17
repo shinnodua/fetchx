@@ -8,13 +8,13 @@ describe('JSON repair utilities', () => {
       JSON.parse(
         repairJson(`
           // comment
-          name: 'Call3',
+          name: 'Fetchx',
           enabled: true,
           missing: undefined,
         `),
       ),
     ).toEqual({
-      name: 'Call3',
+      name: 'Fetchx',
       enabled: true,
       missing: null,
     });
@@ -27,8 +27,8 @@ describe('JSON repair utilities', () => {
   });
 
   test('beautifies repaired JSON while restoring placeholders', () => {
-    expect(beautifyJson('{name:"Call3",token:{{TOKEN}},items:[1,2,],}')).toBe(
-      '{\n  "name": "Call3",\n  "token": {{TOKEN}},\n  "items": [\n    1,\n    2\n  ]\n}',
+    expect(beautifyJson('{name:"Fetchx",token:{{TOKEN}},items:[1,2,],}')).toBe(
+      '{\n  "name": "Fetchx",\n  "token": {{TOKEN}},\n  "items": [\n    1,\n    2\n  ]\n}',
     );
   });
 

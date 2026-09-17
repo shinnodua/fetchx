@@ -1,4 +1,4 @@
-import { buildCall3ApiUrl } from './config';
+import { buildFetchxApiUrl } from './config';
 import { getApiErrorMessage } from './errors';
 import { apiRequest } from './httpClient';
 
@@ -16,9 +16,9 @@ export async function decodeContractBytecode(
   address: string,
   network: string,
 ): Promise<DecodedBytecodeAbi> {
-  const url = buildCall3ApiUrl('decode-abi');
+  const url = buildFetchxApiUrl('decode-abi');
   if (!url) {
-    throw new Error('Call3 API URL is not configured.');
+    throw new Error('Fetchx API URL is not configured.');
   }
 
   const response = await apiRequest({

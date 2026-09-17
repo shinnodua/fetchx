@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "call3",
+  "name": "fetchx",
   "compatibility_date": "2026-06-03",
   "observability": {
     "enabled": true

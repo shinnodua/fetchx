@@ -1,14 +1,14 @@
-# Call3 desktop update service
+# Fetchx desktop update service
 
 This Worker serves Tauri 2 update metadata while release artifacts remain in
-the `call3-desktop-releases` R2 bucket.
+the `fetchx-desktop-releases` R2 bucket.
 
 ## Cloudflare resources
 
-1. Create the `call3-desktop-releases` R2 bucket.
-2. Connect `downloads.call3.dev` as its public custom domain.
+1. Create the `fetchx-desktop-releases` R2 bucket.
+2. Connect `downloads.fetchx.dev` as its public custom domain.
 3. Deploy this Worker with `bun run desktop:updates:deploy`.
-4. Confirm `https://updates.call3.dev/health` returns `{ "status": "ok" }`.
+4. Confirm `https://updates.fetchx.dev/health` returns `{ "status": "ok" }`.
 
 The bucket stores immutable artifacts under `desktop/stable/<version>/` and
 the active release manifest at `channels/stable.json`. Publish the manifest
@@ -27,7 +27,7 @@ with that embedded public key before installing them.
 The Worker only validates release metadata shape before returning it:
 
 - the release is newer than the client version;
-- the platform entry has a `https://downloads.call3.dev/` URL;
+- the platform entry has a `https://downloads.fetchx.dev/` URL;
 - the platform entry has a non-empty updater signature.
 
 Even if a middle-man tampers with `stable.json` or replaces an artifact, the

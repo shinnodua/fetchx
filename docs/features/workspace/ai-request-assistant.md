@@ -48,7 +48,7 @@ The bridge launches each CLI according to its prompt format: Claude Code and Ant
 
 Supported HTTP probes include:
 
-- `http://127.0.0.1:37373` for the Call3 local agent protocol;
+- `http://127.0.0.1:37373` for the Fetchx local agent protocol;
 - `http://127.0.0.1:1234` for OpenAI-compatible local servers such as LM Studio;
 - `http://127.0.0.1:11434` for Ollama chat.
 
@@ -70,7 +70,7 @@ Agents receive a prompt containing the active request and must respond with JSON
 
 `action` may be `create_request`, `update_request`, `create_collection`, `create_collection_with_request`, `save_request_to_collection`, or `none`. For backward compatibility, the parser also accepts the former `create` and `update` request actions. The parser only accepts fields that exist on `RequestItem`, normalizes allowed method values, and converts any cURL value returned as `request.target` into the corresponding REST request fields before applying changes.
 
-The Call3 local HTTP protocol accepts `POST /chat` with:
+The Fetchx local HTTP protocol accepts `POST /chat` with:
 
 ```json
 { "prompt": "..." }

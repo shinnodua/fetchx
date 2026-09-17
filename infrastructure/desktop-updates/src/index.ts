@@ -116,12 +116,12 @@ export default {
     if (!platform?.download_url && updateUrl && target === 'darwin') {
       const baseUrl = updateUrl.substring(0, updateUrl.lastIndexOf('/'));
       const dmgArch = arch === 'x86_64' ? 'x64' : arch;
-      downloadUrl = `${baseUrl}/Call3_${manifest.version}_${dmgArch}.dmg`;
+      downloadUrl = `${baseUrl}/Fetchx_${manifest.version}_${dmgArch}.dmg`;
     }
 
     const updateSignature = platform?.signature;
     if (
-      !updateUrl?.startsWith('https://downloads.call3.dev/') ||
+      !updateUrl?.startsWith('https://downloads.fetchx.dev/') ||
       !updateSignature?.trim()
     ) {
       return new Response(null, { status: 204, headers: CORS_HEADERS });

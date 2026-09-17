@@ -48,12 +48,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           className="flex items-center gap-2 text-sm font-bold text-inherit text-primary-500 hover:opacity-80 transition-opacity"
         >
           <img
-            src="/favicon.svg"
+            src="/fetchx-icon-192.png"
             alt=""
             aria-hidden="true"
             className="h-5 w-5 shrink-0"
           />
-          Call3.dev
+          FetchX
         </Link>
         {actions}
       </div>

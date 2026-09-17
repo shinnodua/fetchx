@@ -13,7 +13,7 @@ const VALID_PUBLIC_KEY =
   'dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQ5NzEyNzg5NUEwM0FFMTAKUldRUXJnTmFpU2R4MmNVVXArK0UxWEZTbUFTTUVYR0wxMTExbHpnNTJXRmk0YnJDOE9FU05rOEUK';
 
 function withTempDirectory(callback: (directory: string) => void) {
-  const directory = mkdtempSync(join(tmpdir(), 'call3-release-test-'));
+  const directory = mkdtempSync(join(tmpdir(), 'fetchx-release-test-'));
   try {
     callback(directory);
   } finally {
@@ -67,7 +67,10 @@ describe('desktop release security validation', () => {
 
   test('validates updater artifact, signature, URL, and SHA-256 metadata', () => {
     withTempDirectory((directory) => {
-      const artifactPath = join(directory, 'call3-0.1.0-darwin-aarch64.tar.gz');
+      const artifactPath = join(
+        directory,
+        'fetchx-0.1.0-darwin-aarch64.tar.gz',
+      );
       writeFileSync(artifactPath, 'signed update artifact');
       writeFileSync(`${artifactPath}.sig`, 'trusted-signature\n');
 
@@ -79,7 +82,7 @@ describe('desktop release security validation', () => {
             release: {
               sha256: sha256File(artifactPath),
               signature: 'trusted-signature',
-              url: 'https://downloads.call3.dev/desktop/stable/0.1.0/call3-0.1.0-darwin-aarch64.tar.gz',
+              url: 'https://downloads.fetchx.dev/desktop/stable/0.1.0/fetchx-0.1.0-darwin-aarch64.tar.gz',
             },
           },
           {
@@ -94,7 +97,7 @@ describe('desktop release security validation', () => {
 
   test('rejects tampered checksum and mismatched signature metadata', () => {
     withTempDirectory((directory) => {
-      const artifactPath = join(directory, 'call3-0.1.0-windows-x86_64.exe');
+      const artifactPath = join(directory, 'fetchx-0.1.0-windows-x86_64.exe');
       writeFileSync(artifactPath, 'signed update artifact');
       writeFileSync(`${artifactPath}.sig`, 'trusted-signature\n');
 
@@ -106,7 +109,7 @@ describe('desktop release security validation', () => {
             release: {
               sha256: 'bad-checksum',
               signature: 'trusted-signature',
-              url: 'https://downloads.call3.dev/desktop/stable/0.1.0/call3-0.1.0-windows-x86_64.exe',
+              url: 'https://downloads.fetchx.dev/desktop/stable/0.1.0/fetchx-0.1.0-windows-x86_64.exe',
             },
           },
           {
@@ -126,7 +129,7 @@ describe('desktop release security validation', () => {
             version: '0.1.0',
             release: {
               signature: 'different-signature',
-              url: 'https://downloads.call3.dev/desktop/stable/0.1.0/call3-0.1.0-windows-x86_64.exe',
+              url: 'https://downloads.fetchx.dev/desktop/stable/0.1.0/fetchx-0.1.0-windows-x86_64.exe',
             },
           },
           {

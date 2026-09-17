@@ -44,7 +44,7 @@ export const useRpcStore = create<RpcState>()(
         })),
     }),
     {
-      name: 'call3-rpc-storage',
+      name: 'fetchx-rpc-storage',
     },
   ),
 );

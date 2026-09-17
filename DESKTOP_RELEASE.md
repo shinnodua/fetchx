@@ -1,6 +1,6 @@
 # Desktop release guide
 
-Call3 bundles the React frontend into a Tauri 2 app. Web deployments continue
+Fetchx bundles the React frontend into a Tauri 2 app. Web deployments continue
 through the existing `bun run deploy` Cloudflare workflow. Desktop releases
 are independent and are published only from `app-v<version>` tags.
 
@@ -9,7 +9,7 @@ are independent and are published only from `app-v<version>` tags.
 Generate the updater signing key outside the repository:
 
 ```bash
-bun tauri signer generate -w ~/.tauri/call3.key
+bun tauri signer generate -w ~/.tauri/fetchx.key
 ```
 
 Replace `REPLACE_WITH_TAURI_UPDATER_PUBLIC_KEY` in
@@ -25,8 +25,8 @@ updates if the key is lost.
 ## Cloudflare setup
 
 Follow `infrastructure/desktop-updates/README.md` to create the R2 bucket,
-attach `downloads.call3.dev`, and deploy the update Worker at
-`updates.call3.dev`.
+attach `downloads.fetchx.dev`, and deploy the update Worker at
+`updates.fetchx.dev`.
 
 Create a Cloudflare API token restricted to object read/write for the desktop
 release bucket, then add these GitHub Actions secrets:
@@ -100,7 +100,7 @@ bun run desktop:local:publish
 Use `--artifact-dir <path>` with either command to override the artifact
 directory, and `--notes "Release notes"` with the publish command. Set
 `R2_BUCKET` only when publishing to a bucket other than
-`call3-desktop-releases`.
+`fetchx-desktop-releases`.
 
 ### Publish through GitHub Actions
 

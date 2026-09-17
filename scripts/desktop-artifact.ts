@@ -85,7 +85,7 @@ function collectArtifact() {
   const suffix = platform.startsWith('darwin-')
     ? '.tar.gz'
     : extname(updateFile);
-  const artifactName = `call3-${version}-${platform}${suffix}`;
+  const artifactName = `fetchx-${version}-${platform}${suffix}`;
   cpSync(updateFile, join(outputDirectory, artifactName));
   cpSync(`${updateFile}.sig`, join(outputDirectory, `${artifactName}.sig`));
 
@@ -164,7 +164,7 @@ export function createManifest({
     `${JSON.stringify(
       {
         version,
-        notes: notes ?? `Call3 ${version}`,
+        notes: notes ?? `Fetchx ${version}`,
         pub_date: new Date().toISOString(),
         platforms: mergedPlatforms,
       },

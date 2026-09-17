@@ -583,7 +583,7 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
               ) : (
                 <div className="space-y-3">
                   <div className="rounded-xl border border-foreground/10 bg-foreground/[0.03] p-3 text-xs leading-5 text-foreground/65">
-                    Call3 looks for supported CLIs on PATH and localhost agent
+                    Fetchx looks for supported CLIs on PATH and localhost agent
                     services on this device.
                   </div>
                   <Button

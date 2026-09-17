@@ -54,11 +54,11 @@ export const CollectionTransferButtons: React.FC = () => {
 
     const payload = createCollectionsExportPayload(selectedCollections);
     const exported = await saveTextFile(JSON.stringify(payload, null, 2), {
-      defaultPath: `call3-collections-${new Date()
+      defaultPath: `fetchx-collections-${new Date()
         .toISOString()
         .slice(0, 10)}.json`,
       extensions: ['json'],
-      name: 'Call3 collections',
+      name: 'Fetchx collections',
     });
     if (!exported) return;
     trackEvent({ screen: 'collections', action: 'export_collections' });
@@ -89,7 +89,7 @@ export const CollectionTransferButtons: React.FC = () => {
     try {
       const content = await openTextFile({
         extensions: ['json'],
-        name: 'Call3 or Postman collections',
+        name: 'Fetchx or Postman collections',
       });
       if (content) prepareCollectionsImport(content);
     } catch (error) {

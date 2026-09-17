@@ -83,7 +83,7 @@ export const LocalAgentConnectionDialog: React.FC<
             Available agents
           </p>
           <p className="mt-1 text-xs leading-5 text-foreground/55">
-            Call3 checks installed CLIs and supported localhost services.
+            Fetchx checks installed CLIs and supported localhost services.
           </p>
         </div>
         <Button
@@ -101,7 +101,7 @@ export const LocalAgentConnectionDialog: React.FC<
 
       {!isDesktop ? (
         <Alert
-          title="Open Call3 Desktop"
+          title="Open Fetchx Desktop"
           icon={<InfoIcon title="Desktop app required" className="h-5 w-5" />}
         >
           Local agents run on your computer and can only be connected from the

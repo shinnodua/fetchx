@@ -11,10 +11,10 @@ use std::{
 
 const ENDPOINTS: &[(&str, &str, &str, &str)] = &[
     (
-        "call3-local-agent",
-        "Call3 Local Agent",
+        "fetchx-local-agent",
+        "Fetchx Local Agent",
         "http://127.0.0.1:37373",
-        "call3-agent",
+        "fetchx-agent",
     ),
     (
         "lm-studio",
@@ -58,7 +58,7 @@ pub(super) fn chat(input: AiAgentChatInput) -> Result<AiAgentChatOutput, String>
         .endpoint
         .ok_or_else(|| "Missing agent endpoint.".to_string())?;
     let response = match input.agent.protocol.as_str() {
-        "call3-agent" => request(&endpoint, "POST", "/chat", Some(json!({ "prompt": input.prompt }).to_string())),
+        "fetchx-agent" => request(&endpoint, "POST", "/chat", Some(json!({ "prompt": input.prompt }).to_string())),
         "ollama-chat" => request(&endpoint, "POST", "/api/chat", Some(json!({ "model": "llama3.1", "stream": false, "messages": [{ "role": "user", "content": input.prompt }] }).to_string())),
         _ => request(&endpoint, "POST", "/v1/chat/completions", Some(json!({ "model": "local-model", "messages": [{ "role": "user", "content": input.prompt }], "temperature": 0.1 }).to_string())),
     }?;

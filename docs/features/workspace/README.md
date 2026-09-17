@@ -1,6 +1,6 @@
 # Workspace Feature
 
-The workspace is the main Call3 product surface. It lets users create collections of requests, edit requests in tabs, execute REST and EVM requests, manage environments, import/export collections, and save responses.
+The workspace is the main Fetchx product surface. It lets users create collections of requests, edit requests in tabs, execute REST and EVM requests, manage environments, import/export collections, and save responses.
 
 ## Source map
 
@@ -15,7 +15,7 @@ The workspace is the main Call3 product surface. It lets users create collection
 - `src/store/rpc/`: persisted custom RPCs.
 - `src/store/abi/`: persisted saved ABI library.
 - `src/services/requestExecutor.ts`: execution boundary for REST and EVM calls.
-- `src/services/api/`: shared HTTP clients and Call3 backend clients.
+- `src/services/api/`: shared HTTP clients and Fetchx backend clients.
 
 ## Docs in this folder
 

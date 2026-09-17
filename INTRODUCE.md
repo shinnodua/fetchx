@@ -1,21 +1,21 @@
 <p align="center">
-  <img src="./public/favicon.svg" alt="Call3.dev logo" width="96" height="96">
+  <img src="./public/favicon.svg" alt="fetchx.dev logo" width="96" height="96">
 </p>
 
-<h1 align="center">Call3.dev</h1>
+<h1 align="center">fetchx.dev</h1>
 
-Call3.dev is a unified workspace for testing REST APIs and interacting with
+fetchx.dev is a unified workspace for testing REST APIs and interacting with
 smart contracts. It brings everyday API tools and Web3 workflows into one
 focused interface, so you can build, test, organize, and reuse requests without
 switching between multiple applications.
 
 Whether you are exploring an API, reading contract state, preparing a
-transaction, or managing a growing request collection, Call3.dev keeps the
+transaction, or managing a growing request collection, fetchx.dev keeps the
 workflow clear and approachable.
 
 ## Easy to Use from the First Request
 
-Call3.dev is designed to reduce setup and repetitive work.
+fetchx.dev is designed to reduce setup and repetitive work.
 
 - Create REST or smart contract requests from the same workspace.
 - Paste a cURL command, Fetch snippet, or URL with query parameters to populate
@@ -76,7 +76,7 @@ requiring you to edit every request manually.
 
 ### Collection and Import Tools
 
-Call3.dev helps your workspace grow without becoming difficult to manage:
+fetchx.dev helps your workspace grow without becoming difficult to manage:
 
 - Create, rename, duplicate, search, and organize collections.
 - Import requests from cURL, Fetch, URLs, or structured request definitions.
@@ -86,7 +86,7 @@ Call3.dev helps your workspace grow without becoming difficult to manage:
 
 ## Security and Privacy by Design
 
-Call3.dev includes practical safeguards for handling API credentials, private
+fetchx.dev includes practical safeguards for handling API credentials, private
 configuration, and blockchain transactions.
 
 ### Protected Sensitive Variables
@@ -112,7 +112,7 @@ unlocked.
 
 ### Wallet-Controlled Transactions
 
-Call3.dev does not sign blockchain transactions on your behalf. Contract write
+fetchx.dev does not sign blockchain transactions on your behalf. Contract write
 operations are sent to your connected wallet, where you can review and approve
 the transaction before it is submitted. Read-only contract calls do not require
 a wallet signature.
@@ -127,7 +127,7 @@ for that blocked request.
 
 ## Built for Confident Development
 
-Call3.dev combines an easy learning curve with the tools needed for real API
+fetchx.dev combines an easy learning curve with the tools needed for real API
 and Web3 development. You can begin with a simple request, then add reusable
 environments, encrypted credentials, custom networks, contract ABIs, organized
 collections, and repeatable workflows as your project grows.

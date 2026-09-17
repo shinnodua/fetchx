@@ -1,7 +1,10 @@
 export const API_BASE_URLS = {
-  call3: normalizeOptionalBaseUrl(import.meta.env.VITE_API_URL_CALL3),
-  desktopDownloads: 'https://downloads.call3.dev',
-  desktopUpdates: 'https://updates.call3.dev',
+  fetchx: resolveFetchxApiBaseUrl(
+    import.meta.env.VITE_API_URL_FETCHX,
+    import.meta.env.VITE_API_URL_CALL3,
+  ),
+  desktopDownloads: 'https://downloads.fetchx.dev',
+  desktopUpdates: 'https://updates.fetchx.dev',
 } as const;
 
 export function buildApiUrl(baseUrl: string, path = '') {
@@ -14,8 +17,8 @@ export function buildOptionalApiUrl(baseUrl: string | null, path = '') {
   return baseUrl ? buildApiUrl(baseUrl, path) : null;
 }
 
-export function buildCall3ApiUrl(path = '') {
-  return buildOptionalApiUrl(API_BASE_URLS.call3, path);
+export function buildFetchxApiUrl(path = '') {
+  return buildOptionalApiUrl(API_BASE_URLS.fetchx, path);
 }
 
 export function buildDesktopDownloadsApiUrl(path = '') {
@@ -26,8 +29,18 @@ export function buildDesktopUpdatesApiUrl(path = '') {
   return buildApiUrl(API_BASE_URLS.desktopUpdates, path);
 }
 
-export function isCall3ApiConfigured() {
-  return API_BASE_URLS.call3 !== null;
+export function isFetchxApiConfigured() {
+  return API_BASE_URLS.fetchx !== null;
+}
+
+export function resolveFetchxApiBaseUrl(
+  fetchxValue: unknown,
+  legacyCall3Value: unknown,
+) {
+  return (
+    normalizeOptionalBaseUrl(fetchxValue) ??
+    normalizeOptionalBaseUrl(legacyCall3Value)
+  );
 }
 
 function normalizeOptionalBaseUrl(value: unknown) {

@@ -10,7 +10,7 @@ export const WorkspaceEmptyState: React.FC<WorkspaceEmptyStateProps> = ({
 }) => (
   <div className="flex-1 flex flex-col items-center justify-center p-8 text-center max-w-2xl mx-auto space-y-6">
     <Badge variant="primary" className="mx-auto">
-      Call3.dev Workspace
+      FetchX Workspace
     </Badge>
     <h1 className="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">
       Interactive Web3 & API Client

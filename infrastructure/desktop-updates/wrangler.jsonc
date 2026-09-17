@@ -1,12 +1,12 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
-  "name": "call3-desktop-updates",
+  "name": "fetchx-desktop-updates",
   "main": "src/index.ts",
   "compatibility_date": "2026-06-19",
   "workers_dev": false,
   "routes": [
     {
-      "pattern": "updates.call3.dev",
+      "pattern": "updates.fetchx.dev",
       "custom_domain": true
     }
   ],
@@ -16,7 +16,7 @@
   "r2_buckets": [
     {
       "binding": "DESKTOP_RELEASES",
-      "bucket_name": "call3-desktop-releases"
+      "bucket_name": "fetchx-desktop-releases"
     }
   ],
   "observability": {

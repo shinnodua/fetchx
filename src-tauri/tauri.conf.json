@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Call3",
+  "productName": "FetchX",
   "version": "0.1.1",
-  "identifier": "dev.call3.desktop",
+  "identifier": "dev.fetchx.desktop",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Call3.dev",
+        "title": "FetchX",
         "width": 1280,
         "height": 800,
         "minWidth": 960,
@@ -30,11 +30,11 @@
     "createUpdaterArtifacts": true,
     "targets": "all",
     "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
+      "icons/fetchx-32x32.png",
+      "icons/fetchx-128x128.png",
+      "icons/fetchx-128x128@2x.png",
+      "icons/fetchx-icon.icns",
+      "icons/fetchx-icon.ico"
     ],
     "android": {
       "debugApplicationIdSuffix": ".debug"
@@ -44,7 +44,7 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQ5NzEyNzg5NUEwM0FFMTAKUldRUXJnTmFpU2R4MmNVVXArK0UxWEZTbUFTTUVYR0wxMTExbHpnNTJXRmk0YnJDOE9FU05rOEUK",
       "endpoints": [
-        "https://updates.call3.dev/v1/update/{{target}}/{{arch}}/{{current_version}}"
+        "https://updates.fetchx.dev/v1/update/{{target}}/{{arch}}/{{current_version}}"
       ]
     }
   }

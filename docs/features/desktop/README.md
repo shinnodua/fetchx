@@ -23,7 +23,7 @@ Desktop-specific side effects should stay centralized in `src/services/platform/
 
 Desktop release/download API calls should stay in `src/services/api/desktopReleaseApi.ts`.
 Website download URLs must resolve to immutable
-`https://downloads.call3.dev/desktop/stable/<version>/...` release artifacts.
+`https://downloads.fetchx.dev/desktop/stable/<version>/...` release artifacts.
 
 Browser download prompts are shown by detected desktop OS only. The macOS
 download prompt must not be shown on iPhone or iPad browsers, including iPadOS

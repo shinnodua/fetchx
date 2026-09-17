@@ -12,7 +12,7 @@ Collections group saved requests in the workspace sidebar.
 
 `RequestItem` contains the request configuration, current response, and saved responses.
 
-Collections are persisted by `useWorkspaceStore` under `call3-workspace-storage`.
+Collections are persisted by `useWorkspaceStore` under `fetchx-workspace-storage`.
 
 ## Sidebar behavior
 
@@ -75,11 +75,11 @@ Requests are normalized on export:
 - `savedResponses` are preserved;
 - `savedResponsesCollapsed` defaults to `false`.
 
-## Call3 import payload
+## Fetchx import payload
 
 `parseCollectionsImportPayload(content)` accepts either:
 
-- a full Call3 export object with `collections`;
+- a full Fetchx export object with `collections`;
 - an array of collection objects.
 
 The parser validates collection, request, key/value, and saved response shapes. Invalid data throws a clear import error.
@@ -88,9 +88,9 @@ Incoming request responses are reset to `null` during normalization. Saved respo
 
 ## Postman import
 
-Before parsing Call3 format, `parseCollectionsImportPayload` checks `canParsePostmanCollection(parsed)`. If true, it delegates to `parsePostmanCollection`.
+Before parsing Fetchx format, `parseCollectionsImportPayload` checks `canParsePostmanCollection(parsed)`. If true, it delegates to `parsePostmanCollection`.
 
-Postman import support belongs in `src/features/workspace/utils/postmanCollectionImport.ts`. Keep new third-party collection formats separate from Call3 export parsing so the native import contract remains stable.
+Postman import support belongs in `src/features/workspace/utils/postmanCollectionImport.ts`. Keep new third-party collection formats separate from Fetchx export parsing so the native import contract remains stable.
 
 ## Paste import
 

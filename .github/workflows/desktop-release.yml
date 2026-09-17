@@ -97,8 +97,8 @@ jobs:
         if: runner.os == 'macOS' && env.APPLE_CERTIFICATE != ''
         shell: bash
         run: |
-          CERTIFICATE_PATH="$RUNNER_TEMP/call3.p12"
-          KEYCHAIN_PATH="$RUNNER_TEMP/call3-signing.keychain-db"
+          CERTIFICATE_PATH="$RUNNER_TEMP/fetchx.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/fetchx-signing.keychain-db"
           KEYCHAIN_PASSWORD="$(openssl rand -hex 24)"
           echo "$APPLE_CERTIFICATE" | base64 --decode > "$CERTIFICATE_PATH"
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
@@ -112,7 +112,7 @@ jobs:
         if: runner.os == 'Windows' && env.WINDOWS_CERTIFICATE != ''
         shell: pwsh
         run: |
-          $certificatePath = Join-Path $env:RUNNER_TEMP 'call3.pfx'
+          $certificatePath = Join-Path $env:RUNNER_TEMP 'fetchx.pfx'
           [IO.File]::WriteAllBytes($certificatePath, [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE))
           $password = ConvertTo-SecureString $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force
           $certificate = Import-PfxCertificate -FilePath $certificatePath -CertStoreLocation Cert:\CurrentUser\My -Password $password
@@ -128,12 +128,12 @@ jobs:
           --platform ${{ matrix.platform }}
           --target-dir src-tauri/target/${{ matrix.target }}/release/bundle
           --output-dir desktop-artifact
-          --base-url https://downloads.call3.dev
+          --base-url https://downloads.fetchx.dev
           --version ${{ needs.validate.outputs.version }}
 
       - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
-          name: call3-${{ matrix.platform }}
+          name: fetchx-${{ matrix.platform }}
           path: desktop-artifact/
           if-no-files-found: error
 
@@ -143,7 +143,7 @@ jobs:
     env:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      R2_BUCKET: call3-desktop-releases
+      R2_BUCKET: fetchx-desktop-releases
       RELEASE_VERSION: ${{ needs.validate.outputs.version }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -165,7 +165,7 @@ jobs:
           --input-dir desktop-artifacts
           --output stable.json
           --version "$RELEASE_VERSION"
-          --notes "Call3 $RELEASE_VERSION"
+          --notes "Fetchx $RELEASE_VERSION"
           --merge-manifest existing-stable.json
       - name: Upload immutable release artifacts
         shell: bash

@@ -26,7 +26,7 @@ export const useCorsStore = create<CorsState>()(
       },
     }),
     {
-      name: 'call3-cors-storage',
+      name: 'fetchx-cors-storage',
       // Since we want the storage to load synchronously for the non-React code,
       // Zustand's persist middleware by default handles localStorage synchronously.
     },

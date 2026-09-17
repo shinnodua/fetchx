@@ -1,5 +1,5 @@
 import { useCorsStore } from '../../store';
-import { API_BASE_URLS, isCall3ApiConfigured } from './config';
+import { API_BASE_URLS, isFetchxApiConfigured } from './config';
 import { callCorsProxy } from './proxyClient';
 import type { ApiRequest, ApiResponse } from './types';
 
@@ -150,7 +150,7 @@ function confirmProxyWithBrowserDialog(risk: SensitiveProxyRisk) {
   }
 
   return globalThis.confirm(
-    `Browser request appears to be CORS-blocked. Retry through the Call3 proxy?\n\nThis request includes credential-like data that will be sent through the proxy:\n${formatSensitiveProxyRisk(risk)}\n\nContinue?`,
+    `Browser request appears to be CORS-blocked. Retry through the Fetchx proxy?\n\nThis request includes credential-like data that will be sent through the proxy:\n${formatSensitiveProxyRisk(risk)}\n\nContinue?`,
   );
 }
 
@@ -180,17 +180,17 @@ export async function apiRequest(
   };
 
   const origin = getUrlOrigin(normalizedRequest.url);
-  const call3Origin = API_BASE_URLS.call3
-    ? getUrlOrigin(API_BASE_URLS.call3)
+  const fetchxOrigin = API_BASE_URLS.fetchx
+    ? getUrlOrigin(API_BASE_URLS.fetchx)
     : null;
-  const isCall3Origin = origin && call3Origin && origin === call3Origin;
+  const isFetchxOrigin = origin && fetchxOrigin && origin === fetchxOrigin;
 
   // Check if we should bypass direct request because origin is known to be blocked by CORS
   if (
     options.proxyOnBrowserBlock &&
-    isCall3ApiConfigured() &&
+    isFetchxApiConfigured() &&
     origin &&
-    !isCall3Origin &&
+    !isFetchxOrigin &&
     useCorsStore.getState().isOriginBlocked(origin)
   ) {
     await confirmSensitiveProxyRequest(normalizedRequest, options);
@@ -202,11 +202,14 @@ export async function apiRequest(
   } catch (error) {
     if (
       !options.proxyOnBrowserBlock ||
-      isCall3Origin ||
-      !isBrowserFetchBlocked(error) ||
-      !isCall3ApiConfigured()
+      isFetchxOrigin ||
+      !isBrowserFetchBlocked(error)
     ) {
       throw error;
+    }
+
+    if (!isFetchxApiConfigured()) {
+      throw new Error(getMissingProxyConfigurationMessage());
     }
 
     // The browser explicitly reported a CORS-blocked response.
@@ -217,6 +220,10 @@ export async function apiRequest(
 
   await confirmSensitiveProxyRequest(normalizedRequest, options);
   return await callCorsProxy(normalizedRequest);
+}
+
+export function getMissingProxyConfigurationMessage() {
+  return 'The Fetchx CORS proxy is not configured. Set VITE_API_URL_FETCHX to the API origin that serves /proxy.';
 }
 
 export function buildUrlWithQueryParams(

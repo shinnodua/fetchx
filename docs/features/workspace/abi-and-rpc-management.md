@@ -13,7 +13,7 @@ Default RPC entries are static feature constants. User-created RPCs are stored s
 `src/store/rpc/useRpcStore.ts` persists under:
 
 ```text
-call3-rpc-storage
+fetchx-rpc-storage
 ```
 
 It stores:
@@ -42,7 +42,7 @@ When the selected network/RPC changes, the active draft is updated with fields s
 `src/store/abi/useAbiStore.ts` persists under:
 
 ```text
-call3-abi-storage
+fetchx-abi-storage
 ```
 
 It stores:
@@ -71,7 +71,7 @@ ABI JSON and human-readable ABI parsing should go through `parseContractAbi`.
 It only attempts auto-load when:
 
 - the active request target changes after the first observed value;
-- Call3 API is configured;
+- Fetchx API is configured;
 - request type is `READ` or `WRITE`;
 - the resolved target is a valid `0x` address;
 - the same tab/address/network combination has not already been attempted.
@@ -94,7 +94,7 @@ On error:
 - the error is logged to the console;
 - the UI does not show a noisy failure toast.
 
-## Call3 service clients
+## Fetchx service clients
 
 Contract info import uses `src/services/api/contractExplorerApi.ts`.
 
@@ -102,9 +102,9 @@ Bytecode ABI inference uses `src/services/api/bytecodeAbiApi.ts`.
 
 Both clients:
 
-- build URLs through `buildCall3ApiUrl`;
-- fail clearly when `VITE_API_URL_CALL3` is not configured;
+- build URLs through `buildFetchxApiUrl`;
+- fail clearly when `VITE_API_URL_FETCHX` is not configured;
 - send `ai: true` in the request body;
 - normalize backend error messages with `getApiErrorMessage`.
 
-Keep future Call3-backed ABI behavior in `src/services/api/*` so components and hooks do not own raw fetch calls.
+Keep future Fetchx-backed ABI behavior in `src/services/api/*` so components and hooks do not own raw fetch calls.

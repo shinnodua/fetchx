@@ -13,7 +13,7 @@ flowchart TD
   Executor --> Api["services/api"]
   Executor --> Wallet["wagmi / viem clients"]
   UI --> Stores
-  Api --> Call3["call3-service"]
+  Api --> Fetchx["fetchx-service"]
   Api --> Target["User target API"]
 ```
 
@@ -66,7 +66,7 @@ Workspace hooks contain stateful behavior that is still feature-specific:
 - `useRequestRunner`: main send/save/simulate orchestration, environment resolution, sensitive unlock gate, and error redaction.
 - `useRunRestRequest`: REST execution result handling and response updates.
 - `useRunContractRequest`: READ, WRITE, SEND, wallet connection, network switching, simulation, and contract response updates.
-- `useAutoLoadAbi`: contract address/network watcher and Call3 contract-info lookup.
+- `useAutoLoadAbi`: contract address/network watcher and Fetchx contract-info lookup.
 - `useWorkspacePublicClient`: public client selection for the active network/RPC.
 - `useAutoCollapseSidebar`: responsive sidebar behavior.
 - `useUnsavedChangesWarning`: browser navigation guard for unsaved drafts.
@@ -76,8 +76,8 @@ Workspace hooks contain stateful behavior that is still feature-specific:
 Workspace utilities must be deterministic and independent of React:
 
 - `requestImport.ts`: parse pasted URL, cURL, and fetch commands.
-- `collectionTransfer.ts`: parse/export Call3 collections and import Postman collections.
-- `postmanCollectionImport.ts`: convert Postman v2.1-style collections into Call3 requests.
+- `collectionTransfer.ts`: parse/export Fetchx collections and import Postman collections.
+- `postmanCollectionImport.ts`: convert Postman v2.1-style collections into Fetchx requests.
 - `contractAbi.ts`: parse JSON and human-readable ABI inputs.
 - `contractArgs.ts`: format string form values into ABI argument values.
 - `environment.ts`: resolve and redact environment variables.
@@ -93,8 +93,8 @@ Services are where side effects belong:
 - `src/services/requestExecutor.ts` wraps viem/wagmi execution helpers and delegates REST to API services.
 - `src/services/api/restApi.ts` converts workspace REST fields into an API request.
 - `src/services/api/httpClient.ts` owns direct fetch, response parsing, CORS proxy fallback, and sensitive proxy confirmation.
-- `src/services/api/contractExplorerApi.ts` calls Call3 `contract-info`.
-- `src/services/api/bytecodeAbiApi.ts` calls Call3 `decode-abi`.
+- `src/services/api/contractExplorerApi.ts` calls Fetchx `contract-info`.
+- `src/services/api/bytecodeAbiApi.ts` calls Fetchx `decode-abi`.
 
 ## Store ownership
 

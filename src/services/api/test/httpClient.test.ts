@@ -1,6 +1,9 @@
 import { describe, expect, test } from 'bun:test';
 
-import { buildUrlWithQueryParams } from '../httpClient';
+import {
+  buildUrlWithQueryParams,
+  getMissingProxyConfigurationMessage,
+} from '../httpClient';
 
 describe('HTTP client utilities', () => {
   test('appends encoded query params and skips empty keys', () => {
@@ -20,5 +23,11 @@ describe('HTTP client utilities', () => {
     expect(
       buildUrlWithQueryParams('https://api.example.com/users', undefined),
     ).toBe('https://api.example.com/users');
+  });
+
+  test('explains how to restore proxy fallback when it is unconfigured', () => {
+    expect(getMissingProxyConfigurationMessage()).toBe(
+      'The Fetchx CORS proxy is not configured. Set VITE_API_URL_FETCHX to the API origin that serves /proxy.',
+    );
   });
 });

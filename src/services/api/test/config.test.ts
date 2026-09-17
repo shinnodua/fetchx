@@ -2,10 +2,11 @@ import { describe, expect, test } from 'bun:test';
 
 import {
   buildApiUrl,
-  buildCall3ApiUrl,
   buildDesktopDownloadsApiUrl,
+  buildFetchxApiUrl,
   buildOptionalApiUrl,
-  isCall3ApiConfigured,
+  isFetchxApiConfigured,
+  resolveFetchxApiBaseUrl,
 } from '../config';
 
 describe('API config utilities', () => {
@@ -27,10 +28,23 @@ describe('API config utilities', () => {
 
   test('builds named service URLs', () => {
     expect(buildDesktopDownloadsApiUrl('/desktop/latest.json')).toBe(
-      'https://downloads.call3.dev/desktop/latest.json',
+      'https://downloads.fetchx.dev/desktop/latest.json',
     );
-    expect(buildCall3ApiUrl('/proxy')).toBe(
-      isCall3ApiConfigured() ? buildCall3ApiUrl('/proxy') : null,
+    expect(buildFetchxApiUrl('/proxy')).toBe(
+      isFetchxApiConfigured() ? buildFetchxApiUrl('/proxy') : null,
     );
+  });
+
+  test('prefers the Fetchx API setting and supports the Call3 migration setting', () => {
+    expect(
+      resolveFetchxApiBaseUrl(
+        'https://api.fetchx.dev',
+        'https://api.call3.dev',
+      ),
+    ).toBe('https://api.fetchx.dev');
+    expect(resolveFetchxApiBaseUrl('', 'https://api.call3.dev')).toBe(
+      'https://api.call3.dev',
+    );
+    expect(resolveFetchxApiBaseUrl('', '')).toBeNull();
   });
 });

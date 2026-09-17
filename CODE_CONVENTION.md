@@ -1,6 +1,6 @@
-# Code Convention - Call3.dev
+# Code Convention - fetchx.dev
 
-This document establishes the architecture, folder layout, state management patterns, and coding styles for the Call3.dev repository. All contributors and AI agents must follow these guidelines.
+This document establishes the architecture, folder layout, state management patterns, and coding styles for the fetchx.dev repository. All contributors and AI agents must follow these guidelines.
 
 ---
 
@@ -44,7 +44,7 @@ src/
 │   ├── api/                 # HTTP API clients, base URL config, proxy fallback, response parsing
 │   │   ├── config.ts        # Named API base URLs and URL helpers
 │   │   ├── httpClient.ts    # Shared direct fetch + optional CORS proxy fallback
-│   │   ├── proxyClient.ts   # Call3 proxy API client
+│   │   ├── proxyClient.ts   # Fetchx proxy API client
 │   │   ├── restApi.ts       # User-defined REST request execution
 │   │   ├── contractExplorerApi.ts # Block explorer contract import API
 │   │   ├── types.ts         # Shared API request/response types

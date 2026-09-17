@@ -1,6 +1,6 @@
 {
-  "name": "Call3.dev",
-  "short_name": "Call3",
+  "name": "FetchX",
+  "short_name": "FetchX",
   "description": "A focused Web3 and REST API client for reusable requests.",
   "start_url": "/",
   "scope": "/",
@@ -11,19 +11,19 @@
   "categories": ["developer", "productivity", "utilities"],
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/fetchx-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/pwa-icon-192.png",
+      "src": "/fetchx-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/pwa-icon-512.png",
+      "src": "/fetchx-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

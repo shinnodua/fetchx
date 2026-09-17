@@ -13,7 +13,7 @@ const variables: EnvironmentVariable[] = [
   {
     id: 'v-api-url',
     key: 'API_URL',
-    value: 'https://api.call3.dev',
+    value: 'https://api.fetchx.dev',
     enabled: true,
     sensitive: false,
   },
@@ -41,11 +41,11 @@ describe('environment utilities', () => {
         variables,
       ),
     ).toEqual({
-      value: 'GET https://api.call3.dev with secret token and {{DISABLED}}',
-      redacted: 'GET https://api.call3.dev with [REDACTED] and {{DISABLED}}',
+      value: 'GET https://api.fetchx.dev with secret token and {{DISABLED}}',
+      redacted: 'GET https://api.fetchx.dev with [REDACTED] and {{DISABLED}}',
     });
     expect(replaceVariables('{{API_URL}}', variables)).toBe(
-      'https://api.call3.dev',
+      'https://api.fetchx.dev',
     );
   });
 

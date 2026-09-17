@@ -277,7 +277,7 @@ export const useEnvironmentStore = create<EnvironmentState>()(
       },
     }),
     {
-      name: 'call3-environment-storage',
+      name: 'fetchx-environment-storage',
       partialize: (state) => ({
         activeEnvironmentId: state.activeEnvironmentId,
         environments: stripSensitivePlaintext(state.environments),

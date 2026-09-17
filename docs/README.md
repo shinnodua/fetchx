@@ -1,4 +1,4 @@
-# Call3 Documentation
+# Fetchx Documentation
 
 This folder documents the product features and the shared implementation boundaries that support them. The source of truth is still the code, but these docs describe how the main pieces fit together so new work can land in the right place.
 
@@ -11,7 +11,7 @@ This folder documents the product features and the shared implementation boundar
 
 ## Shared docs
 
-- [API services](./services/api.md): HTTP client, Call3 service clients, REST execution, CORS proxy fallback, and error handling.
+- [API services](./services/api.md): HTTP client, Fetchx service clients, REST execution, CORS proxy fallback, and error handling.
 - [Stores](./stores/README.md): persisted Zustand stores for workspace, environments, RPCs, ABIs, and CORS state.
 
 ## Documentation rules

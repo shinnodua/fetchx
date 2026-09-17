@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { createManifest } from '../desktop-artifact.ts';
 
 function withTempDirectory(callback: (directory: string) => void) {
-  const directory = mkdtempSync(join(tmpdir(), 'call3-artifact-test-'));
+  const directory = mkdtempSync(join(tmpdir(), 'fetchx-artifact-test-'));
   try {
     callback(directory);
   } finally {
@@ -26,7 +26,7 @@ describe('desktop artifact manifest creation', () => {
           release: {
             sha256: 'new-macos-checksum',
             signature: 'new-macos-signature',
-            url: 'https://downloads.call3.dev/desktop/stable/0.1.1/macos',
+            url: 'https://downloads.fetchx.dev/desktop/stable/0.1.1/macos',
           },
           version: '0.1.1',
         }),
@@ -38,7 +38,7 @@ describe('desktop artifact manifest creation', () => {
             'windows-x86_64': {
               sha256: 'old-windows-checksum',
               signature: 'old-windows-signature',
-              url: 'https://downloads.call3.dev/desktop/stable/0.1.0/windows',
+              url: 'https://downloads.fetchx.dev/desktop/stable/0.1.0/windows',
             },
           },
           version: '0.1.0',

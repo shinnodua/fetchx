@@ -5,7 +5,7 @@ import { getDesktopDownloadUrl } from '../desktopReleaseApi';
 const originalFetch = globalThis.fetch;
 const fetchMock = mock(async (_url: RequestInfo | URL, _init?: RequestInit) =>
   createJsonResponse({
-    url: 'https://downloads.call3.dev/desktop/stable/0.1.0/call3-0.1.0-windows-x86_64-setup.exe',
+    url: 'https://downloads.fetchx.dev/desktop/stable/0.1.0/fetchx-0.1.0-windows-x86_64-setup.exe',
   }),
 );
 
@@ -21,11 +21,11 @@ describe('desktop release API', () => {
 
   test('returns direct stable desktop artifact URLs from the download host', async () => {
     await expect(getDesktopDownloadUrl('windows')).resolves.toBe(
-      'https://downloads.call3.dev/desktop/stable/0.1.0/call3-0.1.0-windows-x86_64-setup.exe',
+      'https://downloads.fetchx.dev/desktop/stable/0.1.0/fetchx-0.1.0-windows-x86_64-setup.exe',
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://updates.call3.dev/v1/update/windows/x86_64/0.0.0',
+      'https://updates.fetchx.dev/v1/update/windows/x86_64/0.0.0',
       { headers: {}, method: 'GET' },
     );
   });
@@ -33,7 +33,7 @@ describe('desktop release API', () => {
   test('rejects desktop artifact URLs from other origins', async () => {
     fetchMock.mockImplementationOnce(async () =>
       createJsonResponse({
-        url: 'https://example.com/desktop/stable/0.1.0/call3-0.1.0-windows-x86_64-setup.exe',
+        url: 'https://example.com/desktop/stable/0.1.0/fetchx-0.1.0-windows-x86_64-setup.exe',
       }),
     );
 
@@ -45,7 +45,7 @@ describe('desktop release API', () => {
   test('rejects legacy download route URLs', async () => {
     fetchMock.mockImplementationOnce(async () =>
       createJsonResponse({
-        url: 'https://downloads.call3.dev/v1/download/desktop/windows/x86_64/call3-0.1.0-windows-x86_64-setup.exe',
+        url: 'https://downloads.fetchx.dev/v1/download/desktop/windows/x86_64/fetchx-0.1.0-windows-x86_64-setup.exe',
       }),
     );
 

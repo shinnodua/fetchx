@@ -1,4 +1,4 @@
-const CACHE_NAME = 'call3-app-v1';
+const CACHE_NAME = 'fetchx-app-v1';
 const APP_SHELL = ['/', '/site.webmanifest', '/favicon.svg'];
 const CACHEABLE_STATIC_EXTENSIONS = new Set([
   '.css',

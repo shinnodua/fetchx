@@ -1,11 +1,11 @@
-import { buildCall3ApiUrl } from './config';
+import { buildFetchxApiUrl } from './config';
 import { getApiErrorMessage } from './errors';
 import type { ApiRequest, ApiResponse, ProxyResponseBody } from './types';
 
 export async function callCorsProxy(request: ApiRequest): Promise<ApiResponse> {
-  const proxyUrl = buildCall3ApiUrl('/proxy');
+  const proxyUrl = buildFetchxApiUrl('/proxy');
   if (!proxyUrl) {
-    throw new Error('Call3 API URL is not configured.');
+    throw new Error('Fetchx API URL is not configured.');
   }
 
   const proxyBody: {

@@ -35,7 +35,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       ...createWorkspaceActions(set, get),
     }),
     {
-      name: 'call3-workspace-storage',
+      name: 'fetchx-workspace-storage',
       onRehydrateStorage: () => () => {
         const { collections, drafts } = useWorkspaceStore.getState();
         const loglessWorkspace = clearWorkspaceResponseLogs(

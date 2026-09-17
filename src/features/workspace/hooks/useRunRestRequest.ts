@@ -37,7 +37,7 @@ export const useRunRestRequest = () => {
     if (proxied) {
       addLog(
         activeTabId,
-        'Direct browser request was blocked. Retried through Call3 proxy.',
+        'Direct browser request was blocked. Retried through Fetchx proxy.',
       );
     }
     addLog(activeTabId, `HTTP status received: ${statusText}`);

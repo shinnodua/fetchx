@@ -16,12 +16,12 @@ Global shared state lives under `src/store/`.
 ## Persistence keys
 
 - App: `app-storage`
-- Workspace: `call3-workspace-storage`
-- Environment: `call3-environment-storage`
-- RPC: `call3-rpc-storage`
-- ABI: `call3-abi-storage`
-- AI assistant: `call3-ai-assistant-storage`
-- AI assistant chat: `call3-ai-assistant-chat-storage`
+- Workspace: `fetchx-workspace-storage`
+- Environment: `fetchx-environment-storage`
+- RPC: `fetchx-rpc-storage`
+- ABI: `fetchx-abi-storage`
+- AI assistant: `fetchx-ai-assistant-storage`
+- AI assistant chat: `fetchx-ai-assistant-chat-storage`
 
 ## App store
 
