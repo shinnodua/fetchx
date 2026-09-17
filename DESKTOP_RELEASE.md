@@ -97,6 +97,9 @@ system-specific command is not needed. Copy the resulting files into one
 `desktop-artifacts` directory when publishing both platforms together. The
 publish command can also release only the platform artifacts that exist in the
 selected artifact directory, so macOS and Windows can be published separately.
+Publishing uploads only files referenced by the validated platform fragments;
+stale artifacts from earlier product names or versions are ignored. If no prior
+manifest exists, publishing continues without attempting to merge one.
 
 Set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`, then publish immutable
 artifacts and activate the release by uploading `channels/stable.json` last:

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import {
   resolveDesktopVersion,
   updateDesktopVersion,
@@ -58,5 +58,16 @@ describe('desktop version command', () => {
         expect(readFileSync(file, 'utf8')).not.toContain('0.1.1');
       }
     });
+  });
+
+  test('uses the FetchX desktop application identifier', () => {
+    const config = JSON.parse(
+      readFileSync(
+        resolve(import.meta.dir, '../../src-tauri/tauri.conf.json'),
+        'utf8',
+      ),
+    ) as { identifier: string };
+
+    expect(config.identifier).toBe('dev.fetchx.desktop');
   });
 });

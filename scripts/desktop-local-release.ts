@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import {
   type BuildTarget,
@@ -23,6 +23,10 @@ interface TauriConfig {
   version: string;
 }
 
+interface ReleaseArtifactFragment extends UpdaterArtifactFragment {
+  release: UpdaterArtifactFragment['release'] & { download_url?: string };
+}
+
 const ROOT_DIRECTORY = resolve(import.meta.dir, '..');
 const DOWNLOAD_BASE_URL = 'https://downloads.fetchx.dev';
 const DEFAULT_BUCKET = 'fetchx-desktop-releases';
@@ -43,17 +47,19 @@ const artifactDirectory = resolve(
   getArgument('artifact-dir') ?? 'desktop-artifacts',
 );
 
-validateVersions();
+if (import.meta.main) {
+  validateVersions();
 
-if (action === 'help' || action === '--help') printHelp();
-else if (action === 'build') await buildForCurrentOperatingSystem();
-else if (action === 'build-macos') await buildForOperatingSystem('darwin');
-else if (action === 'build-windows') await buildForOperatingSystem('win32');
-else if (action === 'publish') await publishRelease();
-else {
-  throw new Error(
-    'Expected build or publish. Example: bun run desktop:local:build',
-  );
+  if (action === 'help' || action === '--help') printHelp();
+  else if (action === 'build') await buildForCurrentOperatingSystem();
+  else if (action === 'build-macos') await buildForOperatingSystem('darwin');
+  else if (action === 'build-windows') await buildForOperatingSystem('win32');
+  else if (action === 'publish') await publishRelease();
+  else {
+    throw new Error(
+      'Expected build or publish. Example: bun run desktop:local:build',
+    );
+  }
 }
 
 function printHelp() {
@@ -141,7 +147,7 @@ async function collectTargetArtifacts(target: BuildTarget) {
 async function publishRelease() {
   requireEnvironmentVariable('CLOUDFLARE_ACCOUNT_ID');
   requireEnvironmentVariable('CLOUDFLARE_API_TOKEN');
-  validateReleaseArtifacts();
+  const fragments = validateReleaseArtifacts();
 
   const bucket = process.env.R2_BUCKET ?? DEFAULT_BUCKET;
   const existingManifestPath = join(artifactDirectory, 'existing-stable.json');
@@ -159,6 +165,7 @@ async function publishRelease() {
       '--remote',
     ]);
   } catch {
+    discardIncompleteManifest(existingManifestPath);
     console.log(
       'No existing manifest found on R2 to merge, or failed to fetch.',
     );
@@ -185,9 +192,7 @@ async function publishRelease() {
 
   await run(manifestCommand);
 
-  const releaseFiles = readdirSync(artifactDirectory, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && !entry.name.endsWith('.json'))
-    .map((entry) => join(artifactDirectory, entry.name));
+  const releaseFiles = releaseFilesForFragments(fragments, artifactDirectory);
 
   for (const file of releaseFiles) {
     await run([
@@ -226,7 +231,7 @@ function validateVersions() {
   validateUpdaterPublicKey(tauriConfig.plugins?.updater?.pubkey);
 }
 
-function validateReleaseArtifacts() {
+function validateReleaseArtifacts(): ReleaseArtifactFragment[] {
   if (!existsSync(artifactDirectory)) {
     throw new Error(`Artifact directory does not exist: ${artifactDirectory}`);
   }
@@ -238,20 +243,21 @@ function validateReleaseArtifacts() {
     );
   }
 
-  for (const platform of platforms) {
+  const fragments = platforms.map((platform) => {
     const fragmentPath = join(artifactDirectory, `${platform}.json`);
-    const fragment = readJson<UpdaterArtifactFragment>(fragmentPath);
+    const fragment = readJson<ReleaseArtifactFragment>(fragmentPath);
     validateUpdaterFragment(fragment, {
       artifactDirectory,
       expectedPlatform: platform,
       expectedVersion: version,
     });
-  }
+    return fragment;
+  });
 
-  const artifactNames = readdirSync(artifactDirectory);
+  const artifactNames = releaseFilesForFragments(fragments, artifactDirectory);
   if (
     platforms.includes('darwin-aarch64') &&
-    !artifactNames.some((name) => name.endsWith('.dmg'))
+    !artifactNames.some((path) => path.endsWith('.dmg'))
   ) {
     throw new Error(
       'The Apple Silicon macOS DMG installer is required before publishing.',
@@ -259,12 +265,54 @@ function validateReleaseArtifacts() {
   }
   if (
     platforms.includes('windows-x86_64') &&
-    !artifactNames.some((name) => name.endsWith('-setup.exe'))
+    !artifactNames.some((path) => path.endsWith('-setup.exe'))
   ) {
     throw new Error(
       'The Windows NSIS installer is required before publishing.',
     );
   }
+
+  return fragments;
+}
+
+export function releaseFilesForFragments(
+  fragments: ReleaseArtifactFragment[],
+  directory: string,
+): string[] {
+  const files = new Set<string>();
+
+  for (const fragment of fragments) {
+    const updaterName = releaseFileName(fragment.release.url);
+    files.add(join(directory, updaterName));
+    files.add(join(directory, `${updaterName}.sig`));
+
+    if (fragment.release.download_url) {
+      files.add(
+        join(directory, releaseFileName(fragment.release.download_url)),
+      );
+    }
+  }
+
+  for (const file of files) {
+    if (!existsSync(file)) {
+      throw new Error(`Missing release file: ${basename(file)}.`);
+    }
+  }
+
+  return [...files];
+}
+
+export function discardIncompleteManifest(path: string) {
+  if (existsSync(path)) rmSync(path);
+}
+
+function releaseFileName(url: string) {
+  const parsedUrl = new URL(url);
+  if (parsedUrl.hostname !== 'downloads.fetchx.dev') {
+    throw new Error('Release files must use downloads.fetchx.dev URLs.');
+  }
+
+  return basename(parsedUrl.pathname);
 }
 
 function releasePlatformsInArtifactDirectory(): ReleasePlatform[] {

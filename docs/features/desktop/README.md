@@ -25,6 +25,9 @@ Desktop release/download API calls should stay in `src/services/api/desktopRelea
 Website download URLs must resolve to immutable
 `https://downloads.fetchx.dev/desktop/stable/<version>/...` release artifacts.
 
+The Tauri bundle identifier is `dev.fetchx.desktop` for FetchX desktop
+releases.
+
 Browser download prompts are shown by detected desktop OS only. The macOS
 download prompt must not be shown on iPhone or iPad browsers, including iPadOS
 desktop-mode browsers that report a Macintosh-like user agent.
