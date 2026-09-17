@@ -1,7 +1,7 @@
 {
   "name": "fetchx",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,6 +15,7 @@
     "desktop:dev": "tauri dev",
     "desktop:build": "tauri build --config src-tauri/tauri.local.conf.json",
     "desktop:release": "bun run scripts/desktop-release.ts",
+    "desktop:version": "bun run scripts/desktop-version.ts",
     "desktop:local:build": "bun run scripts/desktop-local-release.ts build",
     "desktop:local:build:macos": "bun run scripts/desktop-local-release.ts build-macos",
     "desktop:local:build:windows": "bun run scripts/desktop-local-release.ts build-windows",

@@ -56,8 +56,16 @@ problems; production releases require both.
 
 ### Publish from local computers
 
-Set the same version in `package.json`, `src-tauri/Cargo.toml`, and
-`src-tauri/tauri.conf.json`. Set `TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, 
+Use the version command to keep `package.json`, `src-tauri/Cargo.toml`,
+`src-tauri/tauri.conf.json`, and `src-tauri/Cargo.lock` aligned. It accepts a
+release increment or an explicit stable SemVer:
+
+```bash
+bun run desktop:version patch
+# or: bun run desktop:version 1.2.3
+```
+
+Set `TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`,
 then build into the shared `desktop-artifacts` directory. On macOS, run:
 
 Inject secrets first
@@ -105,8 +113,7 @@ directory, and `--notes "Release notes"` with the publish command. Set
 ### Publish through GitHub Actions
 
 1. Update `CHANGELOG.md`.
-2. Set the same SemVer in `package.json`, `src-tauri/Cargo.toml`, and
-   `src-tauri/tauri.conf.json`.
+2. Run `bun run desktop:version <patch|minor|major|x.y.z>`.
 3. Run `bun run lint:fix` and `bun run build`.
 4. Push the code, then create and push `app-v<version>`.
 5. The desktop workflow builds, signs, and uploads every platform artifact.
