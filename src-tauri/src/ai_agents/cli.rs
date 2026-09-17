@@ -255,7 +255,7 @@ fn versioned_node_paths(home: &Path) -> Vec<PathBuf> {
 
 fn agent_path() -> OsString {
     env::join_paths(current_command_search_paths())
-    .unwrap_or_else(|_| env::var_os("PATH").unwrap_or_default())
+        .unwrap_or_else(|_| env::var_os("PATH").unwrap_or_default())
 }
 
 pub(super) fn find_supported(command: &str) -> Option<&'static AgentCli> {
