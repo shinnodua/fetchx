@@ -1,8 +1,11 @@
 import { useMemo } from 'react';
 import { createPublicClient, http } from 'viem';
 import { usePublicClient } from 'wagmi';
+import { createCorsProxyFetch } from '../../../services/api/rpcTransport';
 import { useRpcStore } from '../../../store';
 import type { RequestItem } from '../types';
+
+const corsProxyFetch = createCorsProxyFetch();
 
 export const useWorkspacePublicClient = (activeRequest: RequestItem | null) => {
   const customRpcs = useRpcStore((state) => state.customRpcs);
@@ -21,7 +24,7 @@ export const useWorkspacePublicClient = (activeRequest: RequestItem | null) => {
     if (!activeCustomRpc?.url) return undefined;
 
     return createPublicClient({
-      transport: http(activeCustomRpc.url),
+      transport: http(activeCustomRpc.url, { fetchFn: corsProxyFetch }),
     });
   }, [activeCustomRpc?.url]);
 

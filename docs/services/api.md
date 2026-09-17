@@ -7,6 +7,7 @@ API services live under `src/services/api/` and own fetch-based side effects.
 - `config.ts`: API base URLs, Fetchx API configuration checks, URL builders.
 - `httpClient.ts`: normalized fetch client, response parsing, CORS proxy fallback, sensitive proxy confirmation.
 - `proxyClient.ts`: Fetchx proxy API request.
+- `rpcTransport.ts`: CORS-aware fetch adapter for Viem JSON-RPC transports.
 - `restApi.ts`: workspace REST request execution.
 - `contractExplorerApi.ts`: Fetchx contract-info client.
 - `bytecodeAbiApi.ts`: Fetchx decode-abi client.
@@ -69,6 +70,14 @@ If found, the user must confirm before the proxy call is made. If no browser `co
 - converts header rows to an object;
 - prepares raw, form-data, or x-www-form-urlencoded bodies;
 - calls `apiRequest` with proxy fallback enabled.
+
+## Contract RPC transport
+
+Wagmi/Viem contract reads use `createCorsProxyFetch` as their HTTP transport.
+This keeps JSON-RPC requests direct-first while allowing browser CORS blocks to
+retry through the Fetchx proxy, just like REST requests. Contract RPC requests
+that receive a direct `403 Forbidden` response also retry through the proxy,
+which supports public RPC providers that reject browser-origin traffic.
 
 ## Fetchx service clients
 

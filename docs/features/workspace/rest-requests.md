@@ -68,6 +68,11 @@ The Fetchx proxy fallback is only enabled with `proxyOnBrowserBlock: true`, and 
 
 Do not route all REST traffic through the proxy by default.
 
+Contract `READ` calls use the same direct-first CORS fallback through their
+Viem JSON-RPC transport. Unlike REST requests, contract reads also retry a
+direct `403 Forbidden` response through the proxy because some public RPC
+providers reject browser-origin traffic.
+
 ## CORS proxy fallback
 
 When direct fetch fails due to a CORS/access-control browser block:

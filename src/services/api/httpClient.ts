@@ -5,6 +5,7 @@ import type { ApiRequest, ApiResponse } from './types';
 
 export interface ApiClientOptions {
   proxyOnBrowserBlock?: boolean;
+  proxyOnForbiddenResponse?: boolean;
   confirmProxyForSensitiveRequest?: (
     risk: SensitiveProxyRisk,
   ) => boolean | Promise<boolean>;
@@ -198,7 +199,14 @@ export async function apiRequest(
   }
 
   try {
-    return await directApiRequest(normalizedRequest);
+    const directResponse = await directApiRequest(normalizedRequest);
+    if (
+      !options.proxyOnForbiddenResponse ||
+      isFetchxOrigin ||
+      directResponse.status !== 403
+    ) {
+      return directResponse;
+    }
   } catch (error) {
     if (
       !options.proxyOnBrowserBlock ||
