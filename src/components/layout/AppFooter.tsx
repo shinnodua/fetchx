@@ -8,6 +8,7 @@ import {
 import {
   getDesktopDownloadDevicePlatform,
   isDesktopApp,
+  openBrowserDownloadWindow,
 } from '../../services/platform';
 import { Button } from '../ui/Button';
 import { useToast } from '../ui/Toast';
@@ -31,11 +32,25 @@ export const AppFooter: React.FC = () => {
   }, []);
 
   const downloadDesktopApp = async (target: DesktopDownloadPlatform) => {
+    let downloadWindow: Window;
+    try {
+      downloadWindow = openBrowserDownloadWindow();
+    } catch (error) {
+      toast({
+        title: 'Desktop download unavailable',
+        description:
+          error instanceof Error ? error.message : 'Please try again later.',
+        type: 'error',
+      });
+      return;
+    }
+
     setDownloadingPlatform(target);
     try {
       const downloadUrl = await getDesktopDownloadUrl(target);
-      window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+      downloadWindow.location.assign(downloadUrl);
     } catch (error) {
+      downloadWindow.close();
       toast({
         title: 'Desktop download unavailable',
         description:

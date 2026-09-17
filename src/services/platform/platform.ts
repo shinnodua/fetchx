@@ -30,6 +30,23 @@ declare global {
 export const isDesktopApp = () =>
   typeof window !== 'undefined' && Boolean(window.__TAURI_INTERNALS__);
 
+export function openBrowserDownloadWindow(
+  openWindow: (
+    url?: string,
+    target?: string,
+  ) => Window | null = window.open.bind(window),
+) {
+  const downloadWindow = openWindow('', '_blank');
+  if (!downloadWindow) {
+    throw new Error(
+      'Your browser blocked the download window. Allow pop-ups for this site and try again.',
+    );
+  }
+
+  downloadWindow.opener = null;
+  return downloadWindow;
+}
+
 export const getDesktopDownloadDevicePlatform = (
   navigatorSource: DesktopDownloadNavigator | undefined = typeof navigator ===
   'undefined'

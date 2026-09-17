@@ -31,6 +31,9 @@ releases.
 Browser download prompts are shown by detected desktop OS only. The macOS
 download prompt must not be shown on iPhone or iPad browsers, including iPadOS
 desktop-mode browsers that report a Macintosh-like user agent.
+Browser download actions open their tab synchronously with the user click, then
+navigate it after the release URL resolves so popup blockers do not suppress
+the download.
 Footer desktop download actions should keep a comfortable press area so the
 download button is easy to click on desktop and touch devices. The footer
 should also stay on its own stacking layer so workspace overlays cannot cover

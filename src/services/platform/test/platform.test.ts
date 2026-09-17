@@ -1,9 +1,10 @@
-import { describe, expect, test } from 'bun:test';
+import { describe, expect, mock, test } from 'bun:test';
 
 import {
   discoverLocalAiAgents,
   getDesktopDownloadDevicePlatform,
   localAiAgentCommandNames,
+  openBrowserDownloadWindow,
 } from '../platform';
 
 describe('platform utilities', () => {
@@ -47,6 +48,21 @@ describe('platform utilities', () => {
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
       }),
     ).toBe('windows');
+  });
+
+  test('opens a browser download window during the user interaction', () => {
+    const downloadWindow = { opener: null } as Window;
+    const openWindow = mock(() => downloadWindow);
+
+    expect(openBrowserDownloadWindow(openWindow)).toBe(downloadWindow);
+    expect(openWindow).toHaveBeenCalledWith('', '_blank');
+    expect(downloadWindow.opener).toBeNull();
+  });
+
+  test('explains how to unblock browser download windows', () => {
+    expect(() => openBrowserDownloadWindow(() => null)).toThrow(
+      'Your browser blocked the download window. Allow pop-ups for this site and try again.',
+    );
   });
 
   test('does not discover local AI agents in the web app shell', async () => {
