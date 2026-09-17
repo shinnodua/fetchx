@@ -39,7 +39,7 @@ The frontend calls the desktop bridge commands `discover_ai_agents`, `discover_a
 
 The bridge discovers two kinds of agents:
 
-- local CLI agents on `PATH`, following the Multica-style runtime detection model;
+- local CLI agents on `PATH`, following the Multica-style runtime detection model. The desktop app also searches common GUI-safe CLI locations, including `~/.local/bin`, `~/.bun/bin`, `~/.nvm/versions/node/*/bin`, Homebrew, and npm/pnpm directories. On Windows it also supports `%APPDATA%\npm`, pnpm, Volta, Cargo, Scoop, and Node.js locations, including the `.cmd` and `.bat` shims installed by Node package managers. This ensures desktop apps launched outside a terminal can still find installed CLIs;
 - localhost HTTP agents on known ports.
 
 Supported CLI commands include `claude` (Claude Code), `agy` (Google Antigravity CLI), `codex`, `gemini`, `opencode`, `cursor-agent`, `copilot`, and `kiro-cli`.

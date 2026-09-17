@@ -23,7 +23,10 @@ function writeVersionFiles(directory: string) {
   const cargoLock = join(directory, 'Cargo.lock');
 
   writeFileSync(packageJson, '{\n  "version": "0.1.1"\n}\n');
-  writeFileSync(tauriConfig, '{\n  "version": "0.1.1"\n}\n');
+  writeFileSync(
+    tauriConfig,
+    '{\n  "version": "0.1.1",\n  "title": "FetchX v0.1.1"\n}\n',
+  );
   writeFileSync(cargoToml, '[package]\nname = "FetchX"\nversion = "0.1.1"\n');
   writeFileSync(cargoLock, '[[package]]\nname = "FetchX"\nversion = "0.1.1"\n');
 
@@ -57,6 +60,9 @@ describe('desktop version command', () => {
         expect(readFileSync(file, 'utf8')).toContain('1.2.3');
         expect(readFileSync(file, 'utf8')).not.toContain('0.1.1');
       }
+      expect(readFileSync(files.tauriConfig, 'utf8')).toContain(
+        '"title": "FetchX v1.2.3"',
+      );
     });
   });
 
@@ -66,8 +72,13 @@ describe('desktop version command', () => {
         resolve(import.meta.dir, '../../src-tauri/tauri.conf.json'),
         'utf8',
       ),
-    ) as { identifier: string };
+    ) as {
+      app: { windows: Array<{ title: string }> };
+      identifier: string;
+      version: string;
+    };
 
     expect(config.identifier).toBe('dev.fetchx.desktop');
+    expect(config.app.windows[0]?.title).toBe(`FetchX v${config.version}`);
   });
 });

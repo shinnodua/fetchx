@@ -45,6 +45,7 @@ export function updateDesktopVersion(
 
   writeFileSync(files.packageJson, `${JSON.stringify(packageJson, null, 2)}\n`);
   replaceFileVersion(files.tauriConfig, version, 'Tauri config');
+  replaceWindowTitle(files.tauriConfig, version);
   replacePackageVersion(files.cargoToml, version, 'Cargo.toml');
   replacePackageVersion(files.cargoLock, version, 'Cargo.lock');
 }
@@ -98,6 +99,20 @@ function replacePackageVersion(file: string, version: string, label: string) {
 
   if (content === updatedContent) {
     throw new Error(`${label} does not contain the FetchX package version.`);
+  }
+
+  writeFileSync(file, updatedContent);
+}
+
+function replaceWindowTitle(file: string, version: string) {
+  const content = readFileSync(file, 'utf8');
+  const updatedContent = content.replace(
+    /("title"\s*:\s*)"FetchX(?: v[^"]+)?"/,
+    `$1"FetchX v${version}"`,
+  );
+
+  if (content === updatedContent) {
+    throw new Error(`${file} does not contain the FetchX window title.`);
   }
 
   writeFileSync(file, updatedContent);

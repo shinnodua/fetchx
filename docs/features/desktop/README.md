@@ -15,6 +15,7 @@ The desktop feature owns desktop-specific presentation and user flows:
 
 - checking for available desktop updates;
 - surfacing update status;
+- showing the installed app version in the native window title bar;
 - delegating platform detection, updater actions, relaunch behavior, and native file/window operations to `src/services/platform`.
 
 ## Service boundary
