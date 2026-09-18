@@ -7,6 +7,9 @@ export type AiAssistantAction =
   | 'create_collection'
   | 'create_collection_with_request'
   | 'save_request_to_collection'
+  | 'search_requests'
+  | 'open_request'
+  | 'run_request'
   | 'none';
 
 export interface AiRequestDraft {
@@ -31,10 +34,15 @@ export interface AiAgentStructuredResponse {
   action: AiAssistantAction;
   request?: AiRequestDraft;
   collection?: AiCollectionDraft;
+  search?: AiSearchDraft;
 }
 
 export interface AiCollectionDraft {
   name?: string;
+}
+
+export interface AiSearchDraft {
+  keyword?: string;
 }
 
 const allowedTypes = new Set([
@@ -170,6 +178,13 @@ export function sanitizeAiCollectionDraft(value: unknown): AiCollectionDraft {
   return name ? { name } : {};
 }
 
+export function sanitizeAiSearchDraft(value: unknown): AiSearchDraft {
+  if (!isRecord(value)) return {};
+
+  const keyword = getString(value.keyword);
+  return keyword ? { keyword } : {};
+}
+
 const actionAliases: Record<string, AiAssistantAction> = {
   create: 'create_request',
   create_request: 'create_request',
@@ -178,6 +193,13 @@ const actionAliases: Record<string, AiAssistantAction> = {
   create_collection: 'create_collection',
   create_collection_with_request: 'create_collection_with_request',
   save_request_to_collection: 'save_request_to_collection',
+  search: 'search_requests',
+  search_request: 'search_requests',
+  search_requests: 'search_requests',
+  open: 'open_request',
+  open_request: 'open_request',
+  run: 'run_request',
+  run_request: 'run_request',
 };
 
 export function parseAiAgentResponse(
@@ -205,6 +227,7 @@ export function parseAiAgentResponse(
     const action = actionValue ? actionAliases[actionValue] || 'none' : 'none';
     const request = sanitizeAiRequestDraft(parsed.request);
     const collection = sanitizeAiCollectionDraft(parsed.collection);
+    const search = sanitizeAiSearchDraft(parsed.search);
     const message =
       getString(parsed.message) ||
       (action === 'none'
@@ -216,6 +239,7 @@ export function parseAiAgentResponse(
       message,
       ...(Object.keys(request).length > 0 ? { request } : {}),
       ...(Object.keys(collection).length > 0 ? { collection } : {}),
+      ...(Object.keys(search).length > 0 ? { search } : {}),
     };
   } catch {
     return {
@@ -238,6 +262,7 @@ export function shouldRunCreatedRequest(userMessage: string) {
 export function buildAiAgentPrompt(input: {
   userMessage: string;
   activeRequest: RequestItem | null;
+  availableRequests: Array<Pick<RequestItem, 'name' | 'target'>>;
 }) {
   const activeRequestJson = input.activeRequest
     ? JSON.stringify(input.activeRequest, null, 2)
@@ -249,12 +274,15 @@ Turn the user's chat message into a Fetchx request or collection action.
 Rules:
 - Return only JSON. Do not wrap it in markdown.
 - Do not use tools, inspect files, run commands, or modify anything. Respond directly from this prompt.
-- Use this exact shape: {"message":"short user-facing summary","action":"create_request|update_request|create_collection|create_collection_with_request|save_request_to_collection|none","request":{...fields},"collection":{"name":"..."}}.
+- Use this exact shape: {"message":"short user-facing summary","action":"create_request|update_request|create_collection|create_collection_with_request|save_request_to_collection|search_requests|open_request|run_request|none","request":{...fields},"collection":{"name":"..."},"search":{"keyword":"..."}}.
 - Use action "create_request" when the user asks for a new request. Include collection.name when they ask to save it in an existing collection.
 - Use action "update_request" when the user asks to modify the active request.
 - Use action "create_collection" when the user asks for a collection without a request.
 - Use action "create_collection_with_request" when the user asks to make a new collection and put a new request in it. Include both request and collection.
 - Use action "save_request_to_collection" when the user asks to save the active request in a collection. Include collection.
+- Use action "search_requests" when the user asks to search for requests. Include search.keyword with the text to put in the sidebar search field.
+- Use action "open_request" when the user asks to open a saved request. Include search.keyword that identifies the request by name or target.
+- Use action "run_request" when the user asks to open and run a saved request. Include search.keyword that identifies the request by name or target.
 - Use action "none" if there is not enough information.
 - A collection name is required for every collection action. Do not invent a collection name when the user did not provide one.
 - Allowed request fields: ${requestFieldNames.join(', ')}.
@@ -266,6 +294,9 @@ Rules:
 
 Active request:
 ${activeRequestJson}
+
+Available saved requests:
+${JSON.stringify(input.availableRequests, null, 2)}
 
 User message:
 ${input.userMessage}`;

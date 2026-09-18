@@ -23,12 +23,17 @@ The workspace includes a prominent bottom-left AI Assistant launcher. Opening it
 - Creating a request closes the assistant so the new draft is visible. Prompts that explicitly ask to send, run, execute, perform, or do the request automatically run the new draft; create-only prompts leave it ready for review.
 - When a create or send prompt produces a URL that already belongs to an existing request or unsaved draft, the assistant pauses and asks whether to update that request or create another one. Matching canonicalizes URL query strings and cURL commands, so equivalent cURL requests are recognized. Updating opens the matched request in the workspace and applies the agent's draft there.
 - The assistant can create a collection, create a collection with a request already saved inside it, create a request in an existing collection, or save the active request into a named collection.
+- Users can ask the assistant to search saved requests by keyword. The assistant fills the Collections sidebar search field and expands the sidebar so matching results are visible.
+- Users can ask the assistant to open a saved request by its name or target keyword. If they ask to run it too, the assistant opens the best matching request and runs it after it becomes active.
 - Agent replies are parsed into a structured request or collection action.
 - `create_request` opens a request draft with `addCustomRequest`, then saves it when a collection is named.
 - `update_request` patches the active draft with `updateActiveRequest`.
 - `create_collection` creates the named collection.
 - `create_collection_with_request` creates the collection and saves its new request into it.
 - `save_request_to_collection` saves the active request into the named collection.
+- `search_requests` fills and activates the Collections sidebar search using `search.keyword`.
+- `open_request` opens the best saved request matching `search.keyword`.
+- `run_request` opens the best saved request matching `search.keyword` and runs it.
 - `none` leaves the workspace unchanged and shows the agent message.
 
 ## Local Discovery
@@ -68,7 +73,7 @@ Agents receive a prompt containing the active request and must respond with JSON
 }
 ```
 
-`action` may be `create_request`, `update_request`, `create_collection`, `create_collection_with_request`, `save_request_to_collection`, or `none`. For backward compatibility, the parser also accepts the former `create` and `update` request actions. The parser only accepts fields that exist on `RequestItem`, normalizes allowed method values, and converts any cURL value returned as `request.target` into the corresponding REST request fields before applying changes.
+`action` may be `create_request`, `update_request`, `create_collection`, `create_collection_with_request`, `save_request_to_collection`, `search_requests`, `open_request`, `run_request`, or `none`. Search and request-opening actions include a `search` object such as `{"keyword":"GitHub users"}`. For backward compatibility, the parser also accepts the former `create` and `update` request actions. The parser only accepts fields that exist on `RequestItem`, normalizes allowed method values, and converts any cURL value returned as `request.target` into the corresponding REST request fields before applying changes.
 
 The Fetchx local HTTP protocol accepts `POST /chat` with:
 

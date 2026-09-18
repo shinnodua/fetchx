@@ -5,6 +5,7 @@ import {
   parseAiAgentResponse,
   sanitizeAiCollectionDraft,
   sanitizeAiRequestDraft,
+  sanitizeAiSearchDraft,
   shouldRunCreatedRequest,
 } from '../aiAgentRequest';
 
@@ -93,12 +94,37 @@ describe('AI agent request utilities', () => {
         type: 'GET',
         target: 'https://example.com',
       },
+      availableRequests: [
+        { name: 'GitHub User', target: 'https://api.github.com/users/octocat' },
+      ],
     });
 
     expect(prompt).toContain('"action":"create_request|update_request');
     expect(prompt).toContain('Do not use tools, inspect files, run commands');
+    expect(prompt).toContain('search_requests');
+    expect(prompt).toContain('GitHub User');
     expect(prompt).toContain('"name": "Example"');
     expect(prompt).toContain('make this a POST');
+  });
+
+  test('parses search, open, and run request actions with a keyword', () => {
+    expect(
+      parseAiAgentResponse(
+        '{"message":"Searching GitHub users.","action":"search","search":{"keyword":" GitHub users "}}',
+      ),
+    ).toEqual({
+      message: 'Searching GitHub users.',
+      action: 'search_requests',
+      search: { keyword: 'GitHub users' },
+    });
+    expect(
+      parseAiAgentResponse(
+        '{"message":"Opened and running it.","action":"run_request","search":{"keyword":"Users"}}',
+      ),
+    ).toMatchObject({ action: 'run_request', search: { keyword: 'Users' } });
+    expect(sanitizeAiSearchDraft({ keyword: '  Payments  ' })).toEqual({
+      keyword: 'Payments',
+    });
   });
 
   test('parses collection creation and request-save actions', () => {

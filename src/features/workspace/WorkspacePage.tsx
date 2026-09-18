@@ -29,6 +29,7 @@ export const WorkspacePage: React.FC = () => {
     shouldRunCreatedAssistantRequest,
     setShouldRunCreatedAssistantRequest,
   ] = useState(false);
+  const [assistantRequestToRunId, setAssistantRequestToRunId] = useState('');
 
   // Store bindings
   const {
@@ -101,6 +102,15 @@ export const WorkspacePage: React.FC = () => {
     void handleRunRequest();
   }, [activeRequest, handleRunRequest, shouldRunCreatedAssistantRequest]);
 
+  useEffect(() => {
+    if (!assistantRequestToRunId || activeTabId !== assistantRequestToRunId) {
+      return;
+    }
+
+    setAssistantRequestToRunId('');
+    void handleRunRequest();
+  }, [activeTabId, assistantRequestToRunId, handleRunRequest]);
+
   const validTabs = useMemo(() => {
     return tabs.filter((tabId) => {
       if (drafts[tabId]) return true;
@@ -155,6 +165,9 @@ export const WorkspacePage: React.FC = () => {
       <RequestAssistantChat
         activeRequest={activeRequest}
         onRequestCreated={setShouldRunCreatedAssistantRequest}
+        onRequestOpened={(requestId, shouldRun) => {
+          if (shouldRun) setAssistantRequestToRunId(requestId);
+        }}
         launcherLabel="AI Assistant"
         launcherClassName="absolute bottom-4 right-4 z-[55] shadow-xl shadow-primary-500/25 ring-2 ring-background"
       />

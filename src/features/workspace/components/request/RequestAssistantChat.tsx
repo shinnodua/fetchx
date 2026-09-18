@@ -33,6 +33,7 @@ import {
 } from '../../utils/aiAgentRequest';
 import { findCollectionIdByName } from '../../utils/assistantCollection';
 import { findRequestByTarget } from '../../utils/assistantRequestDuplicate';
+import { findRequestByKeyword } from '../../utils/assistantRequestSearch';
 import {
   getRequestAssistantComposerState,
   isRequestAssistantPanelVisible,
@@ -45,6 +46,7 @@ interface RequestAssistantChatProps {
   launcherClassName?: string;
   launcherLabel?: string;
   onRequestCreated?: (shouldRun: boolean) => void;
+  onRequestOpened?: (requestId: string, shouldRun: boolean) => void;
 }
 
 type ChatMessage = AiAssistantChatMessage;
@@ -53,6 +55,14 @@ interface PendingDuplicateRequest {
   response: AiAgentStructuredResponse;
   existingRequest: RequestItem;
   shouldRun: boolean;
+}
+
+interface AgentResponseSummary {
+  changed: boolean;
+  createdRequest: boolean;
+  openedRequestId?: string;
+  requestNotFound?: boolean;
+  shouldRunOpenedRequest?: boolean;
 }
 
 const createMessage = (
@@ -94,6 +104,7 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
   launcherClassName,
   launcherLabel,
   onRequestCreated,
+  onRequestOpened,
 }) => {
   const prefersReducedMotion = useReducedMotion();
   const { toast } = useToast();
@@ -101,6 +112,11 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
   const addCollection = useWorkspaceStore((state) => state.addCollection);
   const saveDraft = useWorkspaceStore((state) => state.saveDraft);
   const openTab = useWorkspaceStore((state) => state.openTab);
+  const collections = useWorkspaceStore((state) => state.collections);
+  const setCollectionsPanelCollapsed = useWorkspaceStore(
+    (state) => state.setCollectionsPanelCollapsed,
+  );
+  const setSearchTerm = useWorkspaceStore((state) => state.setSearchTerm);
   const updateActiveRequest = useWorkspaceStore(
     (state) => state.updateActiveRequest,
   );
@@ -275,7 +291,9 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
     return true;
   };
 
-  const applyAgentResponse = (response: AiAgentStructuredResponse) => {
+  const applyAgentResponse = (
+    response: AiAgentStructuredResponse,
+  ): AgentResponseSummary => {
     const collectionName = response.collection?.name;
 
     switch (response.action) {
@@ -314,6 +332,40 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
         }
         saveDraft(activeRequest.id, collectionId);
         return { changed: true, createdRequest: false };
+      }
+      case 'search_requests': {
+        const keyword = response.search?.keyword;
+        if (!keyword) return { changed: false, createdRequest: false };
+
+        setSearchTerm(keyword);
+        setCollectionsPanelCollapsed(false);
+        return { changed: true, createdRequest: false };
+      }
+      case 'open_request':
+      case 'run_request': {
+        const keyword = response.search?.keyword;
+        const request = findRequestByKeyword(collections, keyword);
+        if (!keyword || !request) {
+          if (keyword) {
+            setSearchTerm(keyword);
+            setCollectionsPanelCollapsed(false);
+          }
+          return {
+            changed: Boolean(keyword),
+            createdRequest: false,
+            requestNotFound: Boolean(keyword),
+          };
+        }
+
+        setSearchTerm(keyword);
+        setCollectionsPanelCollapsed(false);
+        openTab(request.id);
+        return {
+          changed: true,
+          createdRequest: false,
+          openedRequestId: request.id,
+          shouldRunOpenedRequest: response.action === 'run_request',
+        };
       }
       default:
         return { changed: false, createdRequest: false };
@@ -391,6 +443,12 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
     const prompt = buildAiAgentPrompt({
       userMessage,
       activeRequest,
+      availableRequests: collections.flatMap((collection) =>
+        collection.requests.map((request) => ({
+          name: request.name,
+          target: request.target,
+        })),
+      ),
     });
     const pendingMessage = createMessage('system', workingMessageContent, true);
     setComposerValue('');
@@ -440,7 +498,21 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
         onRequestCreated?.(shouldRunCreatedRequest(userMessage));
       }
 
-      if (resultSummary.changed) {
+      if (resultSummary.openedRequestId) {
+        setIsOpen(false);
+        onRequestOpened?.(
+          resultSummary.openedRequestId,
+          resultSummary.shouldRunOpenedRequest ?? false,
+        );
+      }
+
+      if (resultSummary.requestNotFound) {
+        toast({
+          title: 'No matching saved request',
+          description: 'The sidebar was filtered so you can choose a request.',
+          type: 'error',
+        });
+      } else if (resultSummary.changed) {
         toast({
           title:
             parsedResponse.action === 'create_request' ||
@@ -517,8 +589,8 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
                   </Badge>
                 </div>
                 <p className="text-xs leading-5 text-foreground/55">
-                  Create requests and collections, or save the active request to
-                  a collection with a local agent.
+                  Create requests and collections, search saved requests, or
+                  open and run one with a local agent.
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-1">
@@ -667,7 +739,7 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
                 disabled={composerState.disabled}
                 placeholder={
                   selectedAgent
-                    ? 'Ask for a request or collection, e.g. “Create an Auth collection with a login request.”'
+                    ? 'Ask to create, search, or run a request, e.g. “Find and open GitHub users.”'
                     : 'Connect a local agent first.'
                 }
                 className="min-h-[88px] resize-none"
