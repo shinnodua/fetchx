@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { EnvironmentIcon } from '../../../../assets/svgs';
 import { Button, Dialog, Input } from '../../../../components';
 import { useEnvironmentStore } from '../../../../store';
+import { ManagementDialog } from '../shared/ManagementDialog';
 import { EnvironmentList } from './EnvironmentList';
 import { PincodePanel } from './PincodePanel';
 import { VariablesTable } from './VariablesTable';
@@ -81,12 +82,11 @@ export const EnvironmentDialog: React.FC = () => {
 
   return (
     <>
-      <Dialog
+      <ManagementDialog
         isOpen={manageEnvOpen}
         onClose={handleManageEnvironmentClose}
         title="Manage Environments"
         description="Define environment-specific variables. Use them in your request target URLs, contract addresses, query parameters, body, headers, or arguments as {{variable_name}}."
-        className="flex h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-none flex-col overflow-hidden"
       >
         <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-6 mt-4 select-none">
           {/* Left pane: Environments List */}
@@ -150,7 +150,7 @@ export const EnvironmentDialog: React.FC = () => {
             Done
           </Button>
         </div>
-      </Dialog>
+      </ManagementDialog>
 
       <Dialog
         isOpen={Boolean(environmentToDelete)}

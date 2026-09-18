@@ -14,6 +14,7 @@ import {
 } from '../../../../../components';
 import { trackEvent } from '../../../../../services/analytics/googleAnalytics';
 import { useWorkspaceStore } from '../../../../../store';
+import { usePointerTabReorder } from '../../../hooks/usePointerTabReorder';
 import type { RequestItem } from '../../../types';
 import { getRequestIsDirty } from '../../../utils/requestDirty';
 import { TabContextMenu } from './TabContextMenu';
@@ -43,8 +44,6 @@ export const TabsHeader: React.FC = () => {
     setTabToClose,
     setCollectionsPanelCollapsed,
   } = useWorkspaceStore();
-  const [draggedTabId, setDraggedTabId] = useState<string | null>(null);
-  const [dragOverTabId, setDragOverTabId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{
     tabId: string;
     x: number;
@@ -52,6 +51,8 @@ export const TabsHeader: React.FC = () => {
   } | null>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const { draggedTabId, isTabInsertion, startTabDrag } =
+    usePointerTabReorder(reorderTabs);
 
   useEffect(() => {
     if (!activeTabId) return;
@@ -168,45 +169,6 @@ export const TabsHeader: React.FC = () => {
     }
   };
 
-  const handleDragStart = (
-    tabId: string,
-    event: React.DragEvent<HTMLDivElement>,
-  ) => {
-    setDraggedTabId(tabId);
-    event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/plain', tabId);
-  };
-
-  const handleDragOver = (
-    tabId: string,
-    event: React.DragEvent<HTMLDivElement>,
-  ) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-    if (tabId !== draggedTabId) {
-      setDragOverTabId(tabId);
-    }
-  };
-
-  const handleDrop = (
-    tabId: string,
-    event: React.DragEvent<HTMLDivElement>,
-  ) => {
-    event.preventDefault();
-    const sourceTabId =
-      event.dataTransfer.getData('text/plain') || draggedTabId;
-    if (sourceTabId) {
-      reorderTabs(sourceTabId, tabId);
-    }
-    setDraggedTabId(null);
-    setDragOverTabId(null);
-  };
-
-  const resetDragState = () => {
-    setDraggedTabId(null);
-    setDragOverTabId(null);
-  };
-
   const contextMenuReq = contextMenu
     ? drafts[contextMenu.tabId] ||
       collections
@@ -262,25 +224,21 @@ export const TabsHeader: React.FC = () => {
               ref={(element) => {
                 tabRefs.current[tabId] = element;
               }}
-              draggable
+              data-workspace-tab-id={tabId}
               onClick={() => setActiveTabId(tabId)}
               onContextMenu={(event) => handleTabContextMenu(tabId, event)}
-              onDragStart={(event) => handleDragStart(tabId, event)}
-              onDragOver={(event) => handleDragOver(tabId, event)}
-              onDragLeave={() => {
-                if (dragOverTabId === tabId) {
-                  setDragOverTabId(null);
-                }
-              }}
-              onDrop={(event) => handleDrop(tabId, event)}
-              onDragEnd={resetDragState}
+              onPointerDown={(event) => startTabDrag(tabId, event)}
               className={`${workspaceTabClassName} ${
                 isActive
-                  ? 'z-10 border-foreground/10 bg-background text-foreground shadow-sm shadow-foreground/10 before:absolute before:inset-x-3 before:bottom-0 before:h-0.5 before:rounded-full before:bg-primary-500'
+                  ? 'z-10 border-foreground/10 bg-background text-foreground shadow-sm shadow-foreground/10'
                   : 'border-transparent bg-transparent text-foreground/60 hover:border-foreground/10 hover:bg-background/70 hover:text-foreground'
-              } ${draggedTabId === tabId ? 'opacity-50' : ''} ${
-                dragOverTabId === tabId
-                  ? 'border-primary-500/30 bg-primary-500/10 shadow-[inset_2px_0_0_theme(colors.primary.500)]'
+              } ${draggedTabId === tabId ? 'scale-[0.98] opacity-40' : ''} ${
+                isTabInsertion(tabId, 'before')
+                  ? 'before:absolute before:-left-1 before:inset-y-2 before:w-0.5 before:rounded-full before:bg-primary-500'
+                  : ''
+              } ${
+                isTabInsertion(tabId, 'after')
+                  ? 'after:absolute after:-right-1 after:inset-y-2 after:w-0.5 after:rounded-full after:bg-primary-500'
                   : ''
               }`}
             >
@@ -308,6 +266,9 @@ export const TabsHeader: React.FC = () => {
               >
                 <CloseIcon title="Close tab" className="w-3 h-3 shrink-0" />
               </Button>
+              {isActive && (
+                <span className="pointer-events-none absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-primary-500" />
+              )}
             </div>
           );
         })}

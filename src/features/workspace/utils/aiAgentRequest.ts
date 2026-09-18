@@ -1,4 +1,3 @@
-import type { RequestItem } from '../types';
 import { parseCurl } from './requestImport';
 
 export type AiAssistantAction =
@@ -251,23 +250,10 @@ export function parseAiAgentResponse(
   }
 }
 
-export function shouldRunCreatedRequest(userMessage: string) {
-  const message = userMessage.toLowerCase();
-  return (
-    /\brequest\b/.test(message) &&
-    /\b(?:send|run|execute|perform|do)\b/.test(message)
-  );
-}
-
 export function buildAiAgentPrompt(input: {
   userMessage: string;
-  activeRequest: RequestItem | null;
-  availableRequests: Array<Pick<RequestItem, 'name' | 'target'>>;
+  hasActiveRequest: boolean;
 }) {
-  const activeRequestJson = input.activeRequest
-    ? JSON.stringify(input.activeRequest, null, 2)
-    : 'null';
-
   return `You are an API and smart-contract request assistant inside Fetchx.
 Turn the user's chat message into a Fetchx request or collection action.
 
@@ -282,7 +268,7 @@ Rules:
 - Use action "save_request_to_collection" when the user asks to save the active request in a collection. Include collection.
 - Use action "search_requests" when the user asks to search for requests. Include search.keyword with the text to put in the sidebar search field.
 - Use action "open_request" when the user asks to open a saved request. Include search.keyword that identifies the request by name or target.
-- Use action "run_request" when the user asks to open and run a saved request. Include search.keyword that identifies the request by name or target.
+- Use action "run_request" when the user asks to open a saved request for review. Include search.keyword that identifies the request by name or target. Fetchx never executes an assistant-created or assistant-opened request automatically.
 - Use action "none" if there is not enough information.
 - A collection name is required for every collection action. Do not invent a collection name when the user did not provide one.
 - Allowed request fields: ${requestFieldNames.join(', ')}.
@@ -292,11 +278,8 @@ Rules:
 - For contract requests, set type READ/WRITE/SEND, target, network, abi, functionName, args, and contractName when known.
 - Preserve environment placeholders like {{API_KEY}} exactly.
 
-Active request:
-${activeRequestJson}
-
-Available saved requests:
-${JSON.stringify(input.availableRequests, null, 2)}
+Active request available: ${input.hasActiveRequest ? 'yes' : 'no'}.
+Do not ask for, repeat, or infer credentials, authorization headers, request bodies, URLs, contract arguments, or other stored request values. The user must provide any value needed for an action in their chat message.
 
 User message:
 ${input.userMessage}`;

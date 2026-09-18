@@ -18,24 +18,17 @@ const agents: LocalAiAgent[] = [
     protocol: 'ollama-chat',
   },
   {
-    id: 'cli:codex',
-    name: 'Codex',
-    kind: 'cli',
-    command: 'codex',
-    protocol: 'cli-prompt',
-  },
-  {
-    id: 'cli:claude',
-    name: 'Claude Code',
-    kind: 'cli',
-    command: 'claude',
-    protocol: 'cli-prompt',
+    id: 'http:lm-studio',
+    name: 'LM Studio',
+    kind: 'http',
+    endpoint: 'http://127.0.0.1:1234',
+    protocol: 'openai-chat',
   },
 ];
 
 describe('local AI agent presentation', () => {
-  test('shows the executable for CLI agents and endpoint for HTTP agents', () => {
-    expect(getLocalAiAgentLabel(agents[1])).toBe('codex');
+  test('shows the endpoint for local services', () => {
+    expect(getLocalAiAgentLabel(agents[1])).toBe('http://127.0.0.1:1234');
     expect(getLocalAiAgentLabel(agents[0])).toBe('http://127.0.0.1:11434');
   });
 
@@ -52,10 +45,9 @@ describe('local AI agent presentation', () => {
     ]);
   });
 
-  test('sorts CLI agents before HTTP agents and names alphabetically', () => {
+  test('sorts local services alphabetically', () => {
     expect(sortLocalAiAgents(agents).map((agent) => agent.id)).toEqual([
-      'cli:claude',
-      'cli:codex',
+      'http:lm-studio',
       'http:ollama',
     ]);
     expect(agents[0]?.id).toBe('http:ollama');

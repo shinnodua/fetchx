@@ -73,7 +73,7 @@ export const LocalAgentConnectionDialog: React.FC<
     isOpen={isOpen}
     onClose={onClose}
     title="Connect a local agent"
-    description="Choose an agent CLI or local model service detected on this computer."
+    description="Choose a detected local service or an installed AI CLI."
     className="max-w-xl"
   >
     <div className="space-y-5">
@@ -83,7 +83,8 @@ export const LocalAgentConnectionDialog: React.FC<
             Available agents
           </p>
           <p className="mt-1 text-xs leading-5 text-foreground/55">
-            Fetchx checks installed CLIs and supported localhost services.
+            CLI agents run with the permissions configured in their own tools.
+            Only connect one you trust.
           </p>
         </div>
         <Button
@@ -162,7 +163,6 @@ export const LocalAgentConnectionDialog: React.FC<
               );
             })}
           </div>
-
           {selectedAgentId && (
             <>
               <Select
@@ -188,8 +188,8 @@ export const LocalAgentConnectionDialog: React.FC<
           title="No supported agents found"
           icon={<InfoIcon title="No agents found" className="h-5 w-5" />}
         >
-          Install and sign in to a supported CLI such as Claude Code, Codex,
-          Gemini CLI, Cursor Agent, or OpenCode. Then select Refresh.
+          Install a supported CLI or start a local model service such as Ollama
+          or LM Studio, then select Refresh.
         </Alert>
       )}
 

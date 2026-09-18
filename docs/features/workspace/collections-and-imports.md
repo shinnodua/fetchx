@@ -33,6 +33,23 @@ Collapsed collection ids and sidebar width/collapsed state live in `useWorkspace
 Collection rows use compact vertical gaps and slim selected or hover surfaces so
 more requests and saved responses remain visible in the sidebar.
 
+Each collection's three-dot menu includes **Reorder**. It opens the full-viewport
+**Manage Collections** dialog with the complete collection tree, including every request nested under its
+collection. As a row is dragged, an insertion line shows whether it will land
+before or after the hovered row and the list immediately previews that new
+position. Drag collection rows to reorder collections, or drag a request within
+the same collection to reorder that collection's requests.
+Collection request lists start collapsed in the dialog and can be expanded with
+their chevron control.
+The dialog only saves the staged order after **Save order** is selected; the
+persisted workspace state restores that order after restart.
+
+## Workspace tab ordering
+
+Open workspace tabs can be reordered directly in the tab strip. Dragging a tab
+uses an insertion line and immediately previews its new position; dropping keeps
+that staged order in the persisted workspace state.
+
 ## Collection actions
 
 Collection actions live in `src/store/workspace/collectionActions.ts`.

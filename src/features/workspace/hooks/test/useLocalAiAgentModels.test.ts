@@ -3,9 +3,9 @@ import { getLocalAiAgentModelsQueryKey } from '../useLocalAiAgentModels';
 
 describe('local AI agent model query', () => {
   test('uses an agent-specific cache key', () => {
-    expect(getLocalAiAgentModelsQueryKey('cli:agy')).toEqual([
+    expect(getLocalAiAgentModelsQueryKey('http:ollama')).toEqual([
       'local-ai-agent-models',
-      'cli:agy',
+      'http:ollama',
     ]);
   });
 });

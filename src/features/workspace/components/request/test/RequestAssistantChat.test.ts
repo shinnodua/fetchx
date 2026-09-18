@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 
 import {
   isRequestAssistantWorkingMessage,
+  requestAssistantManageButtonClassName,
   requestAssistantMessageClassName,
   requestAssistantPanelClassName,
   requestAssistantPanelMotion,
@@ -19,6 +20,11 @@ describe('RequestAssistantChat', () => {
     expect(requestAssistantPanelClassName).toContain('bg-primary-50/80');
     expect(requestAssistantPanelClassName).toContain('border-primary-200/80');
     expect(requestAssistantPanelClassName).toContain('backdrop-blur-xl');
+  });
+
+  test('matches the Manage control height to the compact agent select trigger', () => {
+    expect(requestAssistantManageButtonClassName).toContain('h-8');
+    expect(requestAssistantManageButtonClassName).not.toContain('h-10');
   });
 
   test('animates the panel from and toward its launcher', () => {

@@ -6,7 +6,6 @@ import {
   sanitizeAiCollectionDraft,
   sanitizeAiRequestDraft,
   sanitizeAiSearchDraft,
-  shouldRunCreatedRequest,
 } from '../aiAgentRequest';
 
 describe('AI agent request utilities', () => {
@@ -85,25 +84,18 @@ describe('AI agent request utilities', () => {
     });
   });
 
-  test('builds a prompt with the active request and response contract', () => {
+  test('builds a prompt without stored request data', () => {
     const prompt = buildAiAgentPrompt({
       userMessage: 'make this a POST',
-      activeRequest: {
-        id: 'r-1',
-        name: 'Example',
-        type: 'GET',
-        target: 'https://example.com',
-      },
-      availableRequests: [
-        { name: 'GitHub User', target: 'https://api.github.com/users/octocat' },
-      ],
+      hasActiveRequest: true,
     });
 
     expect(prompt).toContain('"action":"create_request|update_request');
     expect(prompt).toContain('Do not use tools, inspect files, run commands');
     expect(prompt).toContain('search_requests');
-    expect(prompt).toContain('GitHub User');
-    expect(prompt).toContain('"name": "Example"');
+    expect(prompt).toContain('Active request available: yes.');
+    expect(prompt).toContain('Do not ask for, repeat, or infer credentials');
+    expect(prompt).not.toContain('https://api.github.com');
     expect(prompt).toContain('make this a POST');
   });
 
@@ -158,15 +150,12 @@ describe('AI agent request utilities', () => {
     });
   });
 
-  test('only runs a created request when the user explicitly asks for it', () => {
-    expect(
-      shouldRunCreatedRequest('Create a GET request for the GitHub API.'),
-    ).toBe(false);
-    expect(
-      shouldRunCreatedRequest(
-        'Create a GET request for the GitHub API and send it.',
-      ),
-    ).toBe(true);
-    expect(shouldRunCreatedRequest('Do the request now.')).toBe(true);
+  test('instructs the agent that assistant requests never execute automatically', () => {
+    const prompt = buildAiAgentPrompt({
+      userMessage: 'Run my saved users request.',
+      hasActiveRequest: false,
+    });
+
+    expect(prompt).toContain('never executes an assistant-created');
   });
 });

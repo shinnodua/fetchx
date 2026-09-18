@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useWorkspaceStore } from '../../store';
 import {
   ActiveRequestWorkspace,
@@ -25,11 +25,6 @@ export const WorkspacePage: React.FC = () => {
   // Global hooks
   useAutoCollapseSidebar();
   useUnsavedChangesWarning();
-  const [
-    shouldRunCreatedAssistantRequest,
-    setShouldRunCreatedAssistantRequest,
-  ] = useState(false);
-  const [assistantRequestToRunId, setAssistantRequestToRunId] = useState('');
 
   // Store bindings
   const {
@@ -95,22 +90,6 @@ export const WorkspacePage: React.FC = () => {
     handleSimulateRequest,
   } = useRequestRunner(activeRequest, activeTabId, publicClient);
 
-  useEffect(() => {
-    if (!shouldRunCreatedAssistantRequest || !activeRequest) return;
-
-    setShouldRunCreatedAssistantRequest(false);
-    void handleRunRequest();
-  }, [activeRequest, handleRunRequest, shouldRunCreatedAssistantRequest]);
-
-  useEffect(() => {
-    if (!assistantRequestToRunId || activeTabId !== assistantRequestToRunId) {
-      return;
-    }
-
-    setAssistantRequestToRunId('');
-    void handleRunRequest();
-  }, [activeTabId, assistantRequestToRunId, handleRunRequest]);
-
   const validTabs = useMemo(() => {
     return tabs.filter((tabId) => {
       if (drafts[tabId]) return true;
@@ -164,10 +143,6 @@ export const WorkspacePage: React.FC = () => {
 
       <RequestAssistantChat
         activeRequest={activeRequest}
-        onRequestCreated={setShouldRunCreatedAssistantRequest}
-        onRequestOpened={(requestId, shouldRun) => {
-          if (shouldRun) setAssistantRequestToRunId(requestId);
-        }}
         launcherLabel="AI Assistant"
         launcherClassName="absolute bottom-4 right-4 z-[55] shadow-xl shadow-primary-500/25 ring-2 ring-background"
       />

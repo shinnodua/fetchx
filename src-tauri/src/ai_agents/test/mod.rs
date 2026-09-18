@@ -1,47 +1,4 @@
-use std::{ffi::OsString, path::PathBuf};
-
 use super::{cli, http, models};
-
-#[test]
-fn builds_positional_cli_prompts_with_an_option_delimiter() {
-    let codex = cli::find_supported("codex").expect("Codex should be supported");
-    let command =
-        cli::build_chat_command_with_executable(codex, "codex", None, "--help me create a request");
-    let arguments = command
-        .get_args()
-        .map(|argument| argument.to_string_lossy().to_string())
-        .collect::<Vec<_>>();
-
-    assert_eq!(
-        arguments,
-        vec![
-            "exec",
-            "--skip-git-repo-check",
-            "--",
-            "--help me create a request"
-        ]
-    );
-}
-
-#[test]
-fn builds_option_value_prompts_after_the_model_argument() {
-    let claude = cli::find_supported("claude").expect("Claude Code should be supported");
-    let command = cli::build_chat_command_with_executable(
-        claude,
-        "claude",
-        Some("sonnet"),
-        "Create a request",
-    );
-    let arguments = command
-        .get_args()
-        .map(|argument| argument.to_string_lossy().to_string())
-        .collect::<Vec<_>>();
-
-    assert_eq!(
-        arguments,
-        vec!["--model", "sonnet", "-p", "Create a request"]
-    );
-}
 
 #[test]
 fn parses_openai_compatible_model_responses() {
@@ -53,7 +10,7 @@ fn parses_openai_compatible_model_responses() {
 }
 
 #[test]
-fn parses_cli_model_ids_and_display_names() {
+fn parses_line_based_model_ids_and_display_names() {
     let models = models::parse("gemini-3.8-flash-high\tGemini 3.8 Flash (High)\nclaude-sonnet-4-6\tClaude Sonnet 4.6 (Thinking)");
 
     assert_eq!(models[0].id, "gemini-3.8-flash-high");
@@ -69,25 +26,42 @@ fn rejects_non_local_http_endpoints() {
 }
 
 #[test]
-fn searches_common_gui_safe_cli_locations() {
-    let paths = cli::command_search_paths(
-        Some(OsString::from("/usr/bin")),
-        Some(OsString::from("/Users/example")),
-    );
+fn rejects_unknown_agent_ids() {
+    let error = http::agent_by_id("http:attacker-controlled")
+        .expect_err("unknown local agents must be rejected");
 
-    assert!(paths.contains(&PathBuf::from("/Users/example/.local/bin")));
-    assert!(paths.contains(&PathBuf::from("/Users/example/.bun/bin")));
-    assert!(paths.contains(&PathBuf::from("/opt/homebrew/bin")));
+    assert_eq!(error, "Unsupported local agent.");
 }
 
-#[cfg(windows)]
 #[test]
-fn searches_windows_cli_install_locations() {
-    let paths = cli::command_search_paths(
-        Some(OsString::from(r"C:\Windows\System32")),
-        Some(OsString::from(r"C:\Users\example")),
-    );
+fn rejects_unknown_cli_agent_ids() {
+    let error =
+        cli::cli_by_id("cli:attacker-controlled").expect_err("unknown CLI agents must be rejected");
 
-    assert!(paths.contains(&PathBuf::from(r"C:\Users\example\AppData\Roaming\npm")));
-    assert!(paths.contains(&PathBuf::from(r"C:\Users\example\scoop\shims")));
+    assert_eq!(error, "Unsupported local agent.");
+}
+
+#[test]
+fn keeps_positional_prompts_as_content() {
+    let codex = cli::cli_by_id("cli:codex").expect("Codex should be supported");
+    let command = cli::build_chat_command_with_executable(
+        codex,
+        "codex",
+        None,
+        "--do not treat this as an option",
+    );
+    let arguments = command
+        .get_args()
+        .map(|argument| argument.to_string_lossy().to_string())
+        .collect::<Vec<_>>();
+
+    assert_eq!(
+        arguments,
+        vec![
+            "exec",
+            "--skip-git-repo-check",
+            "--",
+            "--do not treat this as an option"
+        ]
+    );
 }

@@ -4,6 +4,8 @@ import { createPortal } from 'react-dom';
 import { CloseIcon } from '../../assets/svgs';
 import { cn } from '../../utils/cn';
 
+export const dialogLayerClassName = 'z-[70]';
+
 export interface DialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -37,7 +39,9 @@ export const Dialog = ({
   const dialogContent = (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+        <div
+          className={`fixed inset-0 ${dialogLayerClassName} flex items-center justify-center p-3 sm:p-4`}
+        >
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -52,7 +56,7 @@ export const Dialog = ({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={cn(
-              'relative z-50 w-full max-w-lg rounded-2xl border border-foreground/10 bg-background p-4 shadow-2xl',
+              `relative ${dialogLayerClassName} w-full max-w-lg rounded-2xl border border-foreground/10 bg-background p-4 shadow-2xl`,
               className,
             )}
           >

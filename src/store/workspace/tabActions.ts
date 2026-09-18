@@ -1,4 +1,5 @@
 import type { StateCreator } from 'zustand';
+import { reorderTabIds, type TabReorderPlacement } from './tabOrder';
 import type { WorkspaceState } from './workspaceStoreTypes';
 import {
   cloneRequest,
@@ -65,20 +66,19 @@ export const createTabActions = (set: WorkspaceSet, _get: WorkspaceGet) => ({
       };
     }),
 
-  reorderTabs: (draggedTabId: string, targetTabId: string) =>
+  reorderTabs: (
+    draggedTabId: string,
+    targetTabId: string,
+    placement: TabReorderPlacement = 'before',
+  ) =>
     set((state) => {
-      if (draggedTabId === targetTabId) return {};
-
-      const fromIndex = state.tabs.indexOf(draggedTabId);
-      const toIndex = state.tabs.indexOf(targetTabId);
-      if (fromIndex === -1 || toIndex === -1) return {};
-
-      const updatedTabs = [...state.tabs];
-      const [draggedTab] = updatedTabs.splice(fromIndex, 1);
-      const insertIndex = fromIndex < toIndex ? toIndex - 1 : toIndex;
-      updatedTabs.splice(insertIndex, 0, draggedTab);
-
-      return { tabs: updatedTabs };
+      const tabs = reorderTabIds(
+        state.tabs,
+        draggedTabId,
+        targetTabId,
+        placement,
+      );
+      return tabs === state.tabs ? {} : { tabs };
     }),
 
   revealRequestInSidebar: (reqId: string) =>

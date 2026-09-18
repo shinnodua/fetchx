@@ -1,16 +1,18 @@
 use std::{
     env,
     ffi::OsString,
+    io::Read,
     path::{Path, PathBuf},
-    process::Command,
+    process::{Command, Output, Stdio},
+    sync::mpsc,
+    thread,
+    time::{Duration, Instant},
 };
 
 use super::models::parse;
-use super::types::{
-    AiAgentChatInput, AiAgentChatOutput, AiAgentSelection, LocalAiAgent, LocalAiAgentModel,
-};
+use super::types::{AiAgentChatOutput, LocalAiAgent, LocalAiAgentModel};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub(super) struct AgentCli {
     command: &'static str,
     name: &'static str,
@@ -69,6 +71,9 @@ const SUPPORTED: &[AgentCli] = &[
     },
 ];
 
+const MAX_OUTPUT_BYTES: usize = 1_048_576;
+const COMMAND_TIMEOUT: Duration = Duration::from_secs(120);
+
 pub(super) fn discover() -> Vec<LocalAiAgent> {
     SUPPORTED
         .iter()
@@ -84,39 +89,33 @@ pub(super) fn discover() -> Vec<LocalAiAgent> {
         .collect()
 }
 
-pub(super) fn discover_models(agent: AiAgentSelection) -> Result<Vec<LocalAiAgentModel>, String> {
-    let command = agent
-        .command
-        .ok_or_else(|| "Missing agent command.".to_string())?;
-    if command != "agy" {
+pub(super) fn discover_models(agent_id: &str) -> Result<Vec<LocalAiAgentModel>, String> {
+    let cli = cli_by_id(agent_id)?;
+    if cli.command != "agy" {
         return Ok(Vec::new());
     }
-    let executable = find_command(&command)
-        .ok_or_else(|| format!("Could not find the local agent command: {command}."))?;
-    let output = Command::new(executable)
-        .args(["models"])
-        .env("PATH", agent_path())
-        .output()
-        .map_err(|error| error.to_string())?;
+    let executable = find_command(cli.command)
+        .ok_or_else(|| format!("Could not find the local agent command: {}.", cli.command))?;
+    let mut command = Command::new(executable);
+    command.args(["models"]).env("PATH", agent_path());
+    let output = run_command(command)?;
     if !output.status.success() {
         return Err(String::from_utf8_lossy(&output.stderr).trim().to_string());
     }
     Ok(parse(&String::from_utf8_lossy(&output.stdout)))
 }
 
-pub(super) fn chat(input: AiAgentChatInput) -> Result<AiAgentChatOutput, String> {
-    let command = input
-        .agent
-        .command
-        .ok_or_else(|| "Missing agent command.".to_string())?;
-    let cli =
-        find_supported(&command).ok_or_else(|| "Unsupported local agent command.".to_string())?;
-    let executable = find_command(&command)
-        .ok_or_else(|| format!("Could not find the local agent command: {command}."))?;
-    let output =
-        build_chat_command_with_executable(cli, executable, input.model.as_deref(), &input.prompt)
-            .output()
-            .map_err(|error| error.to_string())?;
+pub(super) fn chat(
+    agent_id: &str,
+    model: Option<&str>,
+    prompt: &str,
+) -> Result<AiAgentChatOutput, String> {
+    let cli = cli_by_id(agent_id)?;
+    let executable = find_command(cli.command)
+        .ok_or_else(|| format!("Could not find the local agent command: {}.", cli.command))?;
+    let output = run_command(build_chat_command_with_executable(
+        cli, executable, model, prompt,
+    ))?;
     let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
     let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
     if !output.status.success() {
@@ -136,6 +135,82 @@ pub(super) fn chat(input: AiAgentChatInput) -> Result<AiAgentChatOutput, String>
     Ok(AiAgentChatOutput { content: stdout })
 }
 
+fn run_command(mut command: Command) -> Result<Output, String> {
+    command.stdout(Stdio::piped()).stderr(Stdio::piped());
+    let mut child = command.spawn().map_err(|error| error.to_string())?;
+    let stdout = child
+        .stdout
+        .take()
+        .ok_or_else(|| "Could not capture agent output.".to_string())?;
+    let stderr = child
+        .stderr
+        .take()
+        .ok_or_else(|| "Could not capture agent diagnostics.".to_string())?;
+    let (sender, receiver) = mpsc::channel();
+    spawn_output_reader(stdout, true, sender.clone());
+    spawn_output_reader(stderr, false, sender);
+
+    let deadline = Instant::now() + COMMAND_TIMEOUT;
+    let status = loop {
+        if let Some(status) = child.try_wait().map_err(|error| error.to_string())? {
+            break status;
+        }
+        if Instant::now() >= deadline {
+            let _ = child.kill();
+            let _ = child.wait();
+            return Err("The local agent exceeded the 120-second safety limit.".to_string());
+        }
+        thread::sleep(Duration::from_millis(50));
+    };
+
+    let mut stdout = None;
+    let mut stderr = None;
+    for _ in 0..2 {
+        let (is_stdout, output) = receiver
+            .recv()
+            .map_err(|_| "Could not read agent output.".to_string())?;
+        let output = output.map_err(|error| error.to_string())?;
+        if output.len() > MAX_OUTPUT_BYTES {
+            return Err("Agent output exceeded the 1 MB safety limit.".to_string());
+        }
+        if is_stdout {
+            stdout = Some(output);
+        } else {
+            stderr = Some(output);
+        }
+    }
+    Ok(Output {
+        status,
+        stdout: stdout.ok_or_else(|| "Could not read agent output.".to_string())?,
+        stderr: stderr.ok_or_else(|| "Could not read agent diagnostics.".to_string())?,
+    })
+}
+
+fn spawn_output_reader<R: std::io::Read + Send + 'static>(
+    stream: R,
+    is_stdout: bool,
+    sender: mpsc::Sender<(bool, std::io::Result<Vec<u8>>)>,
+) {
+    thread::spawn(move || {
+        let mut output = Vec::new();
+        let result = stream
+            .take((MAX_OUTPUT_BYTES + 1) as u64)
+            .read_to_end(&mut output)
+            .map(|_| output);
+        let _ = sender.send((is_stdout, result));
+    });
+}
+
+pub(super) fn cli_by_id(agent_id: &str) -> Result<&'static AgentCli, String> {
+    let command = agent_id
+        .strip_prefix("cli:")
+        .ok_or_else(|| "Unsupported local agent.".to_string())?;
+    SUPPORTED
+        .iter()
+        .find(|cli| cli.command == command)
+        .ok_or_else(|| "Unsupported local agent.".to_string())
+}
+
 fn find_command(command: &str) -> Option<PathBuf> {
     for directory in current_command_search_paths() {
         let candidate = directory.join(command);
@@ -143,12 +218,10 @@ fn find_command(command: &str) -> Option<PathBuf> {
             return Some(candidate);
         }
         #[cfg(windows)]
-        {
-            for extension in [".exe", ".cmd", ".bat", ".com"] {
-                let candidate = directory.join(format!("{command}{extension}"));
-                if candidate.is_file() {
-                    return Some(candidate);
-                }
+        for extension in [".exe", ".cmd", ".bat", ".com"] {
+            let candidate = directory.join(format!("{command}{extension}"));
+            if candidate.is_file() {
+                return Some(candidate);
             }
         }
     }
@@ -162,7 +235,6 @@ pub(super) fn command_search_paths(path: Option<OsString>, home: Option<OsString
         .into_iter()
         .flatten()
         .collect::<Vec<_>>();
-
     if let Some(home) = home.as_deref() {
         let home = PathBuf::from(home);
         paths.extend([
@@ -175,7 +247,6 @@ pub(super) fn command_search_paths(path: Option<OsString>, home: Option<OsString
         ]);
         paths.extend(versioned_node_paths(&home));
     }
-
     #[cfg(unix)]
     paths.extend([
         PathBuf::from("/opt/homebrew/bin"),
@@ -183,15 +254,6 @@ pub(super) fn command_search_paths(path: Option<OsString>, home: Option<OsString
         PathBuf::from("/usr/bin"),
         PathBuf::from("/bin"),
     ]);
-
-    #[cfg(windows)]
-    paths.extend(windows_command_paths(
-        home.as_deref(),
-        env::var_os("APPDATA").as_deref(),
-        env::var_os("LOCALAPPDATA").as_deref(),
-        env::var_os("ProgramFiles").as_deref(),
-    ));
-
     let mut unique_paths = Vec::new();
     for path in paths {
         if !unique_paths.contains(&path) {
@@ -206,37 +268,6 @@ fn current_command_search_paths() -> Vec<PathBuf> {
         env::var_os("PATH"),
         env::var_os("HOME").or_else(|| env::var_os("USERPROFILE")),
     )
-}
-
-#[cfg(windows)]
-fn windows_command_paths(
-    home: Option<&std::ffi::OsStr>,
-    app_data: Option<&std::ffi::OsStr>,
-    local_app_data: Option<&std::ffi::OsStr>,
-    program_files: Option<&std::ffi::OsStr>,
-) -> Vec<PathBuf> {
-    let mut paths = Vec::new();
-    if let Some(home) = home {
-        let home = PathBuf::from(home);
-        paths.extend([
-            home.join("AppData/Roaming/npm"),
-            home.join("AppData/Local/pnpm"),
-            home.join("scoop/shims"),
-            home.join(".bun/bin"),
-            home.join(".volta/bin"),
-            home.join(".cargo/bin"),
-        ]);
-    }
-    if let Some(app_data) = app_data {
-        paths.push(PathBuf::from(app_data).join("npm"));
-    }
-    if let Some(local_app_data) = local_app_data {
-        paths.push(PathBuf::from(local_app_data).join("pnpm"));
-    }
-    if let Some(program_files) = program_files {
-        paths.push(PathBuf::from(program_files).join("nodejs"));
-    }
-    paths
 }
 
 fn versioned_node_paths(home: &Path) -> Vec<PathBuf> {
@@ -256,12 +287,6 @@ fn versioned_node_paths(home: &Path) -> Vec<PathBuf> {
 fn agent_path() -> OsString {
     env::join_paths(current_command_search_paths())
         .unwrap_or_else(|_| env::var_os("PATH").unwrap_or_default())
-}
-
-pub(super) fn find_supported(command: &str) -> Option<&'static AgentCli> {
-    SUPPORTED
-        .iter()
-        .find(|candidate| candidate.command == command)
 }
 
 pub(super) fn build_chat_command_with_executable(

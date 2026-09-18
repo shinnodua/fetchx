@@ -174,7 +174,7 @@ export async function discoverLocalAiAgents(): Promise<LocalAiAgent[]> {
 }
 
 export async function chatWithLocalAiAgent(input: {
-  agent: LocalAiAgent;
+  agentId: string;
   model?: string;
   prompt: string;
 }): Promise<AiAgentChatResult> {
@@ -187,12 +187,12 @@ export async function chatWithLocalAiAgent(input: {
 }
 
 export async function discoverLocalAiAgentModels(
-  agent: LocalAiAgent,
+  agentId: string,
 ): Promise<LocalAiAgentModel[]> {
   if (!isDesktopApp()) return [];
 
   const { invoke } = await import('@tauri-apps/api/core');
   return invoke<LocalAiAgentModel[]>(localAiAgentCommandNames.discoverModels, {
-    agent,
+    agentId,
   });
 }

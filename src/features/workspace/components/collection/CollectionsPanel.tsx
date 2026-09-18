@@ -10,6 +10,7 @@ import { RequestMenuItems } from '../request/RequestMenuItems';
 import { ResponsePayloadDialog } from '../request/response/ResponsePayloadViewer';
 import { CollectionItemView } from './CollectionItemView';
 import { CollectionPanelDialogs } from './CollectionPanelDialogs';
+import { CollectionReorderDialog } from './CollectionReorderDialog';
 import type { ContextMenuTarget, RenameTarget } from './collectionPanelTypes';
 import { SidebarContextMenu } from './SidebarContextMenu';
 import { SidebarHeader } from './SidebarHeader';
@@ -35,6 +36,7 @@ export const CollectionsPanel: React.FC = () => {
     toggleSavedResponsesCollapsed,
     deleteSavedResponse,
     setRequestToRevealId,
+    setCollections,
     toggleCollectionCollapsed,
     setCollectionsPanelWidth,
     setCollectionsPanelCollapsed,
@@ -89,6 +91,9 @@ export const CollectionsPanel: React.FC = () => {
     useState<SavedResponse | null>(null);
   const [contextMenuTarget, setContextMenuTarget] =
     useState<ContextMenuTarget | null>(null);
+  const [reorderCollectionName, setReorderCollectionName] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     if (!contextMenuTarget) return;
@@ -189,6 +194,14 @@ export const CollectionsPanel: React.FC = () => {
 
   const renderCollectionMenuItems = (col: { id: string; name: string }) => (
     <>
+      <DropdownMenuItem
+        onClick={() => {
+          setReorderCollectionName(col.name);
+          setContextMenuTarget(null);
+        }}
+      >
+        Reorder
+      </DropdownMenuItem>
       <DropdownMenuItem
         onClick={() => {
           openRenameDialog({
@@ -353,6 +366,13 @@ export const CollectionsPanel: React.FC = () => {
         deleteCollection={deleteCollection}
         deleteRequest={deleteRequest}
         deleteSavedResponse={deleteSavedResponse}
+      />
+
+      <CollectionReorderDialog
+        collections={collections}
+        isOpen={reorderCollectionName !== null}
+        onClose={() => setReorderCollectionName(null)}
+        onSave={setCollections}
       />
 
       {selectedSavedResponse && (

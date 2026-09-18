@@ -13,17 +13,8 @@ pub(crate) struct LocalAiAgent {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct AiAgentSelection {
-    pub(super) kind: String,
-    pub(super) command: Option<String>,
-    pub(super) endpoint: Option<String>,
-    pub(super) protocol: String,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub(crate) struct AiAgentChatInput {
-    pub(super) agent: AiAgentSelection,
+    pub(super) agent_id: String,
     pub(super) model: Option<String>,
     pub(super) prompt: String,
 }

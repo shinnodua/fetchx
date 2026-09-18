@@ -1,7 +1,5 @@
 use super::models::parse;
-use super::types::{
-    AiAgentChatInput, AiAgentChatOutput, AiAgentSelection, LocalAiAgent, LocalAiAgentModel,
-};
+use super::types::{AiAgentChatInput, AiAgentChatOutput, LocalAiAgent, LocalAiAgentModel};
 use serde_json::{json, Value};
 use std::{
     io::{Read, Write},
@@ -9,62 +7,83 @@ use std::{
     time::Duration,
 };
 
-const ENDPOINTS: &[(&str, &str, &str, &str)] = &[
-    (
-        "fetchx-local-agent",
-        "Fetchx Local Agent",
-        "http://127.0.0.1:37373",
-        "fetchx-agent",
-    ),
-    (
-        "lm-studio",
-        "LM Studio",
-        "http://127.0.0.1:1234",
-        "openai-chat",
-    ),
-    ("ollama", "Ollama", "http://127.0.0.1:11434", "ollama-chat"),
+const MAX_RESPONSE_BYTES: u64 = 1_048_576;
+
+#[derive(Debug)]
+pub(super) struct AgentEndpoint {
+    id: &'static str,
+    name: &'static str,
+    endpoint: &'static str,
+    protocol: &'static str,
+}
+
+const ENDPOINTS: &[AgentEndpoint] = &[
+    AgentEndpoint {
+        id: "fetchx-local-agent",
+        name: "Fetchx Local Agent",
+        endpoint: "http://127.0.0.1:37373",
+        protocol: "fetchx-agent",
+    },
+    AgentEndpoint {
+        id: "lm-studio",
+        name: "LM Studio",
+        endpoint: "http://127.0.0.1:1234",
+        protocol: "openai-chat",
+    },
+    AgentEndpoint {
+        id: "ollama",
+        name: "Ollama",
+        endpoint: "http://127.0.0.1:11434",
+        protocol: "ollama-chat",
+    },
 ];
 
 pub(super) fn discover() -> Vec<LocalAiAgent> {
     ENDPOINTS
         .iter()
-        .filter(|(_, _, endpoint, _)| port_is_open(endpoint))
-        .map(|(id, name, endpoint, protocol)| LocalAiAgent {
-            id: format!("http:{id}"),
-            name: (*name).to_string(),
+        .filter(|agent| port_is_open(agent.endpoint))
+        .map(|agent| LocalAiAgent {
+            id: format!("http:{}", agent.id),
+            name: agent.name.to_string(),
             kind: "http".to_string(),
             command: None,
-            endpoint: Some((*endpoint).to_string()),
-            protocol: (*protocol).to_string(),
+            endpoint: Some(agent.endpoint.to_string()),
+            protocol: agent.protocol.to_string(),
         })
         .collect()
 }
 
-pub(super) fn discover_models(agent: AiAgentSelection) -> Result<Vec<LocalAiAgentModel>, String> {
-    let endpoint = agent
-        .endpoint
-        .ok_or_else(|| "Missing agent endpoint.".to_string())?;
-    let path = match agent.protocol.as_str() {
+pub(super) fn discover_models(agent_id: &str) -> Result<Vec<LocalAiAgentModel>, String> {
+    let agent = agent_by_id(agent_id)?;
+    let path = match agent.protocol {
         "ollama-chat" => "/api/tags",
         "openai-chat" => "/v1/models",
         _ => return Ok(Vec::new()),
     };
-    request(&endpoint, "GET", path, None).map(|response| parse(&response))
+    request(agent.endpoint, "GET", path, None).map(|response| parse(&response))
 }
 
 pub(super) fn chat(input: AiAgentChatInput) -> Result<AiAgentChatOutput, String> {
-    let endpoint = input
-        .agent
-        .endpoint
-        .ok_or_else(|| "Missing agent endpoint.".to_string())?;
-    let response = match input.agent.protocol.as_str() {
-        "fetchx-agent" => request(&endpoint, "POST", "/chat", Some(json!({ "prompt": input.prompt }).to_string())),
-        "ollama-chat" => request(&endpoint, "POST", "/api/chat", Some(json!({ "model": "llama3.1", "stream": false, "messages": [{ "role": "user", "content": input.prompt }] }).to_string())),
-        _ => request(&endpoint, "POST", "/v1/chat/completions", Some(json!({ "model": "local-model", "messages": [{ "role": "user", "content": input.prompt }], "temperature": 0.1 }).to_string())),
+    let agent = agent_by_id(&input.agent_id)?;
+    let response = match agent.protocol {
+        "fetchx-agent" => request(agent.endpoint, "POST", "/chat", Some(json!({ "prompt": input.prompt }).to_string())),
+        "ollama-chat" => request(agent.endpoint, "POST", "/api/chat", Some(json!({ "model": input.model.unwrap_or_else(|| "llama3.1".to_string()), "stream": false, "messages": [{ "role": "user", "content": input.prompt }] }).to_string())),
+        "openai-chat" => request(agent.endpoint, "POST", "/v1/chat/completions", Some(json!({ "model": input.model.unwrap_or_else(|| "local-model".to_string()), "messages": [{ "role": "user", "content": input.prompt }], "temperature": 0.1 }).to_string())),
+        _ => return Err("Unsupported local agent protocol.".to_string()),
     }?;
     Ok(AiAgentChatOutput {
         content: extract_content(&response),
     })
+}
+
+pub(super) fn agent_by_id(agent_id: &str) -> Result<&'static AgentEndpoint, String> {
+    let endpoint_id = agent_id
+        .strip_prefix("http:")
+        .ok_or_else(|| "Unsupported local agent.".to_string())?;
+    ENDPOINTS
+        .iter()
+        .find(|agent| agent.id == endpoint_id)
+        .ok_or_else(|| "Unsupported local agent.".to_string())
 }
 
 pub(super) fn parse_endpoint(endpoint: &str) -> Result<(&str, u16), String> {
@@ -119,8 +138,12 @@ fn request(
         .map_err(|error| error.to_string())?;
     let mut response = String::new();
     stream
+        .take(MAX_RESPONSE_BYTES + 1)
         .read_to_string(&mut response)
         .map_err(|error| error.to_string())?;
+    if response.len() as u64 > MAX_RESPONSE_BYTES {
+        return Err("Agent response exceeded the 1 MB safety limit.".to_string());
+    }
     let (head, body) = response
         .split_once("\r\n\r\n")
         .ok_or_else(|| "Agent returned an invalid HTTP response.".to_string())?;

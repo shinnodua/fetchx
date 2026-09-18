@@ -18,7 +18,7 @@ export const useLocalAiAgentModels = (
     queryFn: () => {
       if (!agent)
         throw new Error('Select a local agent before loading models.');
-      return discoverLocalAiAgentModels(agent);
+      return discoverLocalAiAgentModels(agent.id);
     },
     enabled: enabled && agent !== null,
     staleTime: localAiAgentModelCacheDurationMs,

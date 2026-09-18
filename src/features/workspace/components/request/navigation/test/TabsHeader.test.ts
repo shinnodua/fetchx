@@ -7,4 +7,9 @@ describe('TabsHeader', () => {
     expect(workspaceTabClassName).toContain('text-[11px]');
     expect(workspaceTabClassName).not.toContain('text-xs');
   });
+
+  test('keeps tabs visually ready for pointer-driven reordering', () => {
+    expect(workspaceTabClassName).toContain('transition-all');
+    expect(workspaceTabClassName).toContain('relative');
+  });
 });

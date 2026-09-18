@@ -2,6 +2,7 @@ import type {
   CollectionItem,
   RequestItem,
 } from '../../features/workspace/types';
+import type { TabReorderPlacement } from './tabOrder';
 
 export interface WorkspaceState {
   collections: CollectionItem[];
@@ -58,7 +59,11 @@ export interface WorkspaceState {
   openTab: (reqId: string) => void;
   closeTab: (reqId: string) => void;
   closeTabs: (reqIds: string[]) => void;
-  reorderTabs: (draggedTabId: string, targetTabId: string) => void;
+  reorderTabs: (
+    draggedTabId: string,
+    targetTabId: string,
+    placement?: TabReorderPlacement,
+  ) => void;
   revealRequestInSidebar: (reqId: string) => void;
   setActiveTabId: (id: string) => void;
   updateActiveRequest: (fields: Partial<RequestItem>) => void;

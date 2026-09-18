@@ -29,7 +29,6 @@ import {
   type AiAgentStructuredResponse,
   buildAiAgentPrompt,
   parseAiAgentResponse,
-  shouldRunCreatedRequest,
 } from '../../utils/aiAgentRequest';
 import { findCollectionIdByName } from '../../utils/assistantCollection';
 import { findRequestByTarget } from '../../utils/assistantRequestDuplicate';
@@ -45,8 +44,6 @@ interface RequestAssistantChatProps {
   activeRequest: RequestItem | null;
   launcherClassName?: string;
   launcherLabel?: string;
-  onRequestCreated?: (shouldRun: boolean) => void;
-  onRequestOpened?: (requestId: string, shouldRun: boolean) => void;
 }
 
 type ChatMessage = AiAssistantChatMessage;
@@ -54,15 +51,12 @@ type ChatMessage = AiAssistantChatMessage;
 interface PendingDuplicateRequest {
   response: AiAgentStructuredResponse;
   existingRequest: RequestItem;
-  shouldRun: boolean;
 }
 
 interface AgentResponseSummary {
   changed: boolean;
   createdRequest: boolean;
-  openedRequestId?: string;
   requestNotFound?: boolean;
-  shouldRunOpenedRequest?: boolean;
 }
 
 const createMessage = (
@@ -81,6 +75,9 @@ export const requestAssistantMessageClassName =
 
 export const requestAssistantPanelClassName =
   'fixed bottom-20 right-5 z-[60] flex h-[min(680px,calc(100dvh-7rem))] w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-primary-200/80 bg-primary-50/80 shadow-2xl shadow-primary-900/20 backdrop-blur-xl dark:border-primary-800/80 dark:bg-primary-900/25';
+
+export const requestAssistantManageButtonClassName =
+  'h-8 shrink-0 border border-foreground/10';
 
 export const requestAssistantPanelMotion = {
   animate: { opacity: 1, scale: 1, y: 0 },
@@ -103,8 +100,6 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
   activeRequest,
   launcherClassName,
   launcherLabel,
-  onRequestCreated,
-  onRequestOpened,
 }) => {
   const prefersReducedMotion = useReducedMotion();
   const { toast } = useToast();
@@ -363,8 +358,6 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
         return {
           changed: true,
           createdRequest: false,
-          openedRequestId: request.id,
-          shouldRunOpenedRequest: response.action === 'run_request',
         };
       }
       default:
@@ -392,7 +385,7 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
   const handleCreateDuplicateRequest = () => {
     if (!pendingDuplicateRequest) return;
 
-    const { response, shouldRun } = pendingDuplicateRequest;
+    const { response } = pendingDuplicateRequest;
     const resultSummary = applyAgentResponse(response);
     setPendingDuplicateRequest(null);
     updateMessages((currentMessages) => [
@@ -402,7 +395,6 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
 
     if (resultSummary.createdRequest) {
       setIsOpen(false);
-      onRequestCreated?.(shouldRun);
     }
 
     toast({
@@ -415,7 +407,7 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
   const handleUpdateDuplicateRequest = () => {
     if (!pendingDuplicateRequest) return;
 
-    const { existingRequest, response, shouldRun } = pendingDuplicateRequest;
+    const { existingRequest, response } = pendingDuplicateRequest;
     const request = response.request;
     if (!request) return;
 
@@ -428,7 +420,6 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
       createMessage('assistant', `Updated ${existingRequest.name}.`),
     ]);
     setIsOpen(false);
-    onRequestCreated?.(shouldRun);
     toast({
       title: 'Existing request updated',
       description: `Opened ${existingRequest.name} in the workspace.`,
@@ -442,13 +433,7 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
 
     const prompt = buildAiAgentPrompt({
       userMessage,
-      activeRequest,
-      availableRequests: collections.flatMap((collection) =>
-        collection.requests.map((request) => ({
-          name: request.name,
-          target: request.target,
-        })),
-      ),
+      hasActiveRequest: Boolean(activeRequest),
     });
     const pendingMessage = createMessage('system', workingMessageContent, true);
     setComposerValue('');
@@ -461,7 +446,7 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
 
     try {
       const result = await chatWithLocalAiAgent({
-        agent: selectedAgent,
+        agentId: selectedAgent.id,
         model: selectedModelId || undefined,
         prompt,
       });
@@ -471,7 +456,6 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
         setPendingDuplicateRequest({
           response: parsedResponse,
           existingRequest: duplicateRequest,
-          shouldRun: shouldRunCreatedRequest(userMessage),
         });
         updateMessages((currentMessages) => [
           ...currentMessages.filter(
@@ -495,15 +479,6 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
 
       if (resultSummary.createdRequest) {
         setIsOpen(false);
-        onRequestCreated?.(shouldRunCreatedRequest(userMessage));
-      }
-
-      if (resultSummary.openedRequestId) {
-        setIsOpen(false);
-        onRequestOpened?.(
-          resultSummary.openedRequestId,
-          resultSummary.shouldRunOpenedRequest ?? false,
-        );
       }
 
       if (resultSummary.requestNotFound) {
@@ -647,7 +622,7 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
                     variant="ghost"
                     size="sm"
                     onClick={handleOpenConnectDialog}
-                    className="h-10 shrink-0 border border-foreground/10"
+                    className={requestAssistantManageButtonClassName}
                   >
                     Manage
                   </Button>
@@ -655,8 +630,10 @@ export const RequestAssistantChat: React.FC<RequestAssistantChatProps> = ({
               ) : (
                 <div className="space-y-3">
                   <div className="rounded-xl border border-foreground/10 bg-foreground/[0.03] p-3 text-xs leading-5 text-foreground/65">
-                    Fetchx looks for supported CLIs on PATH and localhost agent
-                    services on this device.
+                    Fetchx connects only to supported localhost model services.
+                    Do not paste credentials or sensitive request data; a local
+                    service may use the model provider configured on your
+                    device.
                   </div>
                   <Button
                     type="button"
