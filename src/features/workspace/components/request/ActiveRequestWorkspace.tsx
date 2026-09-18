@@ -5,7 +5,10 @@ import { Button, Input, Select } from '../../../../components';
 import { trackEvent } from '../../../../services/analytics/googleAnalytics';
 import { useRpcStore } from '../../../../store';
 import { cn } from '../../../../utils/cn';
-import { METHOD_OPTIONS } from '../../constants';
+import {
+  METHOD_OPTIONS,
+  REQUEST_METHOD_TEXT_COLOR_CLASS_NAMES,
+} from '../../constants';
 import type { CollectionItem, RequestItem } from '../../types';
 import { getSelectedRpcId } from '../../utils/rpcOptions';
 import { EnvironmentAwareInput } from '../environment/EnvironmentAwareField';
@@ -28,6 +31,9 @@ interface ActiveRequestWorkspaceProps {
   onUpdateActiveRequest: (fields: Partial<RequestItem>) => void;
 }
 
+export const workspaceRequestTitleClassName =
+  '-ml-2 h-auto rounded-lg border-transparent bg-transparent px-2 py-0.5 text-base font-bold shadow-none hover:border-foreground/10 focus-visible:border-primary-500';
+
 export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
   activeRequest,
   activeTabId,
@@ -48,20 +54,20 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
   const { openConnectModal } = useConnectModal();
 
   return (
-    <div className="flex-grow flex flex-col min-h-0 min-w-0 p-6 space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between border-b border-foreground/5 pb-4">
+    <div className="flex min-h-0 min-w-0 flex-grow flex-col space-y-3 p-4">
+      <div className="flex flex-col items-start justify-between gap-3 border-b border-foreground/5 pb-3 sm:flex-row sm:items-center">
         <div className="min-w-0 flex-grow w-full max-w-lg">
           <Input
             value={activeRequest.name}
             onChange={(event) =>
               onUpdateActiveRequest({ name: event.target.value })
             }
-            className="h-auto text-xl font-bold bg-transparent border-transparent hover:border-foreground/10 focus-visible:border-primary-500 rounded-lg px-2 py-0.5 -ml-2 shadow-none"
+            className={workspaceRequestTitleClassName}
             placeholder="Request Name"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto shrink-0 justify-end">
+        <div className="flex w-full shrink-0 flex-wrap items-center justify-end gap-2 sm:w-auto">
           {activeTabId.startsWith('r-new-') && (
             <div className="flex items-center gap-2">
               <span className="text-xs text-foreground/50 font-medium shrink-0">
@@ -100,11 +106,14 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch">
+      <div className="flex flex-col items-stretch gap-2 sm:flex-row">
         <div className="w-full sm:w-44">
           <Select
             options={METHOD_OPTIONS}
             dropdownClassName="max-h-none overflow-visible"
+            triggerLabelClassName={
+              REQUEST_METHOD_TEXT_COLOR_CLASS_NAMES[activeRequest.type]
+            }
             value={activeRequest.type}
             onChange={(value) =>
               onUpdateActiveRequest({
@@ -155,7 +164,7 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
               ? 'primary'
               : 'secondary'
           }
-          className="h-12 px-8 cursor-pointer"
+          className="h-10 cursor-pointer px-6"
           onClick={
             (activeRequest.type === 'WRITE' || activeRequest.type === 'SEND') &&
             !isConnected
@@ -178,7 +187,7 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
         </Button>
       </div>
 
-      <div className="flex-grow flex flex-col lg:flex-row min-h-0 gap-6">
+      <div className="flex min-h-0 flex-grow flex-col gap-4 lg:flex-row">
         <RequestSettings
           onSimulateRequest={onSimulateRequest}
           isLoading={isLoading}

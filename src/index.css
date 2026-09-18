@@ -59,7 +59,7 @@
 
 @layer base {
   body {
-    @apply bg-background text-foreground font-sans antialiased selection:bg-primary-200 selection:text-primary-900;
+    @apply bg-background text-sm text-foreground font-sans antialiased selection:bg-primary-200 selection:text-primary-900;
   }
 
   .dark body {

@@ -32,11 +32,11 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     });
 
     return (
-      <div className="flex flex-col gap-1.5 w-full">
+      <div className="flex w-full flex-col gap-1">
         {label && (
           <label
             htmlFor={textareaId}
-            className="text-sm font-medium text-foreground/80 ml-1"
+            className="ml-1 text-xs font-medium text-foreground/80"
           >
             {label}
           </label>
@@ -46,12 +46,12 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             <div
               aria-hidden="true"
               className={cn(
-                'pointer-events-none absolute inset-0 z-30 overflow-visible text-sm text-foreground',
+                'pointer-events-none absolute inset-0 z-30 overflow-visible text-xs text-foreground',
               )}
             >
               <div
                 className={cn(
-                  'whitespace-pre-wrap break-words px-4 py-3',
+                  'whitespace-pre-wrap break-words px-3 py-2',
                   highlightedContentClassName,
                 )}
                 style={{
@@ -68,7 +68,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             whileFocus={highlightedContent ? undefined : { scale: 1.01 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             className={cn(
-              'flex min-h-[76px] w-full rounded-xl border border-foreground/10 bg-background/50 px-4 py-3 text-sm text-foreground shadow-sm backdrop-blur-sm transition-all placeholder:text-foreground/40',
+              'flex min-h-16 w-full rounded-xl border border-foreground/10 bg-background/50 px-3 py-2 text-xs text-foreground shadow-sm backdrop-blur-sm transition-all placeholder:text-foreground/40',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50 focus-visible:border-primary-500',
               'hover:border-foreground/20',
               'disabled:cursor-not-allowed disabled:opacity-50',

@@ -18,10 +18,10 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   setCollectionsPanelCollapsed,
 }) => {
   return (
-    <div className="p-4 border-b border-foreground/10 flex flex-col gap-3 select-none">
+    <div className="flex flex-col gap-2 border-b border-foreground/10 p-3 select-none">
       <div className="flex items-center justify-between gap-2 min-w-0 mt-[-8px]">
         <div className="flex items-center gap-1.5 min-w-0 shrink-0">
-          <h2 className="text-lg font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500 truncate">
+          <h2 className="truncate bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-base font-bold tracking-tight text-transparent">
             {collectionsPanelWidth >= 220 ? 'Collections' : 'Cols'}
           </h2>
           <Button

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { getSelectTriggerLabel } from '../Select';
+import { getSelectTriggerLabel, type SelectProps } from '../Select';
 
 describe('Select', () => {
   test('uses its loading label before the selected option', () => {
@@ -11,5 +11,11 @@ describe('Select', () => {
         'Select a model',
       ),
     ).toBe('Loading models…');
+  });
+
+  test('supports a trigger label class for contextual select colors', () => {
+    const triggerLabelClassName: SelectProps['triggerLabelClassName'] =
+      'text-secondary-600';
+    expect(triggerLabelClassName).toBe('text-secondary-600');
   });
 });

@@ -33,26 +33,32 @@ interface ResponsePayloadViewerProps {
   explorerUrl?: string;
 }
 
-type PayloadViewport = 'panel' | 'dialog';
+export const payloadInspectorRowClassName =
+  'relative grid w-full min-w-0 grid-cols-[minmax(7rem,0.45fr)_minmax(9rem,1fr)_auto] items-center gap-1.5 px-2 py-0.5 font-mono text-[11px] after:absolute after:bottom-0 after:right-0 after:left-[var(--payload-key-line-inset)] after:border-t after:border-dashed after:border-foreground/15 last:after:hidden';
 
-const inspectorRowClassName =
-  'grid w-full min-w-0 grid-cols-[minmax(8rem,0.45fr)_minmax(10rem,1fr)_auto] items-center gap-2 border-b border-foreground/10 px-3 py-1 font-mono text-xs last:border-b-0';
+export const rawPayloadCodeClassName =
+  'grid min-w-full grid-cols-[auto_1fr] text-[11px] leading-4 text-foreground/80';
 
-const getScrollHeightClassName = (viewport: PayloadViewport) =>
-  viewport === 'dialog' ? 'max-h-[calc(100vh-14rem)]' : 'max-h-80';
+export const payloadPreviewCardClassName =
+  'flex min-h-0 flex-1 flex-col isolate overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/5 [clip-path:inset(0_round_1rem)]';
+
+export const getPayloadKeyLineInset = (depth: number) =>
+  `calc(0.5rem + ${depth * 12 + 20}px)`;
+
+const getPayloadInspectorRowStyle = (depth: number) =>
+  ({
+    '--payload-key-line-inset': getPayloadKeyLineInset(depth),
+  }) as React.CSSProperties & Record<'--payload-key-line-inset', string>;
 
 const RawPayload: React.FC<{
   data: unknown;
-  viewport?: PayloadViewport;
-}> = ({ data, viewport = 'panel' }) => {
+}> = ({ data }) => {
   const lines = getPayloadText(data).split('\n');
 
   return (
-    <div className="isolate overflow-hidden rounded-xl border border-foreground/10 bg-foreground/5 [clip-path:inset(0_round_0.75rem)]">
-      <div
-        className={`${getScrollHeightClassName(viewport)} overflow-auto rounded-[inherit]`}
-      >
-        <pre className="grid min-w-full grid-cols-[auto_1fr] text-xs leading-5 text-foreground/80">
+    <div className="isolate flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/5 [clip-path:inset(0_round_1rem)]">
+      <div className="min-h-0 flex-1 overflow-auto rounded-[inherit]">
+        <pre className={rawPayloadCodeClassName}>
           {lines.map((line, index) => {
             const lineNumber = index + 1;
 
@@ -61,10 +67,10 @@ const RawPayload: React.FC<{
                 key={`payload-line-${lineNumber}`}
                 className="contents font-mono"
               >
-                <span className="select-none border-r border-foreground/10 px-3 py-0.5 text-right text-foreground/35">
+                <span className="select-none border-r border-foreground/10 px-2 py-0.5 text-right text-foreground/35">
                   {lineNumber}
                 </span>
-                <code className="whitespace-pre px-3 py-0.5">
+                <code className="whitespace-pre px-2 py-0.5">
                   {line || ' '}
                 </code>
               </div>
@@ -96,8 +102,8 @@ const InspectorLabel: React.FC<{
   onToggle?: () => void;
 }> = ({ depth, label, isExpanded, onToggle }) => (
   <span
-    className="flex min-w-0 items-center gap-1.5 text-foreground/55"
-    style={{ paddingLeft: `${depth * 14}px` }}
+    className="flex min-w-0 items-center gap-1 text-foreground/55"
+    style={{ paddingLeft: `${depth * 12}px` }}
   >
     {onToggle ? (
       <Button
@@ -106,26 +112,26 @@ const InspectorLabel: React.FC<{
         size="sm"
         onClick={onToggle}
         aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${label}`}
-        className="h-5 w-5 shrink-0 rounded-md p-0 text-foreground/70 hover:bg-foreground/10 hover:text-foreground"
+        className="h-4 w-4 shrink-0 rounded p-0 text-foreground/70 hover:bg-foreground/10 hover:text-foreground"
       >
         {isExpanded ? (
           <ChevronDownIcon
             title="Collapse node"
-            className="block h-3.5 w-3.5 shrink-0 text-foreground"
+            className="block h-3 w-3 shrink-0 text-foreground"
             stroke="currentColor"
             strokeWidth={2.25}
           />
         ) : (
           <ChevronRightIcon
             title="Expand node"
-            className="block h-3.5 w-3.5 shrink-0 text-foreground"
+            className="block h-3 w-3 shrink-0 text-foreground"
             stroke="currentColor"
             strokeWidth={2.25}
           />
         )}
       </Button>
     ) : (
-      <span className="h-5 w-5 shrink-0" />
+      <span className="h-4 w-4 shrink-0" />
     )}
     <span className="truncate">{label}</span>
   </span>
@@ -141,7 +147,10 @@ const InspectorNode: React.FC<{
 }> = ({ label, value, depth = 0, path, expandedPaths, onToggle }) => {
   if (isPrimitive(value)) {
     return (
-      <div className={inspectorRowClassName}>
+      <div
+        className={payloadInspectorRowClassName}
+        style={getPayloadInspectorRowStyle(depth)}
+      >
         <InspectorLabel depth={depth} label={label ?? 'value'} />
         <PrimitiveValue value={value} />
         <span className="text-[10px] uppercase tracking-wider text-foreground/35 text-right justify-self-end">
@@ -157,7 +166,10 @@ const InspectorNode: React.FC<{
 
     return (
       <div>
-        <div className={inspectorRowClassName}>
+        <div
+          className={payloadInspectorRowClassName}
+          style={getPayloadInspectorRowStyle(depth)}
+        >
           <InspectorLabel
             depth={depth}
             label={label ?? 'items'}
@@ -196,7 +208,10 @@ const InspectorNode: React.FC<{
 
     return (
       <div>
-        <div className={inspectorRowClassName}>
+        <div
+          className={payloadInspectorRowClassName}
+          style={getPayloadInspectorRowStyle(depth)}
+        >
           <InspectorLabel
             depth={depth}
             label={label ?? 'object'}
@@ -225,7 +240,10 @@ const InspectorNode: React.FC<{
   }
 
   return (
-    <div className={inspectorRowClassName}>
+    <div
+      className={payloadInspectorRowClassName}
+      style={getPayloadInspectorRowStyle(depth)}
+    >
       <InspectorLabel depth={depth} label={label ?? 'value'} />
       <span className="min-w-0 break-all w-full block text-foreground/80">
         {String(value)}
@@ -239,8 +257,7 @@ const InspectorNode: React.FC<{
 
 const PayloadPreview: React.FC<{
   data: unknown;
-  viewport?: PayloadViewport;
-}> = ({ data, viewport = 'panel' }) => {
+}> = ({ data }) => {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(
     () => new Set(['root']),
   );
@@ -260,16 +277,14 @@ const PayloadPreview: React.FC<{
   };
 
   if (typeof data === 'string') {
-    return <RawPayload data={data} viewport={viewport} />;
+    return <RawPayload data={data} />;
   }
 
   return (
-    <div className="w-full isolate overflow-hidden rounded-xl border border-foreground/10 bg-foreground/5 [clip-path:inset(0_round_0.75rem)]">
-      <div
-        className={`${getScrollHeightClassName(viewport)} w-full overflow-auto rounded-[inherit]`}
-      >
+    <div className={payloadPreviewCardClassName}>
+      <div className="flex min-h-0 flex-1 w-full overflow-auto rounded-[inherit]">
         <div className="w-full min-w-0 flex flex-col">
-          <div className="sticky top-0 z-10 grid w-full min-w-0 grid-cols-[minmax(8rem,0.45fr)_minmax(10rem,1fr)_auto] items-center gap-2 rounded-t-[inherit] border-b border-foreground/10 bg-background/95 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-foreground/45 backdrop-blur">
+          <div className="sticky top-0 z-10 grid w-full min-w-0 grid-cols-[minmax(7rem,0.45fr)_minmax(9rem,1fr)_auto] items-center gap-1.5 rounded-t-[inherit] border-b border-foreground/10 bg-background/95 px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-foreground/45 backdrop-blur">
             <span>Key</span>
             <span>Value</span>
             <span className="text-right justify-self-end">Type</span>
@@ -288,26 +303,28 @@ const PayloadPreview: React.FC<{
 
 const PayloadTabs: React.FC<{
   data: unknown;
-  viewport?: PayloadViewport;
   actions?: React.ReactNode;
-}> = ({ data, viewport = 'panel', actions }) => (
-  <Tabs defaultValue="preview">
-    <div className="flex flex-wrap items-center justify-between gap-2">
-      <TabsList className="h-9 rounded-lg">
-        <TabsTrigger value="preview" className="h-7 rounded-md px-3 text-xs">
+}> = ({ data, actions }) => (
+  <Tabs defaultValue="preview" className="flex min-h-0 flex-1 flex-col">
+    <div className="flex flex-wrap items-center justify-between gap-1.5">
+      <TabsList className="h-8 rounded-lg">
+        <TabsTrigger
+          value="preview"
+          className="h-6 rounded-md px-2 text-[10px]"
+        >
           Preview
         </TabsTrigger>
-        <TabsTrigger value="raw" className="h-7 rounded-md px-3 text-xs">
+        <TabsTrigger value="raw" className="h-6 rounded-md px-2 text-[10px]">
           Raw
         </TabsTrigger>
       </TabsList>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
+      {actions && <div className="flex items-center gap-1">{actions}</div>}
     </div>
-    <TabsContent value="preview" className="mt-2">
-      <PayloadPreview data={data} viewport={viewport} />
+    <TabsContent value="preview" className="mt-1 flex min-h-0 flex-1 flex-col">
+      <PayloadPreview data={data} />
     </TabsContent>
-    <TabsContent value="raw" className="mt-2">
-      <RawPayload data={data} viewport={viewport} />
+    <TabsContent value="raw" className="mt-1 flex min-h-0 flex-1 flex-col">
+      <RawPayload data={data} />
     </TabsContent>
   </Tabs>
 );
@@ -347,7 +364,6 @@ export const ResponsePayloadDialog: React.FC<{
     >
       <PayloadTabs
         data={data}
-        viewport="dialog"
         actions={
           <Button
             type="button"
@@ -392,13 +408,13 @@ export const ResponsePayloadViewer: React.FC<ResponsePayloadViewerProps> = ({
   };
 
   return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <div className="flex min-h-0 flex-1 flex-col gap-1.5">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-1.5">
         <span className="text-[10px] font-semibold text-foreground/50 uppercase tracking-wider">
           Payload Output
         </span>
-        <div className="flex items-center gap-2">
-          <span className="rounded-full border border-foreground/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-foreground/40">
+        <div className="flex items-center gap-1.5">
+          <span className="rounded-full border border-foreground/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-foreground/40">
             {getTypeLabel(data)}
           </span>
         </div>

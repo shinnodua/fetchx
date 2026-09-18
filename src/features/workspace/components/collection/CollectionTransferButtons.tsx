@@ -152,7 +152,7 @@ export const CollectionTransferButtons: React.FC = () => {
 
   return (
     <>
-      <div className="flex items-center gap-2 sm:ml-4 ml-1">
+      <div className="mb-1 ml-1 flex items-center gap-2 sm:ml-4">
         <Button
           variant="glass"
           size="sm"

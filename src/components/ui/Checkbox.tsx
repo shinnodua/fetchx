@@ -27,7 +27,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     };
 
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <div className="relative flex items-center justify-center">
           <input
             type="checkbox"
@@ -41,7 +41,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           />
           <div
             className={cn(
-              'flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-foreground/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
+              'flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 border-foreground/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
               isChecked
                 ? 'bg-primary-500 border-primary-500 text-white'
                 : 'bg-transparent',
@@ -63,13 +63,9 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
                 scale: isChecked ? 1 : 0.5,
               }}
               transition={{ duration: 0.2 }}
-              className="h-3.5 w-3.5"
+              className="h-3 w-3"
             >
-              <CheckIcon
-                title="Checked"
-                className="h-3.5 w-3.5"
-                strokeWidth={3}
-              />
+              <CheckIcon title="Checked" className="h-3 w-3" strokeWidth={3} />
             </motion.span>
           </div>
         </div>
@@ -77,7 +73,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           <label
             htmlFor={checkboxId}
             className={cn(
-              'text-sm font-medium cursor-pointer',
+              'cursor-pointer text-xs font-medium',
               disabled && 'cursor-not-allowed opacity-50',
             )}
           >

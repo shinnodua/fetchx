@@ -31,11 +31,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const inputId = id || generatedId;
 
     return (
-      <div className="flex flex-col gap-1.5 w-full">
+      <div className="flex w-full flex-col gap-1">
         {label && (
           <label
             htmlFor={inputId}
-            className="text-sm font-medium text-foreground/80 ml-1"
+            className="ml-1 text-xs font-medium text-foreground/80"
           >
             {label}
           </label>
@@ -50,9 +50,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <div
               aria-hidden="true"
               className={cn(
-                'pointer-events-none absolute inset-0 z-30 flex items-center overflow-visible whitespace-pre px-4 py-2 text-sm text-foreground',
-                leftIcon ? 'pl-10' : '',
-                rightIcon ? 'pr-10' : '',
+                'pointer-events-none absolute inset-0 z-30 flex items-center overflow-visible whitespace-pre px-3 py-1.5 text-xs text-foreground',
+                leftIcon ? 'pl-9' : '',
+                rightIcon ? 'pr-9' : '',
                 highlightedContentClassName,
               )}
             >
@@ -65,12 +65,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             whileFocus={highlightedContent ? undefined : { scale: 1.01 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             className={cn(
-              'flex h-[44px] w-full rounded-xl border border-foreground/10 bg-background/50 px-4 py-2 text-sm text-foreground shadow-sm backdrop-blur-sm transition-all file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground/40',
+              'flex h-[38px] w-full rounded-xl border border-foreground/10 bg-background/50 px-3 py-1.5 text-xs text-foreground shadow-sm backdrop-blur-sm transition-all file:border-0 file:bg-transparent file:text-xs file:font-medium placeholder:text-foreground/40',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50 focus-visible:border-primary-500',
               'hover:border-foreground/20',
               'disabled:cursor-not-allowed disabled:opacity-50',
-              leftIcon ? 'pl-10' : '',
-              rightIcon ? 'pr-10' : '',
+              leftIcon ? 'pl-9' : '',
+              rightIcon ? 'pr-9' : '',
               highlightedContent
                 ? 'relative z-20 bg-transparent text-transparent caret-foreground backdrop-blur-none'
                 : '',

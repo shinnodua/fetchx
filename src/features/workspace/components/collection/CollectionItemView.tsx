@@ -6,6 +6,7 @@ import {
   TrashIcon,
 } from '../../../../assets/svgs';
 import { Button, DropdownMenu } from '../../../../components';
+import { REQUEST_METHOD_BADGE_CLASS_NAMES } from '../../constants';
 import type { CollectionItem, SavedResponse } from '../../types';
 import type { ContextMenuTarget } from './collectionPanelTypes';
 
@@ -38,6 +39,9 @@ interface CollectionItemViewProps {
   requestRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
 }
 
+export const collectionRequestRowClassName =
+  'group flex min-w-0 cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-1.5 py-0.5 text-xs transition-all';
+
 export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
   col,
   activeTabId,
@@ -57,7 +61,7 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
   const isCollapsed = collapsedCollectionIds.includes(col.id);
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-0.5">
       <div
         onClick={() => toggleCollectionCollapsed(col.id)}
         onContextMenu={(event) =>
@@ -66,7 +70,7 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
             event,
           )
         }
-        className="flex items-center justify-between group cursor-pointer hover:bg-foreground/5 p-1 -mx-1 rounded-lg select-none transition-colors"
+        className="-mx-0.5 flex cursor-pointer select-none items-center justify-between rounded-md px-0.5 py-0.5 transition-colors hover:bg-foreground/5"
       >
         <div className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-foreground/90">
           <ChevronDownIcon
@@ -129,7 +133,7 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
       </div>
 
       {!isCollapsed && (
-        <div className="pl-0.5 border-l border-foreground/10 space-y-1 pt-1 pb-1.5">
+        <div className="space-y-0.5 border-l border-foreground/10 py-0.5 pl-0.5">
           {col.requests.length === 0 ? (
             <span className="text-xs text-foreground/30 pl-2">
               Empty collection
@@ -141,20 +145,8 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
               const hasSavedResponses = savedResponses.length > 0;
               const savedResponsesCollapsed =
                 req.savedResponsesCollapsed ?? false;
-              const typeColors: Record<string, string> = {
-                READ: 'bg-secondary-500/10 text-secondary-600 border-secondary-500/20',
-                WRITE:
-                  'bg-primary-500/10 text-primary-500 border-primary-500/20',
-                GET: 'bg-secondary-500/10 text-secondary-600 border-secondary-500/20',
-                POST: 'bg-primary-500/10 text-primary-500 border-primary-500/20',
-                PUT: 'bg-primary-500/10 text-primary-500 border-primary-500/20',
-                PATCH:
-                  'bg-secondary-500/10 text-secondary-600 border-secondary-500/20',
-                DELETE:
-                  'bg-primary-500/10 text-primary-500 border-primary-500/20',
-              };
               return (
-                <div key={req.id} className="space-y-1">
+                <div key={req.id} className="space-y-0.5">
                   <div
                     ref={(element) => {
                       requestRefs.current[req.id] = element;
@@ -170,7 +162,7 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
                         event,
                       )
                     }
-                    className={`flex min-w-0 items-center justify-between gap-2 py-1 px-2 rounded-xl text-xs cursor-pointer group transition-all ${
+                    className={`${collectionRequestRowClassName} ${
                       isActive
                         ? 'bg-foreground/5 font-semibold text-foreground border border-foreground/10'
                         : 'text-foreground/75 hover:bg-foreground/5 hover:text-foreground border border-transparent'
@@ -204,7 +196,7 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
                         <span className="h-5 w-5 shrink-0" />
                       )}
                       <span
-                        className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold border ${typeColors[req.type]}`}
+                        className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold border ${REQUEST_METHOD_BADGE_CLASS_NAMES[req.type]}`}
                       >
                         {req.type}
                       </span>
@@ -243,18 +235,18 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
                   </div>
 
                   {hasSavedResponses && !savedResponsesCollapsed && (
-                    <div className="ml-8 space-y-1 border-l border-foreground/10 pl-2">
+                    <div className="ml-7 space-y-0.5 border-l border-foreground/10 pl-1.5">
                       {savedResponses.map((savedResponse) => (
                         <div
                           key={savedResponse.id}
-                          className="group/response flex min-w-0 items-center gap-1 rounded-lg border border-transparent pr-1 transition-colors hover:border-foreground/10 hover:bg-foreground/5"
+                          className="group/response flex min-w-0 items-center gap-1 rounded-md border border-transparent pr-0.5 transition-colors hover:border-foreground/10 hover:bg-foreground/5"
                         >
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
                             onClick={() => openSavedResponse(savedResponse)}
-                            className="flex h-auto min-w-0 flex-1 justify-start gap-2 rounded-lg px-2 py-1 text-left text-[11px] text-foreground/60 hover:bg-transparent hover:text-foreground"
+                            className="flex h-auto min-w-0 flex-1 justify-start gap-1.5 rounded-md px-1.5 py-0.5 text-left text-[11px] text-foreground/60 hover:bg-transparent hover:text-foreground"
                           >
                             <span className="shrink-0 rounded border border-secondary-500/20 bg-secondary-500/10 px-1.5 py-0.5 text-[8px] font-bold text-secondary-600">
                               RES

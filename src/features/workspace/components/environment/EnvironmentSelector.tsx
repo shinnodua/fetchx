@@ -30,7 +30,7 @@ export const EnvironmentSelector: React.FC = () => {
         <Button
           variant="glass"
           size="sm"
-          className="h-8 px-3 rounded-lg text-xs flex items-center gap-1.5 shrink-0 select-none cursor-pointer"
+          className="mb-1 flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg px-3 text-xs select-none"
         >
           <EnvironmentIcon
             title="Environment"

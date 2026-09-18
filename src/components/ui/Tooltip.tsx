@@ -29,7 +29,7 @@ export const Tooltip = ({ content, children, className }: TooltipProps) => {
             exit={{ opacity: 0, y: 2, scale: 0.95 }}
             transition={{ duration: 0.15 }}
             className={cn(
-              'absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-foreground text-background px-3 py-1.5 text-xs font-medium shadow-md',
+              'absolute bottom-full left-1/2 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-lg bg-foreground px-2 py-1 text-xs font-medium text-background shadow-md',
               'after:absolute after:left-1/2 after:top-full after:-translate-x-1/2 after:border-4 after:border-transparent after:border-t-foreground z-50',
               className,
             )}

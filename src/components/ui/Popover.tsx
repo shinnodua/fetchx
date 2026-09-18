@@ -55,7 +55,7 @@ export const Popover = ({
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className={cn(
-              'absolute top-full z-50 mt-2 w-72 rounded-xl border border-foreground/10 bg-background/90 p-4 shadow-xl backdrop-blur-xl outline-none',
+              'absolute top-full z-50 mt-1.5 w-72 rounded-xl border border-foreground/10 bg-background/90 p-3 shadow-xl backdrop-blur-xl outline-none',
               alignStyles[align],
               className,
             )}

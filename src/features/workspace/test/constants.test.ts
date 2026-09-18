@@ -5,6 +5,8 @@ import {
   getNativeTokenSymbol,
   isRestMethod,
   methodSupportsBody,
+  REQUEST_METHOD_BADGE_CLASS_NAMES,
+  REQUEST_METHOD_TEXT_COLOR_CLASS_NAMES,
 } from '../constants';
 
 describe('workspace constants helpers', () => {
@@ -32,5 +34,17 @@ describe('workspace constants helpers', () => {
     expect(methodSupportsBody('POST')).toBe(true);
     expect(methodSupportsBody('GET')).toBe(false);
     expect(methodSupportsBody(undefined)).toBe(false);
+  });
+
+  test('shares method colors between request controls and collection badges', () => {
+    expect(REQUEST_METHOD_TEXT_COLOR_CLASS_NAMES.READ).toBe(
+      'text-secondary-600',
+    );
+    expect(REQUEST_METHOD_BADGE_CLASS_NAMES.READ).toContain(
+      REQUEST_METHOD_TEXT_COLOR_CLASS_NAMES.READ,
+    );
+    expect(REQUEST_METHOD_BADGE_CLASS_NAMES.SEND).toContain(
+      REQUEST_METHOD_TEXT_COLOR_CLASS_NAMES.SEND,
+    );
   });
 });

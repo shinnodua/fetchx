@@ -21,6 +21,16 @@ This feature demonstrates:
 - shared UI component variants;
 - component state examples.
 
+## Compact density
+
+Shared UI primitives use a compact default density so workspace screens can show
+more request, response, and configuration information at once. Buttons, fields,
+tabs, cards, dialogs, menus, tables, and form controls use smaller default text,
+heights, and internal spacing. Feature code may provide a larger class only when
+the task requires a deliberately prominent action or readable long-form content.
+Header action controls retain a small bottom margin to keep visual separation
+from the header boundary.
+
 It should not become the source implementation of shared UI primitives. Shared UI primitives belong in `src/components/ui/` and are exported through `src/components/index.ts`.
 
 ## Route boundary

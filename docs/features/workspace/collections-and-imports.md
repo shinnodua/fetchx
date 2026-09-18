@@ -30,6 +30,9 @@ It owns:
 
 Collapsed collection ids and sidebar width/collapsed state live in `useWorkspaceStore`.
 
+Collection rows use compact vertical gaps and slim selected or hover surfaces so
+more requests and saved responses remain visible in the sidebar.
+
 ## Collection actions
 
 Collection actions live in `src/store/workspace/collectionActions.ts`.

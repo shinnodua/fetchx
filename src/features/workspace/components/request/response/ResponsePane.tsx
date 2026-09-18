@@ -1,17 +1,33 @@
 import type React from 'react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { CopyIcon } from '../../../../../assets/svgs';
-import { Badge, Button, Skeleton, useToast } from '../../../../../components';
+import {
+  Badge,
+  Button,
+  Dialog,
+  Skeleton,
+  useToast,
+} from '../../../../../components';
 import { useRpcStore, useWorkspaceStore } from '../../../../../store';
 import { copyResponse } from '../../../utils/requestExport';
 import { findRpcOption, getSelectedRpcId } from '../../../utils/rpcOptions';
 import { ResponsePayloadViewer } from './ResponsePayloadViewer';
+
+export const consoleLogsButtonClassName =
+  'h-7 rounded-lg px-2 text-[10px] font-semibold uppercase tracking-wider text-primary-600 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200';
+
+export const consoleLogsDialogContentClassName =
+  'min-h-0 flex-1 overflow-auto rounded-lg border border-foreground/10 bg-black/5 p-3 font-mono text-[11px] leading-4 text-foreground/70 dark:bg-black/40';
+
+export const responsePaneContentClassName =
+  'flex-1 min-h-0 overflow-hidden p-3';
 
 export const ResponsePane: React.FC = () => {
   const { toast } = useToast();
   const { collections, activeTabId, drafts, saveActiveResponse } =
     useWorkspaceStore();
   const customRpcs = useRpcStore((state) => state.customRpcs);
+  const [isLogsDialogOpen, setIsLogsDialogOpen] = useState(false);
 
   // Find active request
   const activeRequest = useMemo(() => {
@@ -29,6 +45,7 @@ export const ResponsePane: React.FC = () => {
   const hasResponsePayload =
     activeRequest.response?.data !== undefined &&
     activeRequest.response.data !== null;
+  const responseLogs = activeRequest.response?.logs ?? [];
   const selectedRpc = findRpcOption(
     getSelectedRpcId(activeRequest, customRpcs),
     customRpcs,
@@ -82,7 +99,7 @@ export const ResponsePane: React.FC = () => {
 
   return (
     <div className="w-full lg:w-1/2 flex-1 flex flex-col min-h-0 overflow-hidden border border-foreground/10 rounded-2xl bg-white/5 dark:bg-black/5">
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-foreground/10 bg-background/80 px-4 py-1.5 backdrop-blur">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-foreground/10 bg-background/80 px-3 py-1 backdrop-blur">
         <h3 className="text-sm font-semibold text-foreground/50 uppercase tracking-wider">
           Response & Logs
         </h3>
@@ -102,6 +119,17 @@ export const ResponsePane: React.FC = () => {
             <Badge variant="outline">
               {activeRequest.response.duration} ms
             </Badge>
+            {responseLogs.length > 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsLogsDialogOpen(true)}
+                className={consoleLogsButtonClassName}
+              >
+                Logs ({responseLogs.length})
+              </Button>
+            )}
             {hasResponsePayload && (
               <Button
                 type="button"
@@ -122,13 +150,13 @@ export const ResponsePane: React.FC = () => {
         )}
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto p-4">
+      <div className={responsePaneContentClassName}>
         {!activeRequest.response ? (
           <div className="flex min-h-full flex-col items-center justify-center p-8 text-center text-foreground/40 italic text-xs">
             Configure path parameters and press "Send" to trigger call.
           </div>
         ) : (
-          <div className="flex min-h-full flex-col space-y-4">
+          <div className="flex h-full min-h-0 flex-col gap-3">
             {/* Transaction Receipt Link if WRITE Call */}
             {activeRequest.response.txHash && (
               <div className="p-3 bg-primary-500/5 border border-primary-500/10 rounded-xl space-y-1">
@@ -158,7 +186,7 @@ export const ResponsePane: React.FC = () => {
                 <span className="text-[10px] font-semibold text-foreground/50 uppercase tracking-wider block">
                   Payload Output
                 </span>
-                <div className="bg-foreground/5 p-4 rounded-xl space-y-2.5 border border-foreground/10 animate-pulse">
+                <div className="space-y-2 rounded-xl border border-foreground/10 bg-foreground/5 p-3 animate-pulse">
                   <Skeleton className="h-3 w-[80%] rounded-md bg-foreground/10" />
                   <Skeleton className="h-3 w-[60%] rounded-md bg-foreground/10" />
                   <Skeleton className="h-3 w-[70%] rounded-md bg-foreground/10" />
@@ -174,25 +202,24 @@ export const ResponsePane: React.FC = () => {
                 />
               )
             )}
-
-            {/* Debug Execution Logs */}
-            {activeRequest.response.logs &&
-              activeRequest.response.logs.length > 0 && (
-                <div className="space-y-1 flex-1 flex flex-col min-h-[150px]">
-                  <span className="text-[10px] font-semibold text-foreground/50 uppercase tracking-wider block">
-                    Console Logs
-                  </span>
-                  <div className="bg-black/5 dark:bg-black/40 border border-foreground/10 text-[11px] font-mono p-3 rounded-xl flex-1 overflow-y-auto space-y-1 min-h-[120px] max-h-48 text-foreground/70">
-                    {activeRequest.response.logs.map((log, idx) => (
-                      // biome-ignore lint/suspicious/noArrayIndexKey: logs are append-only static log entries
-                      <div key={idx}>{log}</div>
-                    ))}
-                  </div>
-                </div>
-              )}
           </div>
         )}
       </div>
+
+      <Dialog
+        isOpen={isLogsDialogOpen}
+        onClose={() => setIsLogsDialogOpen(false)}
+        title="Console Logs"
+        description={`${responseLogs.length} log ${responseLogs.length === 1 ? 'entry' : 'entries'}`}
+        className="flex h-[min(32rem,calc(100vh-2rem))] max-w-3xl flex-col"
+      >
+        <div className={consoleLogsDialogContentClassName}>
+          {responseLogs.map((log, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: logs are append-only static log entries
+            <div key={index}>{log}</div>
+          ))}
+        </div>
+      </Dialog>
     </div>
   );
 };

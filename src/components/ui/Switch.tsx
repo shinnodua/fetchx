@@ -32,7 +32,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
     };
 
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <div className="relative inline-flex items-center">
           <input
             type="checkbox"
@@ -46,7 +46,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
           />
           <motion.div
             className={cn(
-              'flex h-6 w-11 cursor-pointer items-center rounded-full p-0.5 transition-colors',
+              'flex h-5 w-9 cursor-pointer items-center rounded-full p-0.5 transition-colors',
               isChecked ? 'bg-primary-500' : 'bg-foreground/20',
               disabled && 'cursor-not-allowed opacity-50',
               className,
@@ -60,7 +60,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
           >
             <motion.div
               layout
-              className="h-5 w-5 rounded-full bg-white shadow-sm"
+              className="h-4 w-4 rounded-full bg-white shadow-sm"
               animate={{ x: isChecked ? 20 : 0 }}
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             />
@@ -70,7 +70,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
           <label
             htmlFor={switchId}
             className={cn(
-              'text-sm font-medium',
+              'text-xs font-medium',
               disabled && 'opacity-50 cursor-not-allowed',
             )}
           >

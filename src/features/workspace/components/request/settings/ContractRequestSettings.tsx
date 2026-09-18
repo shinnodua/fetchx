@@ -23,15 +23,15 @@ export const ContractRequestSettings: React.FC<
 
   return (
     <>
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-foreground/10 bg-background/80 px-4 py-1.5 backdrop-blur">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-foreground/10 bg-background/80 px-3 py-1 backdrop-blur">
         <h3 className="text-sm font-semibold text-foreground/50 uppercase tracking-wider">
           Request Settings
         </h3>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto p-4">
+      <div className="flex-1 min-h-0 overflow-y-auto p-3">
         {isNativeTransfer && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <EnvironmentAwareInput
               label={`Amount (${getNativeTokenSymbol(activeRequest.network)})`}
               inputMode="decimal"
@@ -54,7 +54,7 @@ export const ContractRequestSettings: React.FC<
         )}
 
         {isWeb3Request && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <ContractAbiForm activeRequest={activeRequest} />
             <ContractParamsForm
               activeRequest={activeRequest}

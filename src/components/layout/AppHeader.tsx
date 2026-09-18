@@ -14,6 +14,8 @@ interface AppHeaderProps {
   onToggleTheme: () => void;
 }
 
+export const headerActionButtonClassName = 'mb-1 h-8 rounded-lg px-3 text-xs';
+
 export const AppHeader: React.FC<AppHeaderProps> = ({
   actions,
   desktopActions,
@@ -41,8 +43,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   }, [chain?.id, chain?.name]);
 
   return (
-    <header className="relative shrink-0 flex flex-wrap gap-y-2 items-center justify-between px-4 py-3 md:py-4 border-b border-foreground/10 bg-background/80 backdrop-blur-md z-50">
-      <div className="flex items-center gap-3">
+    <header className="relative z-50 flex shrink-0 flex-wrap items-center justify-between gap-y-1.5 border-b border-foreground/10 bg-background/80 px-3 py-2 backdrop-blur-md">
+      <div className="flex items-center gap-2">
         <Link
           to="/"
           className="flex items-center gap-2 text-sm font-bold text-inherit text-primary-500 hover:opacity-80 transition-opacity"
@@ -65,7 +67,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         <Button
           variant="glass"
           size="sm"
-          className="h-8 px-3 rounded-lg text-xs"
+          className={headerActionButtonClassName}
           onClick={() => {
             const nextTheme = theme === 'dark' ? 'light' : 'dark';
             trackEvent({
@@ -94,7 +96,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 <Button
                   variant="primary"
                   size="sm"
-                  className="h-8 px-3 rounded-lg text-xs"
+                  className={headerActionButtonClassName}
                   onClick={() => {
                     trackEvent({ screen: 'global', action: 'connect_wallet' });
                     openConnectModal();
@@ -110,7 +112,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 <Button
                   variant="primary"
                   size="sm"
-                  className="h-8 px-3 rounded-lg text-xs"
+                  className={headerActionButtonClassName}
                   onClick={() => {
                     trackEvent({ screen: 'global', action: 'change_network' });
                     openChainModal();
@@ -126,7 +128,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 px-3 rounded-lg text-xs"
+                  className={headerActionButtonClassName}
                   onClick={() => {
                     trackEvent({ screen: 'global', action: 'change_network' });
                     openChainModal();
@@ -137,7 +139,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 <Button
                   variant="primary"
                   size="sm"
-                  className="h-8 px-3 rounded-lg text-xs"
+                  className={headerActionButtonClassName}
                   onClick={() => {
                     trackEvent({ screen: 'global', action: 'view_account' });
                     openAccountModal();

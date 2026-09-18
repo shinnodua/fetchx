@@ -86,7 +86,7 @@ export function DesktopUpdateManager() {
         <Button
           variant="secondary"
           size="sm"
-          className="h-8 px-5 rounded-lg text-xs font-bold cursor-pointer shadow-md shadow-primary-500/20"
+          className="mb-1 h-8 cursor-pointer rounded-lg px-5 text-xs font-bold shadow-md shadow-primary-500/20"
           onClick={() => setDialogOpen(true)}
         >
           Update Available

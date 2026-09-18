@@ -135,6 +135,28 @@ export const DEFAULT_RPC_OPTIONS: RpcOption[] = NETWORK_OPTIONS.map(
   }),
 );
 
+export const REQUEST_METHOD_TEXT_COLOR_CLASS_NAMES: Record<string, string> = {
+  READ: 'text-secondary-600',
+  WRITE: 'text-primary-500',
+  SEND: 'text-primary-500',
+  GET: 'text-secondary-600',
+  POST: 'text-primary-500',
+  PUT: 'text-primary-500',
+  PATCH: 'text-secondary-600',
+  DELETE: 'text-primary-500',
+};
+
+export const REQUEST_METHOD_BADGE_CLASS_NAMES: Record<string, string> = {
+  READ: 'bg-secondary-500/10 text-secondary-600 border-secondary-500/20',
+  WRITE: 'bg-primary-500/10 text-primary-500 border-primary-500/20',
+  SEND: 'bg-primary-500/10 text-primary-500 border-primary-500/20',
+  GET: 'bg-secondary-500/10 text-secondary-600 border-secondary-500/20',
+  POST: 'bg-primary-500/10 text-primary-500 border-primary-500/20',
+  PUT: 'bg-primary-500/10 text-primary-500 border-primary-500/20',
+  PATCH: 'bg-secondary-500/10 text-secondary-600 border-secondary-500/20',
+  DELETE: 'bg-primary-500/10 text-primary-500 border-primary-500/20',
+};
+
 export const METHOD_OPTIONS = [
   { value: 'READ', label: 'READ (Contract)' },
   { value: 'WRITE', label: 'WRITE (Contract)' },
@@ -144,7 +166,10 @@ export const METHOD_OPTIONS = [
   { value: 'PUT', label: 'PUT (REST)' },
   { value: 'PATCH', label: 'PATCH (REST)' },
   { value: 'DELETE', label: 'DELETE (REST)' },
-];
+].map((option) => ({
+  ...option,
+  className: REQUEST_METHOD_TEXT_COLOR_CLASS_NAMES[option.value],
+}));
 
 const NATIVE_TOKEN_SYMBOLS: Record<string, string> = {
   '1': 'ETH',

@@ -37,7 +37,7 @@ export const Dialog = ({
   const dialogContent = (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -52,28 +52,28 @@ export const Dialog = ({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={cn(
-              'relative z-50 w-full max-w-lg rounded-2xl bg-background border border-foreground/10 p-6 shadow-2xl',
+              'relative z-50 w-full max-w-lg rounded-2xl border border-foreground/10 bg-background p-4 shadow-2xl',
               className,
             )}
           >
             {!hideCloseButton && (
               <button
                 onClick={onClose}
-                className="absolute right-4 top-4 rounded-full p-1 opacity-70 transition-opacity hover:opacity-100 hover:bg-foreground/10"
+                className="absolute right-3 top-3 rounded-full p-1 opacity-70 transition-opacity hover:opacity-100 hover:bg-foreground/10"
               >
                 <CloseIcon title="Close dialog" className="h-5 w-5" />
               </button>
             )}
 
             {(title || description) && (
-              <div className="mb-6 space-y-1.5 pr-6">
+              <div className="mb-4 space-y-1 pr-6">
                 {title && (
-                  <h2 className="text-xl font-semibold leading-none tracking-tight">
+                  <h2 className="text-lg font-semibold leading-none tracking-tight">
                     {title}
                   </h2>
                 )}
                 {description && (
-                  <p className="text-sm text-foreground/60">{description}</p>
+                  <p className="text-xs text-foreground/60">{description}</p>
                 )}
               </div>
             )}

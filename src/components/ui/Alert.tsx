@@ -33,14 +33,14 @@ export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
         className={cn(
-          'relative w-full rounded-xl border p-4 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground',
+          'relative w-full rounded-xl border p-3 [&>svg]:absolute [&>svg]:left-3 [&>svg]:top-3 [&>svg]:text-foreground',
           variants[variant],
           className,
         )}
         {...props}
       >
         {icon && (
-          <div className="absolute left-4 top-4 text-inherit opacity-70">
+          <div className="absolute left-3 top-3 text-inherit opacity-70">
             {icon}
           </div>
         )}
@@ -50,7 +50,7 @@ export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
               {title}
             </h5>
           )}
-          <div className="text-sm opacity-90">{children}</div>
+          <div className="text-xs opacity-90">{children}</div>
         </div>
       </motion.div>
     );

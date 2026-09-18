@@ -16,7 +16,7 @@ import { useToast } from '../ui/Toast';
 const socialLinkClassName =
   'inline-flex h-8 w-8 items-center justify-center rounded-lg text-foreground/60 transition-colors hover:bg-foreground/10 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500/50';
 export const desktopDownloadButtonClassName =
-  'relative z-10 h-10 min-h-10 px-4 text-sm leading-none rounded-lg border-foreground/10 text-foreground/70 hover:bg-foreground/5 hover:text-foreground';
+  'relative z-10 h-8 min-h-8 px-3 text-xs leading-none rounded-lg border-foreground/10 text-foreground/70 hover:bg-foreground/5 hover:text-foreground';
 
 export const AppFooter: React.FC = () => {
   const { toast } = useToast();
@@ -63,9 +63,9 @@ export const AppFooter: React.FC = () => {
   };
 
   return (
-    <footer className="relative z-50 shrink-0 flex items-center justify-between border-t border-foreground/10 bg-background/80 px-4 py-2 backdrop-blur-md">
+    <footer className="relative z-50 flex shrink-0 items-center justify-between border-t border-foreground/10 bg-background/80 px-3 py-1.5 backdrop-blur-md">
       <div className="flex-1" />
-      <div className="flex items-center justify-center gap-3 flex-1">
+      <div className="flex flex-1 items-center justify-center gap-2">
         <a
           href="https://github.com/shinnodua/fetchx"
           target="_blank"

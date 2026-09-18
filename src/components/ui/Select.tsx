@@ -21,6 +21,7 @@ export interface SelectProps {
   placeholder?: string;
   label?: string;
   className?: string;
+  triggerLabelClassName?: string;
   dropdownClassName?: string;
   disabled?: boolean;
   isLoading?: boolean;
@@ -44,6 +45,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
       placeholder = 'Select an option',
       label,
       className,
+      triggerLabelClassName,
       dropdownClassName,
       disabled,
       isLoading = false,
@@ -89,11 +91,11 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
 
     return (
       <div
-        className={cn('flex flex-col gap-1.5 w-full relative', className)}
+        className={cn('relative flex w-full flex-col gap-1', className)}
         ref={containerRef}
       >
         {label && (
-          <label className="text-sm font-medium text-foreground/80 ml-1">
+          <label className="ml-1 text-xs font-medium text-foreground/80">
             {label}
           </label>
         )}
@@ -101,8 +103,8 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
           ref={ref}
           onClick={() => !disabled && !isLoading && setIsOpen(!isOpen)}
           className={cn(
-            'flex w-full items-center justify-between rounded-xl border border-foreground/10 bg-background/50 text-sm text-foreground shadow-sm backdrop-blur-sm transition-all cursor-pointer',
-            size === 'sm' ? 'h-10 px-3 py-1.5' : 'h-[44px] px-4 py-2',
+            'flex w-full cursor-pointer items-center justify-between rounded-xl border border-foreground/10 bg-background/50 text-xs text-foreground shadow-sm backdrop-blur-sm transition-all',
+            size === 'sm' ? 'h-8 px-2.5 py-1' : 'h-[38px] px-3 py-1.5',
             'hover:border-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500',
             (disabled || isLoading) && 'cursor-not-allowed opacity-50',
             isOpen && 'border-primary-500 ring-2 ring-primary-500/50',
@@ -114,7 +116,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
             className={cn(
               'block truncate min-w-0 mr-2 flex-1 text-left',
               selectedOption || isLoading
-                ? 'text-foreground'
+                ? triggerLabelClassName || 'text-foreground'
                 : 'text-foreground/40',
             )}
           >
@@ -155,9 +157,13 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
                   <div
                     onClick={() => handleSelect(option.value)}
                     className={cn(
-                      'relative flex w-full cursor-pointer select-none items-center rounded-lg py-2.5 pl-3 pr-9 text-sm outline-none transition-colors hover:bg-foreground/5 focus:bg-foreground/5',
+                      'relative flex w-full cursor-pointer select-none items-center rounded-lg py-2 pl-3 pr-8 text-xs outline-none transition-colors hover:bg-foreground/5 focus:bg-foreground/5',
                       selectedValue === option.value
-                        ? 'bg-primary-50 text-primary-900 font-medium dark:bg-primary-900/20 dark:text-primary-100'
+                        ? cn(
+                            'bg-primary-50 font-medium dark:bg-primary-900/20',
+                            option.className ||
+                              'text-primary-900 dark:text-primary-100',
+                          )
                         : option.className || 'text-foreground',
                     )}
                   >

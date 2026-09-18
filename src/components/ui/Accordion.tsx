@@ -50,7 +50,7 @@ export const Accordion = ({
             <button
               type="button"
               onClick={() => toggleItem(item.id)}
-              className="flex w-full items-center justify-between px-5 py-4 text-left font-medium transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:bg-foreground/5"
+              className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:bg-foreground/5"
             >
               <span>{item.title}</span>
               <motion.span
@@ -74,7 +74,7 @@ export const Accordion = ({
                   transition={{ duration: 0.3, ease: 'easeInOut' }}
                   className="overflow-hidden"
                 >
-                  <div className="px-5 pb-4 pt-1 text-sm text-foreground/70">
+                  <div className="px-4 pb-3 pt-1 text-xs text-foreground/70">
                     {item.content}
                   </div>
                 </motion.div>

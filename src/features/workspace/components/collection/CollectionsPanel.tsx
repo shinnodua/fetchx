@@ -285,7 +285,7 @@ export const CollectionsPanel: React.FC = () => {
       />
 
       {/* Collections List */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 space-y-1.5 overflow-y-auto p-3">
         {filteredCollections.length === 0 ? (
           <p className="text-sm text-foreground/40 text-center py-8">
             No collections found.

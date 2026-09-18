@@ -121,7 +121,7 @@ export const RestRequestSettings: React.FC<RestRequestSettingsProps> = ({
       onValueChange={handleRestTabChange}
       className="flex min-h-0 flex-1 flex-col"
     >
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-foreground/10 bg-background/80 px-4 py-1.5 backdrop-blur">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-foreground/10 bg-background/80 px-3 py-1 backdrop-blur">
         <h3 className="text-sm font-semibold text-foreground/50 uppercase tracking-wider">
           Request Settings
         </h3>
@@ -143,9 +143,9 @@ export const RestRequestSettings: React.FC<RestRequestSettingsProps> = ({
         </TabsList>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto p-4">
+      <div className="flex-1 min-h-0 overflow-y-auto p-3">
         <TabsContent value="queryParams" className="mt-0">
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-xs font-semibold text-foreground/75">
                 Query Parameters
@@ -215,7 +215,7 @@ export const RestRequestSettings: React.FC<RestRequestSettingsProps> = ({
         </TabsContent>
 
         <TabsContent value="headers" className="mt-0">
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-xs font-semibold text-foreground/75">
                 Request Headers
@@ -285,7 +285,7 @@ export const RestRequestSettings: React.FC<RestRequestSettingsProps> = ({
         </TabsContent>
 
         <TabsContent value="body" className="mt-0">
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Button

@@ -18,6 +18,9 @@ import type { RequestItem } from '../../../types';
 import { getRequestIsDirty } from '../../../utils/requestDirty';
 import { TabContextMenu } from './TabContextMenu';
 
+export const workspaceTabClassName =
+  'group relative flex h-8 min-w-[140px] max-w-[210px] shrink-0 items-center gap-1.5 rounded-t-lg border border-b-0 px-2.5 text-[11px] cursor-pointer select-none transition-all';
+
 export const TabsHeader: React.FC = () => {
   const {
     tabs,
@@ -211,13 +214,13 @@ export const TabsHeader: React.FC = () => {
         .find((r) => r.id === contextMenu.tabId)
     : null;
   return (
-    <div className="relative flex min-h-11 items-stretch border-b border-foreground/10 bg-foreground/[0.03] shadow-sm shadow-foreground/5 select-none dark:bg-background/40">
+    <div className="relative flex min-h-8 select-none items-stretch border-b border-foreground/10 bg-foreground/[0.03] shadow-sm shadow-foreground/5 dark:bg-background/40">
       {collectionsPanelCollapsed && (
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setCollectionsPanelCollapsed(false)}
-          className="h-11 rounded-none border-r border-foreground/10 px-3.5 text-foreground/60 hover:text-foreground cursor-pointer"
+          className="h-8 cursor-pointer rounded-none border-r border-foreground/10 px-2.5 text-foreground/60 hover:text-foreground"
           title="Expand Sidebar"
         >
           <ChevronRightIcon title="Expand sidebar" className="w-4 h-4" />
@@ -225,7 +228,7 @@ export const TabsHeader: React.FC = () => {
       )}
 
       {/* Scrollable Tabs Container */}
-      <div className="flex min-w-0 flex-1 items-end gap-1 overflow-x-auto px-2 pt-1 scrollbar-none">
+      <div className="flex min-w-0 flex-1 items-end gap-1 overflow-x-auto px-2 pt-0.5 scrollbar-none">
         {tabs.map((tabId) => {
           let reqObject: RequestItem | null = null;
           if (drafts[tabId]) {
@@ -271,7 +274,7 @@ export const TabsHeader: React.FC = () => {
               }}
               onDrop={(event) => handleDrop(tabId, event)}
               onDragEnd={resetDragState}
-              className={`group relative flex h-9 min-w-[148px] max-w-[220px] shrink-0 items-center gap-2 rounded-t-lg border border-b-0 px-3 text-xs cursor-pointer select-none transition-all ${
+              className={`${workspaceTabClassName} ${
                 isActive
                   ? 'z-10 border-foreground/10 bg-background text-foreground shadow-sm shadow-foreground/10 before:absolute before:inset-x-3 before:bottom-0 before:h-0.5 before:rounded-full before:bg-primary-500'
                   : 'border-transparent bg-transparent text-foreground/60 hover:border-foreground/10 hover:bg-background/70 hover:text-foreground'
@@ -319,11 +322,11 @@ export const TabsHeader: React.FC = () => {
               type="button"
               variant="ghost"
               size="sm"
-              className="h-8 w-8 rounded-lg p-0 text-foreground/60 hover:bg-background hover:text-foreground cursor-pointer"
+              className="h-7 w-7 rounded-lg p-0 text-foreground/60 hover:bg-background hover:text-foreground cursor-pointer"
             >
               <PlusIcon
                 title="Add or import request"
-                className="block h-5 w-5 shrink-0"
+                className="block h-4 w-4 shrink-0"
                 strokeWidth={2}
               />
             </Button>

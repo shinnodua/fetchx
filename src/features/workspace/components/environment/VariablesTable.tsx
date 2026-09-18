@@ -60,9 +60,9 @@ export const VariablesTable: React.FC<VariablesTableProps> = ({
   };
 
   return (
-    <div className="flex-grow flex flex-col min-h-0 border border-foreground/10 rounded-xl p-4 bg-foreground/[0.02] overflow-x-auto">
+    <div className="flex min-h-0 flex-grow flex-col overflow-x-auto rounded-xl border border-foreground/10 bg-foreground/[0.02] p-3">
       <div className="min-w-[480px] flex-grow flex flex-col min-h-0">
-        <div className="flex items-center gap-3 px-2 pb-3 border-b border-foreground/10 text-xs font-semibold text-foreground/45 uppercase tracking-wider">
+        <div className="flex items-center gap-2 border-b border-foreground/10 px-2 pb-2 text-xs font-semibold uppercase tracking-wider text-foreground/45">
           <div className="w-14 text-center shrink-0">Active</div>
           <div className="flex-[1.1]">Variable</div>
           <div className="flex-[1.4]">Value</div>
@@ -70,7 +70,7 @@ export const VariablesTable: React.FC<VariablesTableProps> = ({
           <div className="w-8 shrink-0" />
         </div>
 
-        <div className="flex-1 overflow-y-auto py-3 space-y-3 pr-1 min-h-0">
+        <div className="flex min-h-0 flex-1 space-y-2 overflow-y-auto py-2 pr-1">
           {selectedEnv.variables.length === 0 ? (
             <p className="text-xs text-foreground/40 italic text-center py-8">
               No variables defined. Add a variable row below.
@@ -204,7 +204,7 @@ export const VariablesTable: React.FC<VariablesTableProps> = ({
           )}
         </div>
 
-        <div className="pt-3 border-t border-foreground/10">
+        <div className="border-t border-foreground/10 pt-2">
           <Button
             variant="ghost"
             size="sm"
