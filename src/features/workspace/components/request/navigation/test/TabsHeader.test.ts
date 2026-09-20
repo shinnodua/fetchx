@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { workspaceChangeTextClassNames } from '../../../workspaceChangeStatusClassNames';
 import { workspaceTabClassName } from '../TabsHeader';
 
 describe('TabsHeader', () => {
@@ -11,5 +12,10 @@ describe('TabsHeader', () => {
   test('keeps tabs visually ready for pointer-driven reordering', () => {
     expect(workspaceTabClassName).toContain('transition-all');
     expect(workspaceTabClassName).toContain('relative');
+  });
+
+  test('shares GitHub change colors with the collection sidebar', () => {
+    expect(workspaceChangeTextClassNames.added).toBe('text-status-added');
+    expect(workspaceChangeTextClassNames.modified).toBe('text-status-modified');
   });
 });

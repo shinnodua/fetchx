@@ -76,7 +76,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
                 ? 'relative z-20 bg-transparent text-transparent caret-foreground backdrop-blur-none'
                 : '',
               error
-                ? 'border-red-500 focus-visible:ring-red-500/50 focus-visible:border-red-500'
+                ? 'border-status-error focus-visible:ring-status-error/50 focus-visible:border-status-error'
                 : '',
               className,
             )}
@@ -94,7 +94,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           <motion.span
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xs text-red-500 ml-1 font-medium"
+            className="text-xs text-status-error ml-1 font-medium"
           >
             {error}
           </motion.span>

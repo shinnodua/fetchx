@@ -17,6 +17,10 @@ import { useWorkspaceStore } from '../../../../../store';
 import { usePointerTabReorder } from '../../../hooks/usePointerTabReorder';
 import type { RequestItem } from '../../../types';
 import { getRequestIsDirty } from '../../../utils/requestDirty';
+import {
+  workspaceChangeStatusLabels,
+  workspaceChangeTextClassNames,
+} from '../../workspaceChangeStatusClassNames';
 import { TabContextMenu } from './TabContextMenu';
 
 export const workspaceTabClassName =
@@ -26,10 +30,12 @@ export const TabsHeader: React.FC = () => {
   const {
     tabs,
     collections,
+    activeWorkspaceId,
     activeTabId,
     targetColId,
     drafts,
     collectionsPanelCollapsed,
+    workspaces,
     setActiveTabId,
     duplicateRequest,
     closeTab,
@@ -53,6 +59,9 @@ export const TabsHeader: React.FC = () => {
   const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const { draggedTabId, isTabInsertion, startTabDrag } =
     usePointerTabReorder(reorderTabs);
+  const changeIndex = workspaces.find(
+    (workspace) => workspace.id === activeWorkspaceId,
+  )?.github?.syncState?.changeIndex;
 
   useEffect(() => {
     if (!activeTabId) return;
@@ -208,6 +217,8 @@ export const TabsHeader: React.FC = () => {
 
           const isActive = tabId === activeTabId;
           const isDirty = isTabDirty(tabId);
+          const requestChangeStatus =
+            changeIndex?.requests[tabId] ?? 'unchanged';
           const methodColors: Record<string, string> = {
             READ: 'text-secondary-600',
             WRITE: 'text-primary-500',
@@ -248,7 +259,18 @@ export const TabsHeader: React.FC = () => {
                 {reqObject.type}
               </span>
               <span className="inline-flex min-w-0 flex-1 items-center gap-1">
-                <span className="truncate font-medium" title={reqObject.name}>
+                <span
+                  className={`truncate font-medium ${
+                    requestChangeStatus === 'unchanged'
+                      ? ''
+                      : workspaceChangeTextClassNames[requestChangeStatus]
+                  }`}
+                  title={
+                    requestChangeStatus === 'unchanged'
+                      ? reqObject.name
+                      : workspaceChangeStatusLabels[requestChangeStatus]
+                  }
+                >
                   {reqObject.name}
                 </span>
                 {isDirty && (

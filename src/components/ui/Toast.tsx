@@ -26,6 +26,23 @@ export const useToast = () => {
 export const toastViewportClassName =
   'pointer-events-none fixed bottom-0 right-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:flex-col md:max-w-[420px]';
 
+export const toastTypeStyles = {
+  default: 'bg-background border-foreground/10',
+  success:
+    'bg-status-success/10 border-status-success/30 dark:bg-status-success/20 dark:border-status-success/40',
+  error:
+    'bg-status-error/10 border-status-error/30 dark:bg-status-error/20 dark:border-status-error/40',
+  warning:
+    'bg-status-warning/10 border-status-warning/30 dark:bg-status-warning/20 dark:border-status-warning/40',
+};
+
+export const toastTextStyles = {
+  default: 'text-foreground',
+  success: 'text-status-success',
+  error: 'text-status-error',
+  warning: 'text-status-warning',
+};
+
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
@@ -45,22 +62,6 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const typeStyles = {
-    default: 'bg-background border-foreground/10',
-    success:
-      'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-900/50',
-    error: 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-900/50',
-    warning:
-      'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-900/50',
-  };
-
-  const textStyles = {
-    default: 'text-foreground',
-    success: 'text-green-900 dark:text-green-100',
-    error: 'text-red-900 dark:text-red-100',
-    warning: 'text-yellow-900 dark:text-yellow-100',
-  };
-
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
@@ -75,14 +76,14 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               className={cn(
                 'group pointer-events-auto relative flex w-full items-center justify-between space-x-2 overflow-hidden rounded-xl border p-4 pr-10 shadow-lg backdrop-blur-md mb-4',
-                typeStyles[t.type || 'default'],
+                toastTypeStyles[t.type || 'default'],
               )}
             >
               <div className="flex-1 min-w-0 flex flex-col gap-1">
                 <div
                   className={cn(
                     'text-sm font-semibold break-words',
-                    textStyles[t.type || 'default'],
+                    toastTextStyles[t.type || 'default'],
                   )}
                 >
                   {t.title}
@@ -91,7 +92,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
                   <div
                     className={cn(
                       'text-xs opacity-90 break-words whitespace-pre-wrap',
-                      textStyles[t.type || 'default'],
+                      toastTextStyles[t.type || 'default'],
                     )}
                   >
                     {t.description}
@@ -104,7 +105,10 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
               >
                 <CloseIcon
                   title="Dismiss toast"
-                  className={cn('w-4 h-4', textStyles[t.type || 'default'])}
+                  className={cn(
+                    'w-4 h-4',
+                    toastTextStyles[t.type || 'default'],
+                  )}
                 />
               </button>
             </motion.div>

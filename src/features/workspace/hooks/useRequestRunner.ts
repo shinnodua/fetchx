@@ -3,17 +3,18 @@ import type { PublicClient } from 'viem';
 import { useToast } from '../../../components';
 import { useEnvironmentStore, useWorkspaceStore } from '../../../store';
 import { isRestMethod } from '../constants';
-import type { EnvironmentVariable, RequestItem } from '../types';
+import type { RequestItem } from '../types';
 import {
   getLockedSensitiveVariableNames,
   redactSensitiveValues,
-  resolveVariables,
 } from '../utils/environment';
 import {
   createImportedRequestName,
   createPastedUrlRequestUpdate,
   parseRequestImportContent,
 } from '../utils/requestImport';
+import { getRequestSaveTargetCollectionId } from '../utils/requestSaveTarget';
+import { resolveRequestForExecution } from '../utils/resolvedRequest';
 import { getWalletErrorMessage } from '../utils/walletError';
 import { useRunContractRequest } from './useRunContractRequest';
 import { useRunRestRequest } from './useRunRestRequest';
@@ -132,7 +133,11 @@ export const useRequestRunner = (
   const handleSaveActiveRequest = () => {
     if (!activeRequest) return;
 
-    const targetCol = selectedColId || collections[0]?.id || '';
+    const targetCol = getRequestSaveTargetCollectionId(
+      activeTabId,
+      selectedColId || collections[0]?.id || '',
+      collections,
+    );
     if (activeTabId.startsWith('r-new-') && !targetCol) {
       toast({
         title: 'Cannot Save',
@@ -148,67 +153,6 @@ export const useRequestRunner = (
       description: `Saved request "${activeRequest.name}" successfully.`,
       type: 'success',
     });
-  };
-
-  const prepareResolvedRequest = (
-    req: RequestItem,
-    activeVariables: EnvironmentVariable[],
-  ) => {
-    const resolvedTarget = resolveVariables(req.target, activeVariables);
-    const resolvedBody = resolveVariables(req.body || '', activeVariables);
-    const resolvedHeaders = (req.headers || []).map((h) => ({
-      key: resolveVariables(h.key, activeVariables),
-      value: resolveVariables(h.value, activeVariables),
-    }));
-    const resolvedQueryParams = (req.queryParams || []).map((qp) => ({
-      key: resolveVariables(qp.key, activeVariables),
-      value: resolveVariables(qp.value, activeVariables),
-    }));
-    const resolvedArgs = Object.fromEntries(
-      Object.entries(req.args || {}).map(([k, v]) => [
-        k,
-        resolveVariables(v, activeVariables),
-      ]),
-    );
-
-    const resolved = {
-      ...req,
-      target: resolvedTarget.value,
-      body: resolvedBody.value,
-      headers: resolvedHeaders.map((h) => ({
-        key: h.key.value,
-        value: h.value.value,
-      })),
-      queryParams: resolvedQueryParams.map((qp) => ({
-        key: qp.key.value,
-        value: qp.value.value,
-      })),
-      args: Object.fromEntries(
-        Object.entries(resolvedArgs).map(([key, value]) => [key, value.value]),
-      ),
-    };
-
-    const redacted = {
-      ...req,
-      target: resolvedTarget.redacted,
-      body: resolvedBody.redacted,
-      headers: resolvedHeaders.map((h) => ({
-        key: h.key.redacted,
-        value: h.value.redacted,
-      })),
-      queryParams: resolvedQueryParams.map((qp) => ({
-        key: qp.key.redacted,
-        value: qp.value.redacted,
-      })),
-      args: Object.fromEntries(
-        Object.entries(resolvedArgs).map(([key, value]) => [
-          key,
-          value.redacted,
-        ]),
-      ),
-    };
-
-    return { resolved, redacted };
   };
 
   const handleRunRequest = async () => {
@@ -250,7 +194,7 @@ export const useRequestRunner = (
     });
 
     const start = Date.now();
-    const { resolved, redacted } = prepareResolvedRequest(
+    const { resolved, redacted } = resolveRequestForExecution(
       activeRequest,
       activeVariables,
     );
@@ -359,7 +303,7 @@ export const useRequestRunner = (
     });
 
     const start = Date.now();
-    const { resolved, redacted } = prepareResolvedRequest(
+    const { resolved, redacted } = resolveRequestForExecution(
       activeRequest,
       activeVariables,
     );

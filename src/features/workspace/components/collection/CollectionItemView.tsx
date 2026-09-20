@@ -8,10 +8,16 @@ import {
 import { Button, DropdownMenu } from '../../../../components';
 import { REQUEST_METHOD_BADGE_CLASS_NAMES } from '../../constants';
 import type { CollectionItem, SavedResponse } from '../../types';
+import type { WorkspaceChangeIndex } from '../../utils/workspaceSyncState';
+import {
+  workspaceChangeStatusLabels,
+  workspaceChangeTextClassNames,
+} from '../workspaceChangeStatusClassNames';
 import type { ContextMenuTarget } from './collectionPanelTypes';
 
 interface CollectionItemViewProps {
   col: CollectionItem;
+  changeIndex?: WorkspaceChangeIndex;
   activeTabId: string;
   collapsedCollectionIds: string[];
   toggleCollectionCollapsed: (id: string) => void;
@@ -44,6 +50,7 @@ export const collectionRequestRowClassName =
 
 export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
   col,
+  changeIndex,
   activeTabId,
   collapsedCollectionIds,
   toggleCollectionCollapsed,
@@ -59,6 +66,8 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
   requestRefs,
 }) => {
   const isCollapsed = collapsedCollectionIds.includes(col.id);
+  const collectionChangeStatus =
+    changeIndex?.collections[col.id] ?? 'unchanged';
 
   return (
     <div className="space-y-0.5">
@@ -84,7 +93,20 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
             title="Collection"
             className="w-4 h-4 text-primary-400 shrink-0"
           />
-          <span className="min-w-0 truncate">{col.name}</span>
+          <span
+            className={`min-w-0 truncate ${
+              collectionChangeStatus === 'unchanged'
+                ? ''
+                : workspaceChangeTextClassNames[collectionChangeStatus]
+            }`}
+            title={
+              collectionChangeStatus === 'unchanged'
+                ? col.name
+                : workspaceChangeStatusLabels[collectionChangeStatus]
+            }
+          >
+            {col.name}
+          </span>
         </div>
         <div className="flex shrink-0 items-center gap-1 transition-opacity">
           <Button
@@ -141,6 +163,8 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
           ) : (
             col.requests.map((req) => {
               const isActive = req.id === activeTabId;
+              const requestChangeStatus =
+                changeIndex?.requests[req.id] ?? 'unchanged';
               const savedResponses = req.savedResponses ?? [];
               const hasSavedResponses = savedResponses.length > 0;
               const savedResponsesCollapsed =
@@ -200,7 +224,18 @@ export const CollectionItemView: React.FC<CollectionItemViewProps> = ({
                       >
                         {req.type}
                       </span>
-                      <span className="min-w-0 truncate" title={req.name}>
+                      <span
+                        className={`min-w-0 truncate ${
+                          requestChangeStatus === 'unchanged'
+                            ? ''
+                            : workspaceChangeTextClassNames[requestChangeStatus]
+                        }`}
+                        title={
+                          requestChangeStatus === 'unchanged'
+                            ? req.name
+                            : workspaceChangeStatusLabels[requestChangeStatus]
+                        }
+                      >
                         {req.name}
                       </span>
                     </div>

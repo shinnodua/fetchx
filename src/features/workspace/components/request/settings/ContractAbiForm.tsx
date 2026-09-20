@@ -1,13 +1,6 @@
 import type React from 'react';
 import { useMemo, useRef, useState } from 'react';
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  Textarea,
-  useToast,
-} from '../../../../../components';
+import { Button, Textarea, useToast } from '../../../../../components';
 import { trackEvent } from '../../../../../services/analytics/googleAnalytics';
 import {
   decodeContractBytecodeAbi,
@@ -23,6 +16,7 @@ import {
 } from '../../../utils/contractAbi';
 import { ManageAbisDialog } from '../dialogs/ManageAbisDialog';
 import { SaveAbiDialog } from '../dialogs/SaveAbiDialog';
+import { ContractAbiPresetMenu } from './ContractAbiPresetMenu';
 
 interface ContractAbiFormProps {
   activeRequest: RequestItem;
@@ -316,55 +310,12 @@ export const ContractAbiForm: React.FC<ContractAbiFormProps> = ({
           >
             LOAD ABI
           </Button>
-          <DropdownMenu
-            align="right"
-            className="w-56"
-            trigger={
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-6 px-1.5 text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer"
-              >
-                LOAD PRESET ABI
-              </Button>
-            }
-          >
-            <DropdownMenuItem
-              onClick={() => setManageAbiOpen(true)}
-              className="text-primary-500 hover:text-primary-600 font-medium"
-            >
-              Manage ABI
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => loadPresetAbi('ERC20')}>
-              ERC20 Preset
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => loadPresetAbi('ERC721')}>
-              ERC721 Preset
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => loadPresetAbi('ERC1155')}>
-              ERC1155 Preset
-            </DropdownMenuItem>
-            {savedAbis.length > 0 && (
-              <>
-                <DropdownMenuSeparator />
-                <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-foreground/40">
-                  Saved ABIs
-                </div>
-                {savedAbis.map((savedAbi) => (
-                  <DropdownMenuItem
-                    key={savedAbi.id}
-                    onClick={() => loadSavedAbi(savedAbi.abi, savedAbi.name)}
-                    className="truncate"
-                    title={savedAbi.name}
-                  >
-                    <span className="truncate">{savedAbi.name}</span>
-                  </DropdownMenuItem>
-                ))}
-              </>
-            )}
-          </DropdownMenu>
+          <ContractAbiPresetMenu
+            savedAbis={savedAbis}
+            onLoadPreset={loadPresetAbi}
+            onLoadSavedAbi={loadSavedAbi}
+            onManageAbi={() => setManageAbiOpen(true)}
+          />
         </div>
       </div>
       {activeRequest.contractName && (

@@ -2,9 +2,44 @@ import type {
   CollectionItem,
   RequestItem,
 } from '../../features/workspace/types';
+import type { GitHubWorkspaceSyncState } from '../../features/workspace/utils/workspaceSyncState';
 import type { TabReorderPlacement } from './tabOrder';
 
+export interface GitHubWorkspaceConnection {
+  repository: string;
+  branch: string;
+  connectionId?: string;
+  connectionMode?: 'connect' | 'create';
+  credentialKey?: string;
+  lastSyncedCommitSha?: string;
+  lastSyncedCollectionsDigest?: string;
+  lastSyncedCollections?: CollectionItem[];
+  syncState?: GitHubWorkspaceSyncState;
+}
+
+export interface GitHubConnectionDescriptor {
+  id: string;
+  accountId: string;
+  accountLogin: string;
+  mode: 'connect' | 'create';
+  authType: 'oauth' | 'pat';
+  credentialKey: string;
+  expiresAt?: number;
+}
+
+export interface WorkspaceDescriptor {
+  id: string;
+  name: string;
+  kind: 'local' | 'github';
+  github?: GitHubWorkspaceConnection;
+  syncStatus?: 'synced' | 'dirty' | 'syncing' | 'conflict' | 'error';
+}
+
 export interface WorkspaceState {
+  workspaces: WorkspaceDescriptor[];
+  githubConnections: GitHubConnectionDescriptor[];
+  activeWorkspaceId: string;
+  workspaceCollections: Record<string, CollectionItem[]>;
   collections: CollectionItem[];
   tabs: string[];
   activeTabId: string;
@@ -79,4 +114,32 @@ export interface WorkspaceState {
   initializeDraft: (reqId: string) => void;
   setTabToClose: (id: string | null) => void;
   setAbiLoading: (loading: boolean) => void;
+  createGitHubWorkspace: (
+    name: string,
+    github: GitHubWorkspaceConnection,
+    collections?: CollectionItem[],
+  ) => string | undefined;
+  switchWorkspace: (workspaceId: string) => void;
+  removeWorkspace: (workspaceId: string) => boolean;
+  renameWorkspace: (workspaceId: string, newName: string) => boolean;
+  moveCollectionToWorkspace: (
+    collectionId: string,
+    sourceWorkspaceId: string,
+    targetWorkspaceId: string,
+  ) => boolean;
+  setWorkspaceCollections: (
+    workspaceId: string,
+    collections: CollectionItem[],
+  ) => void;
+  setWorkspaceSyncStatus: (
+    workspaceId: string,
+    syncStatus: 'synced' | 'dirty' | 'syncing' | 'conflict' | 'error',
+  ) => void;
+  setWorkspaceGitHubSyncInfo: (
+    workspaceId: string,
+    info: Partial<GitHubWorkspaceConnection>,
+  ) => void;
+  upsertGitHubConnection: (connection: GitHubConnectionDescriptor) => void;
+  removeGitHubConnection: (connectionId: string) => void;
+  migrateLegacyGitHubConnections: () => void;
 }

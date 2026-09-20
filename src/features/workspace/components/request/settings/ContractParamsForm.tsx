@@ -189,7 +189,7 @@ export const ContractParamsForm: React.FC<ContractParamsFormProps> = ({
                 {copiedCalldata ? (
                   <CheckIcon
                     title="Check"
-                    className="w-3.5 h-3.5 text-green-500"
+                    className="w-3.5 h-3.5 text-status-success"
                   />
                 ) : (
                   <CopyIcon title="Copy" className="w-3.5 h-3.5" />

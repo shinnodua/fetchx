@@ -41,6 +41,11 @@
     }
   },
   "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": ["fetchx"]
+      }
+    },
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQ5NzEyNzg5NUEwM0FFMTAKUldRUXJnTmFpU2R4MmNVVXArK0UxWEZTbUFTTUVYR0wxMTExbHpnNTJXRmk0YnJDOE9FU05rOEUK",
       "endpoints": [

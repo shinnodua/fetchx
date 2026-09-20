@@ -11,21 +11,23 @@ export interface AlertProps
   children?: React.ReactNode;
 }
 
+export const alertVariantClassNames = {
+  default:
+    'bg-primary-50 text-primary-900 border-primary-200 dark:bg-primary-900/20 dark:text-primary-100 dark:border-primary-900/50',
+  destructive:
+    'bg-status-error/10 text-status-error border-status-error/30 dark:bg-status-error/20 dark:text-status-error dark:border-status-error/40',
+  success:
+    'bg-status-success/10 text-status-success border-status-success/30 dark:bg-status-success/20 dark:text-status-success dark:border-status-success/40',
+  warning:
+    'bg-status-warning/10 text-status-warning border-status-warning/30 dark:bg-status-warning/20 dark:text-status-warning dark:border-status-warning/40',
+};
+
 export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   (
     { className, variant = 'default', title, icon, children, ...props },
     ref,
   ) => {
-    const variants = {
-      default:
-        'bg-primary-50 text-primary-900 border-primary-200 dark:bg-primary-900/20 dark:text-primary-100 dark:border-primary-900/50',
-      destructive:
-        'bg-red-50 text-red-900 border-red-200 dark:bg-red-900/20 dark:text-red-100 dark:border-red-900/50',
-      success:
-        'bg-green-50 text-green-900 border-green-200 dark:bg-green-900/20 dark:text-green-100 dark:border-green-900/50',
-      warning:
-        'bg-yellow-50 text-yellow-900 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-100 dark:border-yellow-900/50',
-    };
+    const variants = alertVariantClassNames;
 
     return (
       <motion.div

@@ -5,6 +5,7 @@ import { createRequestActions } from './requestActions';
 import { createResponseActions } from './responseActions';
 import { createSetterActions } from './setterActions';
 import { createTabActions } from './tabActions';
+import { createWorkspaceIdentityActions } from './workspaceIdentityActions';
 import type { WorkspaceState } from './workspaceStoreTypes';
 
 type WorkspaceSet = Parameters<StateCreator<WorkspaceState>>[0];
@@ -20,4 +21,5 @@ export const createWorkspaceActions = (
   ...createTabActions(set, get),
   ...createResponseActions(set, get),
   ...createDraftActions(set, get),
+  ...createWorkspaceIdentityActions(set, get),
 });

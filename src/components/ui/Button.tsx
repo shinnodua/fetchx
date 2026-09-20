@@ -8,9 +8,29 @@ export interface ButtonProps
   extends Omit<HTMLMotionProps<'button'>, 'ref' | 'children'> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'glass';
   size?: 'sm' | 'md' | 'lg';
+  iconOnly?: boolean;
   isLoading?: boolean;
   children?: React.ReactNode;
 }
+
+export const getButtonSizeClasses = (
+  size: NonNullable<ButtonProps['size']>,
+  iconOnly = false,
+) => {
+  if (iconOnly) {
+    return {
+      sm: 'h-8 w-8 p-0',
+      md: 'h-9 w-9 p-0',
+      lg: 'h-11 w-11 p-0',
+    }[size];
+  }
+
+  return {
+    sm: 'h-7 px-3 text-xs',
+    md: 'h-9 px-4 text-sm',
+    lg: 'h-11 px-6 text-base font-semibold',
+  }[size];
+};
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
@@ -18,6 +38,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       className,
       variant = 'primary',
       size = 'md',
+      iconOnly = false,
       isLoading,
       children,
       ...props
@@ -39,18 +60,18 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         'bg-white/20 backdrop-blur-md border border-white/30 text-foreground shadow-xl hover:bg-white/30 dark:bg-black/20 dark:border-white/10 dark:hover:bg-black/30',
     };
 
-    const sizes = {
-      sm: 'h-7 px-3 text-xs',
-      md: 'h-9 px-4 text-sm',
-      lg: 'h-11 px-6 text-base font-semibold',
-    };
-
     return (
       <motion.button
         ref={ref}
         whileHover={!isLoading && !props.disabled ? { scale: 1.02 } : {}}
         whileTap={!isLoading && !props.disabled ? { scale: 0.98 } : {}}
-        className={cn(baseStyles, variants[variant], sizes[size], className)}
+        className={cn(
+          baseStyles,
+          variants[variant],
+          getButtonSizeClasses(size, iconOnly),
+          iconOnly && '[&>svg]:h-4 [&>svg]:w-4',
+          className,
+        )}
         disabled={isLoading || props.disabled}
         {...props}
       >

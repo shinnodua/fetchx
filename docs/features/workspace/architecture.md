@@ -59,6 +59,14 @@ Do not add parsing, network calls, wallet operations, or large nested UI blocks 
 - pincode and unlock panels;
 - environment-aware input/textarea overlays.
 
+`src/features/workspace/components/workspace/` owns workspace switching and management UI:
+
+- workspace selector trigger and dropdown menu;
+- GitHub workspace connection and repository creation dialogs;
+- GitHub device authorization card and repository picker;
+- workspace list and details management dialog with collection reassignments;
+- desktop app requirement warning dialog.
+
 ## Hook ownership
 
 Workspace hooks contain stateful behavior that is still feature-specific:
@@ -70,6 +78,9 @@ Workspace hooks contain stateful behavior that is still feature-specific:
 - `useWorkspacePublicClient`: public client selection for the active network/RPC.
 - `useAutoCollapseSidebar`: responsive sidebar behavior.
 - `useUnsavedChangesWarning`: browser navigation guard for unsaved drafts.
+- `useGitHubDeviceFlow`: GitHub App device code authorization lifecycle and polling.
+- `useWorkspaceRemoteSync`: remote commit checking and GitHub push/pull synchronization.
+- `useConnectGitHubWorkspace`: workspace creation, repository initialization, and connection workflow.
 
 ## Utility ownership
 
@@ -101,6 +112,7 @@ Services are where side effects belong:
 Stores are durable application state:
 
 - `useWorkspaceStore`: collections, tabs, drafts, sidebar state, dialog state, ABI loading state, and response save/delete actions.
+- `useWorkspaceStore` also owns the local/GitHub workspace registry and switches the active collection snapshot without carrying transient tabs or drafts across workspaces.
 - `useEnvironmentStore`: environments, active environment, sensitive pincode config, lock/unlock state, and encrypted sensitive values.
 - `useRpcStore`: custom RPC endpoints and manage-RPC dialog state.
 - `useAbiStore`: saved ABI library and manage-ABI dialog state.

@@ -19,6 +19,9 @@ const initialChatHistory: AiAssistantChatMessage[] = [
 
 interface AiAssistantChatState {
   messages: AiAssistantChatMessage[];
+  appendMessage: (message: AiAssistantChatMessage) => void;
+  replaceMessage: (messageId: string, message: AiAssistantChatMessage) => void;
+  removeMessage: (messageId: string) => void;
   updateMessages: (
     updater: (messages: AiAssistantChatMessage[]) => AiAssistantChatMessage[],
   ) => void;
@@ -29,6 +32,20 @@ export const useAiAssistantChatStore = create<AiAssistantChatState>()(
   persist(
     (set) => ({
       messages: initialChatHistory,
+      appendMessage: (message) =>
+        set((state) => ({ messages: [...state.messages, message] })),
+      replaceMessage: (messageId, message) =>
+        set((state) => ({
+          messages: state.messages.map((currentMessage) =>
+            currentMessage.id === messageId ? message : currentMessage,
+          ),
+        })),
+      removeMessage: (messageId) =>
+        set((state) => ({
+          messages: state.messages.filter(
+            (message) => message.id !== messageId,
+          ),
+        })),
       updateMessages: (updater) =>
         set((state) => ({ messages: updater(state.messages) })),
       clearChatHistory: () => set({ messages: [] }),

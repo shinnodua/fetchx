@@ -25,3 +25,4 @@ export * from './request/settings/RequestSettings';
 export * from './request/settings/RpcSelectField';
 export * from './request/WorkspaceEmptyState';
 export * from './shared/ManagementDialog';
+export * from './workspace';

@@ -32,3 +32,4 @@ export * from './cors/useCorsStore';
 export * from './environment/useEnvironmentStore';
 export * from './rpc/useRpcStore';
 export * from './workspace/useWorkspaceStore';
+export * from './workspace/workspaceIdentityActions';

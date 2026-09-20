@@ -1,6 +1,7 @@
 import type {
   AiAgentChatResult,
   DesktopUpdate,
+  GitHubAuthToken,
   LocalAiAgent,
   LocalAiAgentModel,
   OpenTextFileOptions,
@@ -164,6 +165,45 @@ export async function relaunchDesktopApp() {
   if (!isDesktopApp()) return;
   const { relaunch } = await import('@tauri-apps/plugin-process');
   await relaunch();
+}
+
+export async function saveGitHubCredential(
+  credentialKey: string,
+  token: string,
+) {
+  if (!isDesktopApp()) {
+    throw new Error('GitHub workspaces are available in the desktop app.');
+  }
+  const { invoke } = await import('@tauri-apps/api/core');
+  await invoke('save_github_credential', { credentialKey, token });
+}
+
+export async function readGitHubCredential(credentialKey: string) {
+  if (!isDesktopApp()) return null;
+  const { invoke } = await import('@tauri-apps/api/core');
+  return invoke<string | null>('read_github_credential', {
+    credentialKey,
+  });
+}
+
+export async function removeGitHubCredential(credentialKey: string) {
+  if (!isDesktopApp()) return;
+  const { invoke } = await import('@tauri-apps/api/core');
+  await invoke('remove_github_credential', { credentialKey });
+}
+
+export async function refreshGitHubToken(
+  clientId: string,
+  refreshToken: string,
+): Promise<GitHubAuthToken> {
+  if (!isDesktopApp()) {
+    throw new Error('GitHub token refresh is available in the desktop app.');
+  }
+  const { invoke } = await import('@tauri-apps/api/core');
+  return invoke<GitHubAuthToken>('refresh_github_token', {
+    clientId,
+    refreshToken,
+  });
 }
 
 export async function discoverLocalAiAgents(): Promise<LocalAiAgent[]> {

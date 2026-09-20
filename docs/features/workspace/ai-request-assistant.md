@@ -37,6 +37,18 @@ The workspace includes a prominent bottom-left AI Assistant launcher. Opening it
 - `run_request` opens the best saved request matching `search.keyword` for review only.
 - `none` leaves the workspace unchanged and shows the agent message.
 
+## Implementation Boundaries
+
+The assistant keeps model interpretation separate from application mutations:
+
+- `useRequestAssistantController` owns local-agent discovery, sending, pending-message lifecycle, duplicate decisions, and user-facing outcomes.
+- `RequestAssistantChat` owns only the launcher, while `RequestAssistantPanel` renders the connected panel, transcript, composer, and dialogs.
+- `createAssistantActionPlan` turns a validated agent response plus the current workspace snapshot into a typed action plan. It performs no mutation and is unit-tested independently.
+- `executeAssistantActionPlan` is the only layer that applies a plan to workspace actions. This maintains the application—not the model—as the authority that changes drafts, collections, search state, or tabs.
+- The persisted chat store exposes append, replacement, and removal operations for stable pending-message lifecycle management. Persisted history is a local transcript, not model context; each model request uses only the current user message and the active-request availability flag.
+
+These boundaries make future structured-output or MCP adapters interchangeable without granting an AI provider direct access to workspace state or mutation APIs.
+
 ## Local Discovery
 
 Discovery lives behind `src/services/platform` and is implemented by the focused `src-tauri/src/ai_agents/` Tauri feature module. `src-tauri/src/lib.rs` only registers those commands with the desktop application. The backend resolves every selected agent ID against its fixed allowlist; it does not trust a renderer-provided endpoint or protocol.

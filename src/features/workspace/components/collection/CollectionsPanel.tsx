@@ -5,24 +5,33 @@ import {
   DropdownMenuSeparator,
 } from '../../../../components';
 import { useWorkspaceStore } from '../../../../store';
-import type { CollectionItem, SavedResponse } from '../../types';
+import type { SavedResponse } from '../../types';
+import { getSyncedCollectionsSnapshot } from '../../utils/workspaceRepositoryFormat';
+import { createWorkspaceChangeIndex } from '../../utils/workspaceSyncState';
 import { RequestMenuItems } from '../request/RequestMenuItems';
 import { ResponsePayloadDialog } from '../request/response/ResponsePayloadViewer';
 import { CollectionItemView } from './CollectionItemView';
 import { CollectionPanelDialogs } from './CollectionPanelDialogs';
 import { CollectionReorderDialog } from './CollectionReorderDialog';
 import type { ContextMenuTarget, RenameTarget } from './collectionPanelTypes';
+import {
+  filterCollections,
+  getContextMenuPosition,
+} from './collectionPanelUtils';
 import { SidebarContextMenu } from './SidebarContextMenu';
 import { SidebarHeader } from './SidebarHeader';
+import { useCollectionPanelResize } from './useCollectionPanelResize';
 
 export const CollectionsPanel: React.FC = () => {
   const {
     collections,
     searchTerm,
     activeTabId,
+    activeWorkspaceId,
     requestToRevealId,
     collapsedCollectionIds,
     collectionsPanelWidth,
+    workspaces,
     setSearchTerm,
     setNewColOpen,
     setTargetColId,
@@ -40,37 +49,33 @@ export const CollectionsPanel: React.FC = () => {
     toggleCollectionCollapsed,
     setCollectionsPanelWidth,
     setCollectionsPanelCollapsed,
+    setWorkspaceGitHubSyncInfo,
   } = useWorkspaceStore();
 
-  const [isDragging, setIsDragging] = useState(false);
+  const {
+    isDragging,
+    safeCollectionsPanelWidth,
+    handleMouseDown,
+    handleDoubleClick,
+  } = useCollectionPanelResize({
+    collectionsPanelWidth,
+    setCollectionsPanelWidth,
+    setCollectionsPanelCollapsed,
+  });
+
+  const activeWorkspace = workspaces.find(
+    (workspace) => workspace.id === activeWorkspaceId,
+  );
+  const baselineCollections = activeWorkspace?.github?.lastSyncedCollections;
+  const changeIndex = activeWorkspace?.github?.syncState?.changeIndex;
   const panelRef = useRef<HTMLElement>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const requestRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const safeCollectionsPanelWidth =
-    Number.isFinite(collectionsPanelWidth) && collectionsPanelWidth > 0
-      ? Math.max(200, Math.min(500, collectionsPanelWidth))
-      : 320;
 
-  const filteredCollections = useMemo<CollectionItem[]>(() => {
-    if (!searchTerm.trim()) return collections;
-    const lower = searchTerm.toLowerCase();
-    return collections
-      .map((col) => {
-        const filteredReqs = col.requests.filter(
-          (req) =>
-            req.name.toLowerCase().includes(lower) ||
-            req.target.toLowerCase().includes(lower) ||
-            (req.savedResponses ?? []).some((savedResponse) =>
-              savedResponse.name.toLowerCase().includes(lower),
-            ),
-        );
-        if (col.name.toLowerCase().includes(lower) || filteredReqs.length > 0) {
-          return { ...col, requests: filteredReqs };
-        }
-        return null;
-      })
-      .filter((col): col is CollectionItem => col !== null);
-  }, [collections, searchTerm]);
+  const filteredCollections = useMemo(
+    () => filterCollections(collections, searchTerm),
+    [collections, searchTerm],
+  );
 
   const [colToDelete, setColToDelete] = useState<{
     id: string;
@@ -94,6 +99,32 @@ export const CollectionsPanel: React.FC = () => {
   const [reorderCollectionName, setReorderCollectionName] = useState<
     string | null
   >(null);
+
+  useEffect(() => {
+    if (!activeWorkspace?.github || activeWorkspace.github.syncState) return;
+
+    const syncedSnapshot =
+      baselineCollections ??
+      getSyncedCollectionsSnapshot(
+        collections,
+        activeWorkspace.github.lastSyncedCollectionsDigest,
+      );
+    if (!syncedSnapshot) return;
+
+    setWorkspaceGitHubSyncInfo(activeWorkspaceId, {
+      ...(baselineCollections ? {} : { lastSyncedCollections: syncedSnapshot }),
+      syncState: {
+        changeIndex: createWorkspaceChangeIndex(syncedSnapshot, collections),
+        remote: { aheadBy: null, status: 'unknown' },
+      },
+    });
+  }, [
+    activeWorkspace,
+    activeWorkspaceId,
+    baselineCollections,
+    collections,
+    setWorkspaceGitHubSyncInfo,
+  ]);
 
   useEffect(() => {
     if (!contextMenuTarget) return;
@@ -178,17 +209,15 @@ export const CollectionsPanel: React.FC = () => {
     event.preventDefault();
     event.stopPropagation();
     const panelRect = panelRef.current?.getBoundingClientRect();
-    const relativeX = panelRect
-      ? event.clientX - panelRect.left
-      : event.clientX;
-    const relativeY = panelRect ? event.clientY - panelRect.top : event.clientY;
-
     setContextMenuTarget({
       ...target,
-      x: Math.max(8, Math.min(relativeX, safeCollectionsPanelWidth - 168)),
-      y: panelRect
-        ? Math.max(8, Math.min(relativeY, panelRect.height - 144))
-        : relativeY,
+      ...getContextMenuPosition({
+        clientX: event.clientX,
+        clientY: panelRect ? event.clientY - panelRect.top : event.clientY,
+        panelHeight: panelRect?.height,
+        panelLeft: panelRect?.left,
+        panelWidth: safeCollectionsPanelWidth,
+      }),
     });
   };
 
@@ -244,39 +273,6 @@ export const CollectionsPanel: React.FC = () => {
     />
   );
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-
-    const startX = e.clientX;
-    const startWidth = safeCollectionsPanelWidth;
-
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const deltaX = moveEvent.clientX - startX;
-      const newWidth = Math.max(200, Math.min(500, startWidth + deltaX));
-      setCollectionsPanelWidth(newWidth);
-    };
-
-    const handleMouseUp = (upEvent: MouseEvent) => {
-      setIsDragging(false);
-      const finalX = upEvent.clientX;
-      const deltaX = finalX - startX;
-      if (startWidth + deltaX < 160) {
-        setCollectionsPanelCollapsed(true);
-        setCollectionsPanelWidth(320);
-      }
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-  };
-
-  const handleDoubleClick = () => {
-    setCollectionsPanelCollapsed(true);
-  };
-
   return (
     <aside
       ref={panelRef}
@@ -308,6 +304,7 @@ export const CollectionsPanel: React.FC = () => {
             <CollectionItemView
               key={col.id}
               col={col}
+              changeIndex={changeIndex}
               activeTabId={activeTabId}
               collapsedCollectionIds={collapsedCollectionIds}
               toggleCollectionCollapsed={toggleCollectionCollapsed}

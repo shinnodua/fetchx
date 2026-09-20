@@ -25,9 +25,11 @@ We have custom-designed, premium components located in `src/components/ui/` and 
 - Always import UI elements from **`../components`** (or `@/components` if aliased). Never bypass the design system.
 - Detailed skill guide: [.agent/skills/design-system-guideline.md](./.agent/skills/design-system-guideline.md)
 
-### 3. Run Linting and Formatting Before Finishing
-This project uses Biome for linting and formatting. 
-- You must run `bun run lint:fix` (or `biome check --write .`) to ensure the codebase remains clean, formatted, and free of lint errors before completing your turn.
+### 3. Run Verification Checks (Convention, Tests, Lint) Before Finishing
+After implementing changes for any task, you **must** run the following verification commands and fix any errors reported by them before completing your turn:
+1. **Code Convention Audit**: `bun run convention:check --strict` to ensure no convention rules (e.g. 400 lines per file, raw color scales, forbidden `any`, or direct `fetch` outside services) are violated. Fix all violations before proceeding.
+2. **Unit Tests**: `bun run test` (or `bun test`) to ensure all tests pass and newly added/updated unit tests provide coverage. Fix any failing tests.
+3. **Linting and Formatting**: `bun run lint:fix` (or `biome check --write .`) to ensure the codebase remains clean, properly formatted, and free of lint errors.
 - Detailed skill guide: [.agent/skills/lint-and-fix.md](./.agent/skills/lint-and-fix.md)
 
 ### 4. Add Unit Tests for Every Task
@@ -44,8 +46,8 @@ Every code change must update the relevant docs when behavior, architecture, fea
 
 ### 6. Adhere to the Feature-Based Architecture
 We organize source files around capabilities under `src/features/`. Route files under `src/routes/` are thin wrapper modules. Global stores and services go to `src/store/` and `src/services/`.
-- Before implementing or modifying code, read and follow **[CODE_CONVENTION.md](./CODE_CONVENTION.md)**. Code changes must comply with its architecture, file placement, component, styling, TypeScript, and Biome rules.
-- Detailed code convention guide: [CODE_CONVENTION.md](./CODE_CONVENTION.md)
+- Before implementing or modifying code, read and follow **[.agent/skills/code-convention.md](./.agent/skills/code-convention.md)**. Code changes must comply with its architecture, file placement, component, styling, TypeScript, and Biome rules.
+- Detailed skill guide: [.agent/skills/code-convention.md](./.agent/skills/code-convention.md)
 
 ### 7. Skip Manual Verification unless Requested
 Do not run manual or browser-based verification steps unless they are explicitly requested in the user prompt.
@@ -62,5 +64,5 @@ Below are the step-by-step procedures to accomplish specific tasks:
 1. **[Package Installation Skill](./.agent/skills/package-installation.md)**: How to safely add packages to the project.
 2. **[Design System Enforcement Skill](./.agent/skills/design-system-guideline.md)**: How to build UIs matching the design language.
 3. **[Lint and Format Skill](./.agent/skills/lint-and-fix.md)**: How to verify and clean up code syntax.
-4. **[Code Convention Guide](./CODE_CONVENTION.md)**: Detailed rules on repository layouts, stores, and services.
+4. **[Code Convention Skill](./.agent/skills/code-convention.md)**: Detailed rules on repository layouts, stores, and services.
 5. **[Taste UI Implementation Skill](./.agent/skills/taste-ui.md)**: Guidelines for applying premium design taste and UI polish.

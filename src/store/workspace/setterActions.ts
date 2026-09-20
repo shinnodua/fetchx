@@ -10,7 +10,14 @@ const clampCollectionsPanelWidth = (width: number) =>
 
 export const createSetterActions = (set: WorkspaceSet, _get: WorkspaceGet) => ({
   setSearchTerm: (searchTerm: string) => set({ searchTerm }),
-  setCollections: (collections: CollectionItem[]) => set({ collections }),
+  setCollections: (collections: CollectionItem[]) =>
+    set((state) => ({
+      collections,
+      workspaceCollections: {
+        ...state.workspaceCollections,
+        [state.activeWorkspaceId]: collections,
+      },
+    })),
   setNewColOpen: (newColOpen: boolean) => set({ newColOpen }),
   setNewColName: (newColName: string) => set({ newColName }),
   setNewReqOpen: (newReqOpen: boolean) => set({ newReqOpen }),

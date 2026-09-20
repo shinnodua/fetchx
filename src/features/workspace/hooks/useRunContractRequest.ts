@@ -14,8 +14,8 @@ import {
 } from '../../../services/requestExecutor';
 import { useWorkspaceStore } from '../../../store';
 import type { EnvironmentVariable, RequestItem } from '../types';
-import { parseContractAbi } from '../utils/contractAbi';
-import { formatContractArgs, serializeBigInts } from '../utils/contractArgs';
+import { serializeBigInts } from '../utils/contractArgs';
+import { prepareContractCall } from '../utils/contractCallPreparation';
 import { redactSensitiveData } from '../utils/environment';
 import { getWalletErrorMessage } from '../utils/walletError';
 
@@ -156,34 +156,11 @@ export const useRunContractRequest = (
       resolvedRequest.type === 'READ' ||
       resolvedRequest.type === 'WRITE'
     ) {
-      if (!resolvedRequest.target) {
-        throw new Error('Contract address is required.');
-      }
-
-      const parsedAbi = parseContractAbi(resolvedRequest.abi || '');
-      if (!parsedAbi) {
-        throw new Error(
-          'Invalid ABI format. Paste ABI JSON or human-readable ABI signatures.',
-        );
-      }
-
-      const selectedFunc = parsedAbi.find(
-        (item) =>
-          item.type === 'function' &&
-          item.name === resolvedRequest.functionName,
-      );
-
-      if (!selectedFunc) {
-        throw new Error(
-          `Function "${resolvedRequest.functionName}" not found in ABI.`,
-        );
-      }
-
-      // Parse function arguments
-      const formattedArgs = formatContractArgs(
-        selectedFunc.inputs,
-        resolvedRequest.args,
-      );
+      const {
+        formattedArgs,
+        parsedAbi,
+        selectedFunction: selectedFunc,
+      } = prepareContractCall(resolvedRequest);
 
       addLog(
         activeTabId,
@@ -317,33 +294,11 @@ export const useRunContractRequest = (
   ) => {
     if (resolvedRequest.type !== 'WRITE') return;
 
-    if (!resolvedRequest.target) {
-      throw new Error('Contract address is required.');
-    }
-
-    const parsedAbi = parseContractAbi(resolvedRequest.abi || '');
-    if (!parsedAbi) {
-      throw new Error(
-        'Invalid ABI format. Paste ABI JSON or human-readable ABI signatures.',
-      );
-    }
-
-    const selectedFunc = parsedAbi.find(
-      (item) =>
-        item.type === 'function' && item.name === resolvedRequest.functionName,
-    );
-
-    if (!selectedFunc) {
-      throw new Error(
-        `Function "${resolvedRequest.functionName}" not found in ABI.`,
-      );
-    }
-
-    // Parse function arguments
-    const formattedArgs = formatContractArgs(
-      selectedFunc.inputs,
-      resolvedRequest.args,
-    );
+    const {
+      formattedArgs,
+      parsedAbi,
+      selectedFunction: selectedFunc,
+    } = prepareContractCall(resolvedRequest);
 
     addLog(
       activeTabId,

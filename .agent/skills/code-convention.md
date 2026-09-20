@@ -1,6 +1,10 @@
-# Code Convention - fetchx.dev
+---
+name: code-convention
+description: Architecture, directory layout, state management, and coding standards for fetchx.dev. Follow this skill when creating, refactoring, or organizing files and code.
+---
+# Skill: Code Convention & Architecture Guidelines
 
-This document establishes the architecture, folder layout, state management patterns, and coding styles for the fetchx.dev repository. All contributors and AI agents must follow these guidelines.
+This skill guides AI agents to adhere to the architecture, directory layout, state management patterns, and coding styles established for the fetchx.dev codebase.
 
 ---
 
@@ -67,7 +71,7 @@ src/
 ### 1. Minimal Route Wrappers
 Route files under `src/routes/` must be thin entry points. They should **only** import page-level components from `src/features/` and render them (wrapped in toast or context providers if necessary).
 - ❌ **Avoid**: Writing rendering markup or state logic inside `src/routes/index.tsx`.
-- **Use**:
+-  **Use**:
   ```tsx
   import { WorkspacePage } from '../features/workspace/WorkspacePage';
   export const Route = createFileRoute('/')({
@@ -93,7 +97,7 @@ Do not let page or view files become dumping grounds. When a component grows bec
 Pure functions that are specific to one feature must be moved out of page-level components and placed in `src/features/<feature-name>/utils/`. Examples include parsers, formatters, naming helpers, validators, and data transformation functions. Keep page components focused on orchestration, state wiring, and rendering.
 
 - ❌ **Avoid**: Defining cURL parsers, JSON import transformers, or naming helpers inside `WorkspacePage.tsx`.
-- **Use**:
+-  **Use**:
   ```tsx
   import { parseRequestImportContent } from './utils/requestImport';
   ```
@@ -160,6 +164,7 @@ Keep static assets organized by type:
 1. **Adhere to the Flamingo Design System**:
    - Always import buttons, inputs, selects, overlays, dialogs, and progress bars from `src/components` (barrel export).
    - Never write raw buttons or style with arbitrary colors (e.g. `bg-red-500` or `#ff0000`). Use theme tokens (e.g. `bg-primary-500` or `text-foreground`).
+   - For a button whose only content is an icon, use `Button` with `iconOnly`. It provides the standard target size and icon scale; do not recreate icon-button sizing with `h-*`, `w-*`, and `p-0` utility overrides.
 2. **React Key Usage**:
    - Do not use array indexes (`key={idx}`) for dynamic lists. Use unique identifiers (like `inputName` or item IDs).
    - If no unique keys exist, generate a stable ID at list instantiation or use a `// biome-ignore lint/suspicious/noArrayIndexKey` comment with a clear rationale.
@@ -173,10 +178,11 @@ Keep static assets organized by type:
 
 ---
 
-## 🚨 TypeScript and Biome Rules
+## 🚨 TypeScript, Biome, and Convention Rules
 
 - **Zero "any" Types**: Explicit `any` declarations are forbidden. Use strict types, generic parameters, or `unknown` for dynamic payloads.
-- **Auto-Formatting**: Run `bun run lint:fix` to check compliance before completing a task.
+- **Convention Audit**: Run `bun run convention:check --strict` to ensure no tracked convention rules (400-line limit, raw color scales, `any`, direct fetch outside services) are violated.
+- **Auto-Formatting**: Run `bun run lint:fix` to check compliance and format files before completing a task.
 
 ---
 
@@ -184,6 +190,8 @@ Keep static assets organized by type:
 
 - Keep `src-tauri/src/lib.rs` as the application bootstrap: plugin registration, setup, command registration, and the `run` entry point only.
 - Organize desktop capabilities into focused modules under `src-tauri/src/<feature>/`. Tauri command functions should be thin adapters that validate or dispatch work to feature modules.
+- Put every capability's Rust files in its own named folder, including small capabilities. For example, GitHub desktop integration lives in `src-tauri/src/github/` with `credentials.rs`, `device_auth.rs`, and `mod.rs`; do not add `github_*.rs` files beside `lib.rs`.
+- Each capability folder owns its adjacent `test/` folder and declares it from `mod.rs` behind `#[cfg(test)]`. Keep capability-internal helpers private; expose them as `pub(super)` only when sibling tests need to cover pure validation or parsing.
 - Separate Tauri serialization types, command orchestration, process execution, local networking, and response parsing when a capability needs more than one responsibility. Keep Rust source files below the 400-line limit.
 - Keep native integrations local-first. Validate and constrain endpoints before opening sockets or processes; do not introduce unrestricted remote network access from the desktop shell.
 - Use `Result<T, String>` consistently for native command flows when the string is user-safe error text surfaced through Tauri. Preserve context at the command boundary.
@@ -192,9 +200,12 @@ Keep static assets organized by type:
 
 ---
 
-## ✅ Unit Test Rules
+## ✅ Verification and Testing Sequence Before Finishing
 
 - Every code task must add or update unit tests for the behavior being changed.
 - Unit tests must live in a `test/` folder at the same directory level as the source code under test.
 - Name test files after the source file they cover, such as `responsePayload.test.ts` for `responsePayload.ts`.
-- Run `bun run test` for unit tests before finishing, or explain why a task cannot be unit tested.
+- Before completing any task, execute the full verification sequence and fix any failures:
+  1. `bun run convention:check --strict`
+  2. `bun run test` (or `bun test`)
+  3. `bun run lint:fix`

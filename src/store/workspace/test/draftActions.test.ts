@@ -9,6 +9,9 @@ type WorkspaceSet = Parameters<StateCreator<WorkspaceState>>[0];
 type WorkspaceGet = Parameters<StateCreator<WorkspaceState>>[1];
 
 const createTestWorkspaceState = (): WorkspaceState => ({
+  workspaces: [{ id: 'local', name: 'Local Workspace', kind: 'local' }],
+  activeWorkspaceId: 'local',
+  workspaceCollections: {},
   collections: [],
   tabs: [],
   activeTabId: '',
@@ -70,6 +73,10 @@ const createTestWorkspaceState = (): WorkspaceState => ({
   initializeDraft: () => {},
   setTabToClose: () => {},
   setAbiLoading: () => {},
+  createGitHubWorkspace: () => {},
+  switchWorkspace: () => {},
+  setWorkspaceCollections: () => {},
+  setWorkspaceSyncStatus: () => {},
 });
 
 describe('workspace draft actions', () => {
@@ -135,5 +142,40 @@ describe('workspace draft actions', () => {
     expect(state.collections[1].requests).toMatchObject([
       { id: request.id, target: 'https://api.example.com/profile' },
     ]);
+  });
+
+  test('keeps an edited request at its original position in its collection', () => {
+    const firstRequest = createRequest('r-1', 'First request', 'GET');
+    const editedRequest = createRequest('r-2', 'Original request', 'GET');
+    const lastRequest = createRequest('r-3', 'Last request', 'GET');
+    let state: WorkspaceState = {
+      ...createTestWorkspaceState(),
+      activeTabId: editedRequest.id,
+      collections: [
+        {
+          id: 'requests',
+          name: 'Requests',
+          requests: [firstRequest, editedRequest, lastRequest],
+        },
+      ],
+      drafts: {
+        [editedRequest.id]: { ...editedRequest, name: 'Renamed request' },
+      },
+    };
+    const set = ((partial) => {
+      const nextState =
+        typeof partial === 'function' ? partial(state) : partial;
+      state = { ...state, ...nextState };
+    }) as WorkspaceSet;
+    const get = (() => state) as WorkspaceGet;
+
+    createDraftActions(set, get).saveDraft(editedRequest.id, 'requests');
+
+    expect(state.collections[0].requests.map((request) => request.id)).toEqual([
+      firstRequest.id,
+      editedRequest.id,
+      lastRequest.id,
+    ]);
+    expect(state.collections[0].requests[1].name).toBe('Renamed request');
   });
 });

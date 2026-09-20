@@ -33,3 +33,12 @@ export interface LocalAiAgentModel {
 export interface AiAgentChatResult {
   content: string;
 }
+
+export interface GitHubAuthToken {
+  accessToken: string;
+  expiresIn?: number;
+  refreshToken?: string;
+  refreshTokenExpiresIn?: number;
+  tokenType?: string;
+  scope?: string;
+}

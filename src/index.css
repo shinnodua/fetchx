@@ -47,6 +47,13 @@
 
   --color-secondary: var(--color-secondary-500);
 
+  /* Workspace synchronization indicators & semantic status tokens */
+  --color-status-added: #16a34a;
+  --color-status-modified: #ca8a04;
+  --color-status-error: #ef4444;
+  --color-status-success: #16a34a;
+  --color-status-warning: #eab308;
+
   /* Typography */
   --font-sans: "Outfit", "Inter", system-ui, -apple-system, sans-serif;
 

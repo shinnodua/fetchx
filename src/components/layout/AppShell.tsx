@@ -5,6 +5,7 @@ import { DesktopUpdateManager } from '../../features/desktop/components';
 import {
   CollectionTransferButtons,
   EnvironmentSelector,
+  WorkspaceSelector,
 } from '../../features/workspace/components';
 import { useStore } from '../../store';
 import { AppFooter } from './AppFooter';
@@ -27,7 +28,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
     <div className="h-screen overflow-hidden flex flex-col bg-background text-foreground">
       <AppHeader
         actions={isRootPage ? <CollectionTransferButtons /> : undefined}
-        desktopActions={<DesktopUpdateManager />}
+        desktopActions={
+          isRootPage ? <WorkspaceSelector /> : <DesktopUpdateManager />
+        }
         environmentSelector={isRootPage ? <EnvironmentSelector /> : undefined}
         theme={theme}
         onToggleTheme={toggleTheme}

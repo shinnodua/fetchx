@@ -2,6 +2,19 @@
 
 Workspace state is persisted through Zustand.
 
+## Workspace sources
+
+`Local Workspace` is the permanent default source. GitHub workspace descriptors
+are also persisted locally so users can switch between sources. Each descriptor
+contains a display name, non-secret repository metadata, and the mode that
+authorized it. Access tokens and OAuth refresh tokens are kept in the desktop
+credential store, never in Zustand or browser storage.
+
+Switching workspaces saves the current collection snapshot, loads the selected
+collection snapshot, and clears transient tabs and drafts. See
+[GitHub workspaces](./github-workspaces.md) for the repository file format and
+manual sync behavior.
+
 ## Store files
 
 - `src/store/workspace/useWorkspaceStore.ts`: store creation and persistence setup.
