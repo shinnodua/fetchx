@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import {
   getGitHubActionError,
+  getGitHubRepositoryCreationError,
   initialModeCredentials,
   isGitHubAuthenticationError,
   isRepositoryEmptyOrMissingWorkspace,
@@ -35,6 +36,19 @@ describe('workspaceSelectorUtils', () => {
       token: '',
       isGitHubConnected: false,
     });
+  });
+
+  test('explains how to recover when GitHub App repository creation lacks permission', () => {
+    expect(
+      getGitHubRepositoryCreationError(
+        new Error('Resource not accessible by integration'),
+      ),
+    ).toBe(
+      'GitHub denied repository creation. Reconnect the Create repository GitHub App after granting it Administration: Read and write, or use a personal access token with repository administration access.',
+    );
+    expect(
+      getGitHubRepositoryCreationError(new Error('Repository exists')),
+    ).toBe('Repository exists');
   });
 
   test('detects empty repository or missing workspace errors', () => {

@@ -55,6 +55,10 @@ export const useWorkspaceRemoteSync = ({
   const [unpulledCommitsCount, setUnpulledCommitsCount] = useState<
     number | null
   >(null);
+  const [sessionCredential, setSessionCredential] = useState<{
+    workspaceId: string;
+    token: string;
+  } | null>(null);
   const [conflict, setConflict] = useState<WorkspaceSyncConflict | null>(null);
 
   const activeWorkspace = workspaces.find(
@@ -90,16 +94,20 @@ export const useWorkspaceRemoteSync = ({
     : 0;
   const remoteAheadBy =
     activeWorkspace?.github?.syncState?.remote.aheadBy ?? unpulledCommitsCount;
+  const remoteCheckToken =
+    token.trim() ||
+    (sessionCredential?.workspaceId === activeWorkspaceId
+      ? sessionCredential.token
+      : '');
 
   useGitHubRemoteCommitCheck({
     activeWorkspaceId,
     connection: activeGitHub,
-    credentialKey,
     isLocalDirty,
     setUnpulledCommitsCount,
     setWorkspaceGitHubSyncInfo,
     setWorkspaceSyncStatus,
-    token,
+    token: remoteCheckToken,
   });
 
   const handleSync = async (direction: 'pull' | 'push') => {
@@ -151,6 +159,7 @@ export const useWorkspaceRemoteSync = ({
       onRequestToken();
       return;
     }
+    setSessionCredential({ workspaceId: activeWorkspace.id, token: syncToken });
 
     const performSyncOperation = async (activeToken: string) => {
       if (direction === 'pull') {

@@ -3,7 +3,6 @@ import {
   compareGitHubCommits,
   getGitHubBranchHead,
   pullGitHubWorkspace,
-  resolveWorkspaceGitHubCredential,
 } from '../../../services/github';
 import { useWorkspaceStore } from '../../../store';
 import type {
@@ -23,7 +22,6 @@ import {
 interface UseGitHubRemoteCommitCheckOptions {
   activeWorkspaceId: string;
   connection: GitHubWorkspaceConnection | null;
-  credentialKey?: string;
   isLocalDirty: boolean;
   setUnpulledCommitsCount: (count: number | null) => void;
   setWorkspaceGitHubSyncInfo: WorkspaceState['setWorkspaceGitHubSyncInfo'];
@@ -31,10 +29,18 @@ interface UseGitHubRemoteCommitCheckOptions {
   token: string;
 }
 
+export const getGitHubRemoteCheckSession = (
+  repository: string | undefined,
+  branch: string | undefined,
+  sessionToken: string,
+) => {
+  const token = sessionToken.trim();
+  return repository && branch && token ? { repository, branch, token } : null;
+};
+
 export function useGitHubRemoteCommitCheck({
   activeWorkspaceId,
   connection,
-  credentialKey,
   isLocalDirty,
   setUnpulledCommitsCount,
   setWorkspaceGitHubSyncInfo,
@@ -48,7 +54,8 @@ export function useGitHubRemoteCommitCheck({
   const changeIndex = connection?.syncState?.changeIndex;
 
   useEffect(() => {
-    if (!repository || !branch) {
+    const remoteCheck = getGitHubRemoteCheckSession(repository, branch, token);
+    if (!remoteCheck) {
       setUnpulledCommitsCount(null);
       return;
     }
@@ -56,18 +63,17 @@ export function useGitHubRemoteCommitCheck({
     let isCancelled = false;
     const checkRemoteCommits = async () => {
       try {
-        const resolved = await resolveWorkspaceGitHubCredential({
-          credentialKey,
-          repository,
-        });
-        const syncToken = resolved?.credential.accessToken || token.trim();
-        if (!syncToken) return;
+        const {
+          repository: activeRepository,
+          branch: activeBranch,
+          token: syncToken,
+        } = remoteCheck;
 
         if (!hasSyncedCollections) {
           const pulled = await pullGitHubWorkspace(
             syncToken,
-            repository,
-            branch,
+            activeRepository,
+            activeBranch,
           );
           const currentState = useWorkspaceStore.getState();
           if (
@@ -107,9 +113,9 @@ export function useGitHubRemoteCommitCheck({
         if (lastSyncedCommitSha) {
           const compare = await compareGitHubCommits(
             syncToken,
-            repository,
+            activeRepository,
             lastSyncedCommitSha,
-            branch,
+            activeBranch,
           );
           if (isCancelled) return;
           setUnpulledCommitsCount(compare.aheadBy);
@@ -132,8 +138,8 @@ export function useGitHubRemoteCommitCheck({
 
         const headSha = await getGitHubBranchHead(
           syncToken,
-          repository,
-          branch,
+          activeRepository,
+          activeBranch,
         );
         if (!isCancelled) {
           setWorkspaceGitHubSyncInfo(activeWorkspaceId, {
@@ -142,7 +148,7 @@ export function useGitHubRemoteCommitCheck({
           setUnpulledCommitsCount(0);
         }
       } catch {
-        // Background network and credential failures should not interrupt editing.
+        // Background network failures should not interrupt editing.
       }
     };
 
@@ -154,7 +160,6 @@ export function useGitHubRemoteCommitCheck({
     activeWorkspaceId,
     branch,
     changeIndex,
-    credentialKey,
     hasSyncedCollections,
     isLocalDirty,
     lastSyncedCommitSha,

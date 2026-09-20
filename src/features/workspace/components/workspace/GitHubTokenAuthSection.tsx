@@ -1,7 +1,17 @@
 import type React from 'react';
-import { Button, Input } from '../../../../components';
+import { Alert, Button, Input } from '../../../../components';
 import { getGitHubTokenTypeLabel } from '../../../../services/github';
 import { GitHubDeviceAuthCard } from './GitHubDeviceAuthCard';
+
+export const GITHUB_CREDENTIAL_ACCESS_NOTICE = {
+  title: 'Allow secure access when prompted',
+  description:
+    'FetchX saves your GitHub credential in the system keychain. Your operating system may ask FetchX for access now or when the app reopens. Approve the request to reconnect and sync automatically. On macOS, choose “Always Allow” when the prompt identifies FetchX.',
+} as const;
+
+export const shouldShowGitHubCredentialAccessNotice = (
+  isGitHubConnected: boolean,
+) => !isGitHubConnected;
 
 interface GitHubTokenAuthSectionProps {
   token: string;
@@ -35,7 +45,12 @@ export const GitHubTokenAuthSection: React.FC<GitHubTokenAuthSectionProps> = ({
   onDisconnectGitHub,
 }) => {
   return (
-    <div className="space-y-1">
+    <div className="space-y-2">
+      {shouldShowGitHubCredentialAccessNotice(isGitHubConnected) && (
+        <Alert title={GITHUB_CREDENTIAL_ACCESS_NOTICE.title}>
+          {GITHUB_CREDENTIAL_ACCESS_NOTICE.description}
+        </Alert>
+      )}
       <div className="flex items-end gap-2">
         <Input
           label="GitHub personal access token"

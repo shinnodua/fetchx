@@ -13,7 +13,6 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '../../../../components';
-import { ensureValidGitHubCredential } from '../../../../services/github';
 import { isDesktopApp } from '../../../../services/platform';
 import { useWorkspaceStore } from '../../../../store';
 import { cn } from '../../../../utils/cn';
@@ -27,7 +26,6 @@ import { WorkspaceConflictDialog } from './WorkspaceConflictDialog';
 export const WorkspaceSelector: React.FC = () => {
   const {
     activeWorkspaceId,
-    githubConnections,
     migrateLegacyGitHubConnections,
     switchWorkspace,
     workspaces,
@@ -40,15 +38,7 @@ export const WorkspaceSelector: React.FC = () => {
   useEffect(() => {
     if (!isDesktopApp()) return;
     migrateLegacyGitHubConnections();
-    const credentialKeys = new Set(
-      githubConnections.map((connection) => connection.credentialKey),
-    );
-    void Promise.all(
-      [...credentialKeys].map((credentialKey) =>
-        ensureValidGitHubCredential(credentialKey).catch(() => null),
-      ),
-    );
-  }, [githubConnections, migrateLegacyGitHubConnections]);
+  }, [migrateLegacyGitHubConnections]);
 
   const {
     activeWorkspace,

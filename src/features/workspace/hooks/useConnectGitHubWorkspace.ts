@@ -9,6 +9,7 @@ import { useWorkspaceStore } from '../../../store';
 import type { CollectionItem } from '../types';
 import {
   getGitHubActionError,
+  getGitHubRepositoryCreationError,
   isRepositoryEmptyOrMissingWorkspace,
 } from '../utils/workspaceSelectorUtils';
 
@@ -180,7 +181,9 @@ export const useConnectGitHubWorkspace = (initialError?: string | null) => {
       onSuccess();
     } catch (setupError) {
       setError(
-        getGitHubActionError(setupError, 'Could not connect to GitHub.'),
+        mode === 'create'
+          ? getGitHubRepositoryCreationError(setupError)
+          : getGitHubActionError(setupError, 'Could not connect to GitHub.'),
       );
     } finally {
       setIsWorking(false);

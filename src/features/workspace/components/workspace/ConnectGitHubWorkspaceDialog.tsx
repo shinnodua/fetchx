@@ -195,8 +195,7 @@ export const ConnectGitHubWorkspaceDialog: React.FC<
             placeholder="main"
           />
           <p className="text-xs leading-relaxed text-foreground/55">
-            FetchX saves GitHub credentials in your desktop keychain. It writes
-            collection files under{' '}
+            FetchX writes collection files under{' '}
             <code className="rounded bg-foreground/5 px-1 py-0.5">
               .fetchx/
             </code>{' '}

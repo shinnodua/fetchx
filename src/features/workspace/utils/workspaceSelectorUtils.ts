@@ -29,6 +29,19 @@ export const getGitHubActionError = (
   return fallback;
 };
 
+export const getGitHubRepositoryCreationError = (error: unknown): string => {
+  const message = getGitHubActionError(
+    error,
+    'Could not create the GitHub repository.',
+  );
+  if (
+    message.toLowerCase().includes('resource not accessible by integration')
+  ) {
+    return 'GitHub denied repository creation. Reconnect the Create repository GitHub App after granting it Administration: Read and write, or use a personal access token with repository administration access.';
+  }
+  return message;
+};
+
 export const isGitHubAuthenticationError = (error: unknown): boolean => {
   const message = getGitHubActionError(error, '').toLowerCase();
   return (
