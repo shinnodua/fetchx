@@ -56,8 +56,8 @@ export const useGitHubBranchManager = ({
   const resolveToken = async () => {
     if (!github) return null;
     const credentialKey =
-      connection?.credentialKey ??
       github.credentialKey ??
+      connection?.credentialKey ??
       getGitHubConnectionCredentialKey(github.connectionMode ?? 'connect');
     const resolved = await resolveWorkspaceGitHubCredential({
       credentialKey,

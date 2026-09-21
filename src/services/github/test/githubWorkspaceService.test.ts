@@ -3,6 +3,7 @@ import {
   createGitHubBranch as createBranch,
   createGitHubPullRequest as createPullRequest,
   findOpenGitHubPullRequest as findOpenPullRequest,
+  getGitHubApiErrorMessage,
   listGitHubBranches as listBranches,
 } from '../githubBranchPullRequestService';
 import { hasGitHubAppInstallation } from '../githubInstallationService';
@@ -478,5 +479,17 @@ describe('githubWorkspaceService', () => {
     } finally {
       globalThis.fetch = originalFetch;
     }
+  });
+
+  test('preserves GitHub validation details for failed pull requests', () => {
+    expect(
+      getGitHubApiErrorMessage(
+        {
+          message: 'Validation Failed',
+          errors: [{ message: 'No commits between main and feature/request' }],
+        },
+        422,
+      ),
+    ).toBe('Validation Failed: No commits between main and feature/request');
   });
 });

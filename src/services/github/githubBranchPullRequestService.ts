@@ -16,6 +16,14 @@ interface GitHubReferenceApiResponse {
   object: { sha: string };
 }
 
+interface GitHubApiErrorBody {
+  message?: string;
+  errors?: Array<
+    | string
+    | { code?: string; field?: string; message?: string; resource?: string }
+  >;
+}
+
 export interface GitHubBranch {
   name: string;
   commitSha: string;
@@ -32,18 +40,31 @@ const getHeaders = (token: string) => ({
   Authorization: `Bearer ${token.trim().replace(/^Bearer\s+/i, '')}`,
 });
 
+export const getGitHubApiErrorMessage = (
+  body: GitHubApiErrorBody | null,
+  status: number,
+) => {
+  const details = body?.errors
+    ?.map((error) =>
+      typeof error === 'string'
+        ? error
+        : error.message || [error.field, error.code].filter(Boolean).join(' '),
+    )
+    .filter(Boolean);
+  const message = body?.message || `GitHub request failed (${status}).`;
+  return details?.length ? `${message}: ${details.join('; ')}` : message;
+};
+
 const request = async <T>(token: string, path: string, init?: RequestInit) => {
   const response = await fetch(`${GITHUB_API_URL}${path}`, {
     ...init,
     headers: { ...getHeaders(token), ...init?.headers },
   });
   if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as {
-      message?: string;
-    } | null;
-    throw new Error(
-      body?.message || `GitHub request failed (${response.status}).`,
-    );
+    const body = (await response
+      .json()
+      .catch(() => null)) as GitHubApiErrorBody | null;
+    throw new Error(getGitHubApiErrorMessage(body, response.status));
   }
   return response.json() as Promise<T>;
 };

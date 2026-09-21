@@ -9,11 +9,6 @@ import type { GitHubConnectionDescriptor } from '../../../../store/workspace/wor
 
 export type SetupMode = 'connect' | 'create';
 
-export interface StoredGitHubConnection {
-  connection: GitHubConnectionDescriptor;
-  credential: GitHubStoredCredential | null;
-}
-
 export const canMigrateLegacyModeCredential = (
   connection: GitHubConnectionDescriptor,
   connections: GitHubConnectionDescriptor[],
@@ -36,6 +31,27 @@ export const INITIAL_GITHUB_CONNECTIONS_BY_MODE: GitHubConnectionsByMode = {
   connect: { token: '', isGitHubConnected: false },
   create: { token: '', isGitHubConnected: false },
 };
+
+export const getSavedGitHubConnectionForMode = (
+  connections: GitHubConnectionDescriptor[],
+  mode: SetupMode,
+) => connections.find((connection) => connection.mode === mode);
+
+export async function readSavedGitHubConnectionForMode(
+  connections: GitHubConnectionDescriptor[],
+  mode: SetupMode,
+): Promise<{
+  connection: GitHubConnectionDescriptor;
+  credential: GitHubStoredCredential | null;
+} | null> {
+  const connection = getSavedGitHubConnectionForMode(connections, mode);
+  if (!connection) return null;
+  const credential = await readStoredGitHubConnectionCredential(
+    connection,
+    connections,
+  ).catch(() => null);
+  return { connection, credential };
+}
 
 export function getGitHubConnectionForAccount(
   account: { id: string; login: string },
@@ -98,18 +114,6 @@ export async function createGitHubConnectionRecord(
     );
   }
   return connection;
-}
-
-export async function loadStoredGitHubCredentials(
-  githubConnections: GitHubConnectionDescriptor[],
-): Promise<StoredGitHubConnection[]> {
-  return Promise.all(
-    githubConnections.map((connection) =>
-      readStoredGitHubConnectionCredential(connection, githubConnections)
-        .then((credential) => ({ connection, credential }))
-        .catch(() => ({ connection, credential: null })),
-    ),
-  );
 }
 
 export async function readStoredGitHubConnectionCredential(

@@ -5,6 +5,7 @@ import {
   canMirrorModeCredential,
   disconnectGitHubStoredConnection,
   getGitHubConnectionForAccount,
+  getSavedGitHubConnectionForMode,
   INITIAL_GITHUB_CONNECTIONS_BY_MODE,
 } from '../connectGitHubWorkspaceUtils';
 
@@ -17,6 +18,25 @@ describe('connectGitHubWorkspaceUtils', () => {
     expect(INITIAL_GITHUB_CONNECTIONS_BY_MODE.create.token).toBe('');
     expect(INITIAL_GITHUB_CONNECTIONS_BY_MODE.create.isGitHubConnected).toBe(
       false,
+    );
+  });
+
+  test('only identifies a saved connection for the active mode', () => {
+    const connection: GitHubConnectionDescriptor = {
+      id: 'conn-123',
+      accountId: 'acc-1',
+      accountLogin: 'octocat',
+      mode: 'connect',
+      authType: 'oauth',
+      credentialKey: 'connection.conn-123',
+    };
+
+    expect(getSavedGitHubConnectionForMode([], 'connect')).toBeUndefined();
+    expect(
+      getSavedGitHubConnectionForMode([connection], 'create'),
+    ).toBeUndefined();
+    expect(getSavedGitHubConnectionForMode([connection], 'connect')).toBe(
+      connection,
     );
   });
 

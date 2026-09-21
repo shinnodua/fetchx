@@ -16,7 +16,7 @@ import {
   disconnectGitHubStoredConnection,
   type GitHubConnectionsByMode,
   INITIAL_GITHUB_CONNECTIONS_BY_MODE,
-  loadStoredGitHubCredentials,
+  readSavedGitHubConnectionForMode,
   readStoredGitHubConnectionCredential,
   type SetupMode,
 } from './connectGitHubWorkspaceUtils';
@@ -190,27 +190,27 @@ export function useConnectGitHubWorkspaceForm({
 
     let isCancelled = false;
     const loadStored = async () => {
-      const stored = await loadStoredGitHubCredentials(githubConnections);
+      const saved = await readSavedGitHubConnectionForMode(
+        githubConnections,
+        mode,
+      );
       if (isCancelled) return;
 
-      const matching = githubConnections.find(
-        (connection) => connection.mode === mode,
-      );
-      const matchingCred = stored.find(
-        (entry) => entry.connection.id === matching?.id,
-      )?.credential;
-
-      setSelectedConnectionId(matching?.id || '');
+      setSelectedConnectionId(saved?.connection.id || '');
       setConnections((current) => ({
         ...current,
         [mode]: {
-          token: matchingCred?.accessToken || '',
-          isGitHubConnected: Boolean(matchingCred?.accessToken),
+          token: saved?.credential?.accessToken || '',
+          isGitHubConnected: Boolean(saved?.credential?.accessToken),
         },
       }));
 
-      if (mode === 'connect' && matchingCred?.accessToken) {
-        void loadRepositories(matchingCred.accessToken, matching?.id, false);
+      if (mode === 'connect' && saved?.credential?.accessToken) {
+        void loadRepositories(
+          saved.credential.accessToken,
+          saved.connection.id,
+          false,
+        );
       }
     };
 

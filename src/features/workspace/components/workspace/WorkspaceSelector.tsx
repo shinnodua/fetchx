@@ -325,11 +325,14 @@ export const WorkspaceSelector: React.FC = () => {
           <GitHubPullRequestDialog
             currentBranch={activeWorkspace.github.branch}
             defaultBranch={pullRequest.defaultBranch}
+            error={pullRequest.error}
             hasUnpushedChanges={pullRequest.hasUnpushedChanges}
             isOpen={isPullRequestOpen}
+            isLoadingBranches={pullRequest.isLoadingBranches}
             isWorking={pullRequest.isWorking}
             onClose={() => setIsPullRequestOpen(false)}
             onCreate={pullRequest.createPullRequest}
+            onLoadBranches={pullRequest.loadBranches}
           />
         </>
       )}
