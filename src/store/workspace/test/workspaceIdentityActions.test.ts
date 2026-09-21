@@ -47,6 +47,54 @@ describe('workspace identity actions', () => {
     expect(state.workspaceCollections.local).toHaveLength(1);
   });
 
+  test('replaces open drafts with resolved workspace requests', () => {
+    const resolvedRequest = {
+      id: 'r-1',
+      name: 'Resolved request',
+      type: 'POST',
+      target: 'https://resolved.example.com',
+    };
+    const resolvedCollections = [
+      { id: 'c-1', name: 'Resolved collection', requests: [resolvedRequest] },
+    ];
+    let state = {
+      activeWorkspaceId: 'github',
+      workspaceCollections: { github: [] },
+      collections: [],
+      tabs: ['r-1', 'r-deleted'],
+      activeTabId: 'r-deleted',
+      drafts: {
+        'r-1': {
+          ...resolvedRequest,
+          name: 'Stale draft',
+          target: 'https://draft.example.com',
+        },
+        'r-deleted': {
+          id: 'r-deleted',
+          name: 'Deleted draft',
+          type: 'GET',
+          target: '',
+        },
+      },
+    } as unknown as WorkspaceState;
+    const set = ((partial) => {
+      const next = typeof partial === 'function' ? partial(state) : partial;
+      state = { ...state, ...next } as WorkspaceState;
+    }) as WorkspaceSet;
+    const actions = createWorkspaceIdentityActions(
+      set,
+      (() => state) as WorkspaceGet,
+    );
+
+    actions.setWorkspaceCollections('github', resolvedCollections, true);
+
+    expect(state.collections).toEqual(resolvedCollections);
+    expect(state.drafts['r-1']).toEqual(resolvedRequest);
+    expect(state.drafts['r-deleted']).toBeUndefined();
+    expect(state.tabs).toEqual(['r-1']);
+    expect(state.activeTabId).toBe('r-1');
+  });
+
   test('createGitHubWorkspace creates, activates, and isolates collections', () => {
     let state = {
       workspaces: [

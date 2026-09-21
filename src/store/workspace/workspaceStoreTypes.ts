@@ -130,6 +130,7 @@ export interface WorkspaceState {
   setWorkspaceCollections: (
     workspaceId: string,
     collections: CollectionItem[],
+    resetDraftsToCollections?: boolean,
   ) => void;
   setWorkspaceSyncStatus: (
     workspaceId: string,

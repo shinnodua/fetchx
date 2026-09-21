@@ -11,17 +11,17 @@ import {
   saveGitHubStoredCredential,
 } from '../../../services/github';
 import { useWorkspaceStore } from '../../../store';
+import { createWorkspaceConflictResult } from '../utils/workspaceConflictResult';
 import {
   createCollectionsSnapshot,
   getCollectionsDigest,
 } from '../utils/workspaceRepositoryFormat';
 import { isGitHubAuthenticationError } from '../utils/workspaceSelectorUtils';
 import {
-  applyWorkspaceConflictResolutions,
   createEmptyWorkspaceChangeIndex,
-  createWorkspaceChangeIndex,
   createWorkspaceSyncConflict,
   getWorkspaceChangeCount,
+  type WorkspaceConflictResolution,
   type WorkspaceSyncConflict,
 } from '../utils/workspaceSyncState';
 import { useGitHubRemoteCommitCheck } from './useGitHubRemoteCommitCheck';
@@ -218,15 +218,26 @@ export const useWorkspaceRemoteSync = ({
           gh.repository,
           gh.branch,
         );
-        setConflict(
-          createWorkspaceSyncConflict(
-            baselineCollections,
-            collections,
-            remote.collections,
-            gh.lastSyncedCommitSha,
-            remote.commitSha,
-          ),
+        const nextConflict = createWorkspaceSyncConflict(
+          baselineCollections,
+          collections,
+          remote.collections,
+          gh.lastSyncedCommitSha,
+          remote.commitSha,
         );
+        if (nextConflict.entries.length === 0) {
+          const result = createWorkspaceConflictResult(nextConflict);
+          setWorkspaceGitHubSyncInfo(activeWorkspace.id, result.githubSyncInfo);
+          setWorkspaceCollections(activeWorkspace.id, result.mergedCollections);
+          setWorkspaceSyncStatus(activeWorkspace.id, result.syncStatus);
+          toast({
+            title: 'Changes merged automatically',
+            description: 'Local and GitHub changes did not overlap.',
+            type: 'success',
+          });
+          return;
+        }
+        setConflict(nextConflict);
         setWorkspaceSyncStatus(activeWorkspace.id, 'conflict');
       } catch (conflictError) {
         const errorMessage =
@@ -315,41 +326,27 @@ export const useWorkspaceRemoteSync = ({
     }
   };
 
-  const resolveConflict = (resolutions: Record<string, 'local' | 'remote'>) => {
+  const resolveConflict = (
+    resolutions: Record<string, WorkspaceConflictResolution>,
+  ) => {
     if (!conflict || !activeWorkspace?.github) return;
-    const mergedCollections = applyWorkspaceConflictResolutions(
-      conflict,
-      resolutions,
-    );
-    setWorkspaceGitHubSyncInfo(activeWorkspace.id, {
-      lastSyncedCommitSha: conflict.remoteCommitSha,
-      lastSyncedCollectionsDigest: getCollectionsDigest(
-        conflict.remoteCollections,
-      ),
-      lastSyncedCollections: createCollectionsSnapshot(
-        conflict.remoteCollections,
-      ),
-      syncState: {
-        changeIndex: createEmptyWorkspaceChangeIndex(),
-        remote: {
-          aheadBy: 0,
-          headSha: conflict.remoteCommitSha,
-          status: 'synced',
-        },
-      },
-    });
-    setWorkspaceCollections(activeWorkspace.id, mergedCollections);
-    const hasUnpushedChanges =
-      getWorkspaceChangeCount(
-        createWorkspaceChangeIndex(
-          conflict.remoteCollections,
-          mergedCollections,
-        ),
-      ) > 0;
-    setWorkspaceSyncStatus(
-      activeWorkspace.id,
-      hasUnpushedChanges ? 'dirty' : 'synced',
-    );
+    let result: ReturnType<typeof createWorkspaceConflictResult>;
+    try {
+      result = createWorkspaceConflictResult(conflict, resolutions);
+    } catch (resolutionError) {
+      toast({
+        title: 'Could not apply resolution',
+        description:
+          resolutionError instanceof Error
+            ? resolutionError.message
+            : 'The resolved workspace is invalid.',
+        type: 'error',
+      });
+      return;
+    }
+    setWorkspaceGitHubSyncInfo(activeWorkspace.id, result.githubSyncInfo);
+    setWorkspaceCollections(activeWorkspace.id, result.mergedCollections, true);
+    setWorkspaceSyncStatus(activeWorkspace.id, result.syncStatus);
     setConflict(null);
   };
 

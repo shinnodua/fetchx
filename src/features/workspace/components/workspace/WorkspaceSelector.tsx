@@ -370,6 +370,7 @@ export const WorkspaceSelector: React.FC = () => {
       />
 
       <WorkspaceConflictDialog
+        key={conflict?.remoteCommitSha ?? 'no-conflict'}
         conflict={conflict}
         onClose={dismissConflict}
         onResolve={resolveConflict}

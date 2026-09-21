@@ -80,15 +80,88 @@ describe('workspace sync state', () => {
     const conflict = createWorkspaceSyncConflict(baseline, local, remote);
 
     expect(conflict.entries).toMatchObject([
-      { id: 'payments', label: 'Local payments' },
+      {
+        collectionId: 'payments',
+        label: 'Local payments',
+        path: ['name'],
+      },
     ]);
     expect(
       conflict.mergedCollections.map((collection) => collection.id),
-    ).toEqual(['remote-only', 'local-only']);
+    ).toEqual(['payments', 'remote-only', 'local-only']);
     expect(
-      applyWorkspaceConflictResolutions(conflict, { payments: 'remote' }).map(
-        (collection) => collection.name,
-      ),
+      applyWorkspaceConflictResolutions(conflict, {
+        'payments:name': { choice: 'remote' },
+      }).map((collection) => collection.name),
     ).toEqual(['Remote payments', 'Remote only', 'Local only']);
+  });
+
+  test('auto-merges independent request fields and exposes only collisions', () => {
+    const local = [
+      {
+        ...baseline[0],
+        requests: [
+          {
+            ...baseline[0].requests[0],
+            name: 'Create local payment',
+            target: 'https://local.example.com/payments',
+          },
+        ],
+      },
+    ];
+    const remote = [
+      {
+        ...baseline[0],
+        requests: [
+          {
+            ...baseline[0].requests[0],
+            name: 'Create remote payment',
+            type: 'PUT',
+          },
+        ],
+      },
+    ];
+
+    const conflict = createWorkspaceSyncConflict(baseline, local, remote);
+
+    expect(conflict.entries.map((entry) => entry.path)).toEqual([
+      ['requests', 'create-payment', 'name'],
+    ]);
+    const merged = applyWorkspaceConflictResolutions(conflict, {
+      'payments:requests/create-payment/name': {
+        choice: 'custom',
+        custom: { exists: true, value: 'Create merged payment' },
+      },
+    });
+    expect(merged[0].requests[0]).toMatchObject({
+      name: 'Create merged payment',
+      type: 'PUT',
+      target: 'https://local.example.com/payments',
+    });
+  });
+
+  test('represents edit-delete collisions without losing the edited request', () => {
+    const local = [
+      {
+        ...baseline[0],
+        requests: [{ ...baseline[0].requests[0], name: 'Local edit' }],
+      },
+    ];
+    const remote = [{ ...baseline[0], requests: [] }];
+    const conflict = createWorkspaceSyncConflict(baseline, local, remote);
+
+    expect(conflict.entries).toMatchObject([
+      { kind: 'edit-delete', path: ['requests', 'create-payment'] },
+    ]);
+    expect(
+      applyWorkspaceConflictResolutions(conflict, {
+        'payments:requests/create-payment': { choice: 'local' },
+      })[0].requests,
+    ).toHaveLength(1);
+    expect(
+      applyWorkspaceConflictResolutions(conflict, {
+        'payments:requests/create-payment': { choice: 'remote' },
+      })[0].requests,
+    ).toHaveLength(0);
   });
 });

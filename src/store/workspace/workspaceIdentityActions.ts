@@ -1,5 +1,8 @@
 import type { StateCreator } from 'zustand';
-import type { CollectionItem } from '../../features/workspace/types';
+import type {
+  CollectionItem,
+  RequestItem,
+} from '../../features/workspace/types';
 import {
   createCollectionsSnapshot,
   getCollectionsDigest,
@@ -10,6 +13,7 @@ import type {
   GitHubWorkspaceConnection,
   WorkspaceState,
 } from './workspaceStoreTypes';
+import { cloneRequest } from './workspaceStoreUtils';
 
 type WorkspaceSet = Parameters<StateCreator<WorkspaceState>>[0];
 type WorkspaceGet = Parameters<StateCreator<WorkspaceState>>[1];
@@ -210,14 +214,39 @@ export const createWorkspaceIdentityActions = (
   setWorkspaceCollections: (
     workspaceId: string,
     collections: CollectionItem[],
+    resetDraftsToCollections = false,
   ) =>
-    set((state) => ({
-      workspaceCollections: {
-        ...state.workspaceCollections,
-        [workspaceId]: collections,
-      },
-      ...(workspaceId === state.activeWorkspaceId ? { collections } : {}),
-    })),
+    set((state) => {
+      const isActiveWorkspace = workspaceId === state.activeWorkspaceId;
+      const nextState: Partial<WorkspaceState> = {
+        workspaceCollections: {
+          ...state.workspaceCollections,
+          [workspaceId]: collections,
+        },
+        ...(isActiveWorkspace ? { collections } : {}),
+      };
+      if (!isActiveWorkspace || !resetDraftsToCollections) return nextState;
+
+      const requestsById = new Map(
+        collections.flatMap((collection) =>
+          collection.requests.map((request) => [request.id, request] as const),
+        ),
+      );
+      const tabs = state.tabs.filter((requestId) =>
+        requestsById.has(requestId),
+      );
+      nextState.tabs = tabs;
+      nextState.activeTabId = tabs.includes(state.activeTabId)
+        ? state.activeTabId
+        : (tabs[0] ?? '');
+      nextState.drafts = Object.fromEntries(
+        tabs.map((requestId) => [
+          requestId,
+          cloneRequest(requestsById.get(requestId) as RequestItem),
+        ]),
+      );
+      return nextState;
+    }),
   setWorkspaceSyncStatus: (
     workspaceId: string,
     syncStatus: 'synced' | 'dirty' | 'syncing' | 'conflict' | 'error',
