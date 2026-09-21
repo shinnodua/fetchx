@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -22,6 +22,22 @@ function withTempDirectory(callback: (directory: string) => void) {
 }
 
 describe('desktop release security validation', () => {
+  test('requires and verifies a stable Developer ID signature for macOS releases', () => {
+    const workflow = readFileSync(
+      join(import.meta.dir, '../../.github/workflows/desktop-release.yml'),
+      'utf8',
+    );
+
+    expect(workflow).toContain(
+      'Require Apple signing and notarization credentials',
+    );
+    expect(workflow).toContain('APPLE_SIGNING_IDENTITY=$SIGNING_IDENTITY');
+    expect(workflow).toContain('codesign --verify --deep --strict');
+    expect(workflow).toContain(
+      "grep -q '^Authority=Developer ID Application:'",
+    );
+  });
+
   test('accepts the embedded minisign updater public key format', () => {
     expect(() => validateUpdaterPublicKey(VALID_PUBLIC_KEY)).not.toThrow();
   });

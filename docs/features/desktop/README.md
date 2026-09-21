@@ -77,6 +77,14 @@ macOS releases should also be signed with Developer ID and notarized. Windows
 installers should be signed with Authenticode. Those OS signatures complement
 the Tauri updater signature; they do not replace it.
 
+The macOS release job fails when its Apple signing or notarization credentials
+are missing, selects the imported `Developer ID Application` identity
+explicitly, and verifies the finished `.app` bundle before collecting release
+artifacts. This stable signature lets macOS recognize updated FetchX releases
+as the same application, so a Keychain **Always Allow** decision survives an
+app restart or upgrade. Development binaries launched with `tauri dev` do not
+have that stable release identity and can prompt again after recompilation.
+
 ## Extension rules
 
 - Keep web and desktop behavior separated at the platform service boundary.

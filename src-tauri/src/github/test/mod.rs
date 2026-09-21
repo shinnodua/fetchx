@@ -1,5 +1,6 @@
 use super::{credentials, device_auth, repositories};
 use keyring::credential::CredentialPersistence;
+use std::collections::HashMap;
 
 #[test]
 fn uses_a_persistent_native_credential_store() {
@@ -7,6 +8,35 @@ fn uses_a_persistent_native_credential_store() {
         keyring::default::default_credential_builder().persistence(),
         CredentialPersistence::UntilDelete
     ));
+}
+
+#[test]
+fn stores_multiple_github_connections_in_one_versioned_vault() {
+    let mut vault = credentials::CredentialVault {
+        version: 1,
+        credentials: HashMap::new(),
+    };
+    vault
+        .credentials
+        .insert("connection.account-a".to_string(), "token-a".to_string());
+    vault
+        .credentials
+        .insert("connection.account-b".to_string(), "token-b".to_string());
+
+    let serialized = serde_json::to_string(&vault).expect("vault should serialize");
+    let restored = serde_json::from_str::<credentials::CredentialVault>(&serialized)
+        .expect("vault should deserialize");
+
+    assert_eq!(restored.version, 1);
+    assert_eq!(restored.credentials.len(), 2);
+    assert_eq!(
+        restored.credentials.get("connection.account-a"),
+        Some(&"token-a".to_string())
+    );
+    assert_eq!(
+        restored.credentials.get("connection.account-b"),
+        Some(&"token-b".to_string())
+    );
 }
 
 #[test]
