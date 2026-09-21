@@ -30,5 +30,17 @@ export default defineConfig({
     target: tauriBuildTarget,
     minify: process.env.TAURI_ENV_DEBUG ? false : 'esbuild',
     sourcemap: Boolean(process.env.TAURI_ENV_DEBUG),
+    rolldownOptions: {
+      onLog(level, log, handler) {
+        // Suppress INVALID_ANNOTATION warnings from third-party node_modules (ox library)
+        if (
+          log.code === 'INVALID_ANNOTATION' &&
+          log.id?.includes('node_modules')
+        ) {
+          return;
+        }
+        handler(level, log);
+      },
+    },
   },
 });

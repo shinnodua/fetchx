@@ -18,7 +18,11 @@ const socialLinkClassName =
 export const desktopDownloadButtonClassName =
   'relative z-10 h-8 min-h-8 px-3 text-xs leading-none rounded-lg border-foreground/10 text-foreground/70 hover:bg-foreground/5 hover:text-foreground';
 
-export const AppFooter: React.FC = () => {
+export interface AppFooterProps {
+  desktopActions?: React.ReactNode;
+}
+
+export const AppFooter: React.FC<AppFooterProps> = ({ desktopActions }) => {
   const { toast } = useToast();
   const isDesktop = isDesktopApp();
   const [downloadingPlatform, setDownloadingPlatform] =
@@ -88,6 +92,7 @@ export const AppFooter: React.FC = () => {
         </a>
       </div>
       <div className="relative z-10 flex flex-1 items-center justify-end gap-2">
+        {desktopActions}
         {!isDesktop && (
           <>
             {platform === 'mac' && (

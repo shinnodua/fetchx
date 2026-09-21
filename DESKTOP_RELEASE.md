@@ -113,6 +113,11 @@ directory, and `--notes "Release notes"` with the publish command. Set
 `R2_BUCKET` only when publishing to a bucket other than
 `fetchx-desktop-releases`.
 
+Update app updates service
+```bash
+bun desktop:updates:deploy
+```
+
 ### Publish through GitHub Actions
 
 1. Update `CHANGELOG.md`.

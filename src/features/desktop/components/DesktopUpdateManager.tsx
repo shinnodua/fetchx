@@ -11,6 +11,9 @@ import { getWorkspaceHasUnsavedChanges } from '../../workspace/utils/requestDirt
 
 type UpdateStatus = 'idle' | 'checking' | 'available' | 'downloading';
 
+export const desktopUpdateButtonClassName =
+  'relative z-10 h-8 min-h-8 cursor-pointer rounded-lg px-3 text-xs font-semibold';
+
 export function DesktopUpdateManager() {
   const { toast } = useToast();
   const [status, setStatus] = useState<UpdateStatus>('idle');
@@ -86,7 +89,7 @@ export function DesktopUpdateManager() {
         <Button
           variant="secondary"
           size="sm"
-          className="mb-1 h-8 cursor-pointer rounded-lg px-5 text-xs font-bold shadow-md shadow-primary-500/20"
+          className={desktopUpdateButtonClassName}
           onClick={() => setDialogOpen(true)}
         >
           Update Available

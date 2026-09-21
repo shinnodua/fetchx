@@ -28,9 +28,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
     <div className="h-screen overflow-hidden flex flex-col bg-background text-foreground">
       <AppHeader
         actions={isRootPage ? <CollectionTransferButtons /> : undefined}
-        desktopActions={
-          isRootPage ? <WorkspaceSelector /> : <DesktopUpdateManager />
-        }
+        desktopActions={isRootPage ? <WorkspaceSelector /> : undefined}
         environmentSelector={isRootPage ? <EnvironmentSelector /> : undefined}
         theme={theme}
         onToggleTheme={toggleTheme}
@@ -38,7 +36,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
         {children}
       </main>
-      <AppFooter />
+      <AppFooter desktopActions={<DesktopUpdateManager />} />
     </div>
   );
 };

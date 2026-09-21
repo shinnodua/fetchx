@@ -14,7 +14,7 @@ The desktop feature contains UI behavior that only exists for the Tauri desktop 
 The desktop feature owns desktop-specific presentation and user flows:
 
 - checking for available desktop updates;
-- surfacing update status;
+- surfacing update status and triggering updates from the bottom bar (bottom right of the app window);
 - showing the installed app version in the native window title bar;
 - delegating platform detection, updater actions, relaunch behavior, and native file/window operations to `src/services/platform`.
 
@@ -36,9 +36,9 @@ Browser download actions open their tab synchronously with the user click, then
 navigate it after the release URL resolves so popup blockers do not suppress
 the download.
 Footer desktop download actions should keep a comfortable press area so the
-download button is easy to click on desktop and touch devices. The footer
+download button is easy to click on desktop and touch devices. In the desktop application, the right side of the footer hosts the `DesktopUpdateManager` trigger, surfacing the 'Update Available' action when a new release is detected. The footer
 should also stay on its own stacking layer so workspace overlays cannot cover
-part of the download button. Empty fixed overlay viewports, such as the toast
+part of the footer actions. Empty fixed overlay viewports, such as the toast
 viewport, must not intercept pointer events over footer actions.
 
 Desktop window close is native. Do not intercept Tauri `onCloseRequested` for

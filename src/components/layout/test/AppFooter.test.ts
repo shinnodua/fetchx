@@ -1,8 +1,12 @@
 import { describe, expect, test } from 'bun:test';
 
-import { desktopDownloadButtonClassName } from '../AppFooter';
+import { AppFooter, desktopDownloadButtonClassName } from '../AppFooter';
 
 describe('AppFooter', () => {
+  test('exports AppFooter component', () => {
+    expect(typeof AppFooter).toBe('function');
+  });
+
   test('uses the compact action scale for desktop download actions', () => {
     expect(desktopDownloadButtonClassName).toContain('min-h-8');
     expect(desktopDownloadButtonClassName).toContain('h-8');
