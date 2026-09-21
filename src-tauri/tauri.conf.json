@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "FetchX",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "identifier": "dev.fetchx.desktop",
   "build": {
     "frontendDist": "../dist",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "FetchX v0.1.5",
+        "title": "FetchX v0.1.6",
         "width": 1280,
         "height": 800,
         "minWidth": 960,
