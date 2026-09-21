@@ -1,3 +1,4 @@
+export * from './githubBranchPullRequestService';
 export * from './githubCommitMessage';
 export * from './githubCredentialService';
 export * from './githubDeviceAuth';

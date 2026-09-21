@@ -13,7 +13,7 @@ request controls and output:
 - method/type selector;
 - target input;
 - RPC selector for contract requests;
-- connect/send button;
+- contextual wallet connection, account management, network state, and send controls for `WRITE` and `SEND` requests;
 - request settings pane;
 - response pane.
 

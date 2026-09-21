@@ -31,6 +31,10 @@ the task requires a deliberately prominent action or readable long-form content.
 Header action controls retain a small bottom margin to keep visual separation
 from the header boundary.
 
+Inline field-and-action rows use matching density variants. Compact rows pair
+`Input density="sm"` with `Button size="sm"`; feature code should not use one-off
+height utilities to force controls into alignment.
+
 It should not become the source implementation of shared UI primitives. Shared UI primitives belong in `src/components/ui/` and are exported through `src/components/index.ts`.
 
 ## Route boundary

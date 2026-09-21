@@ -39,3 +39,13 @@ If you need to dynamically list color swatches, do not concatenate strings dynam
 // Correct usage via static lookup maps:
 className={`${primaryBgClasses[step]}`}
 ```
+
+### 5. Inline Action-Row Alignment
+
+When a text field and button share one horizontal action row (for example,
+creating a branch, adding a header, or entering a label), they must use the
+same design-system density. Use `Input density="sm"` together with `Button
+size="sm"` for compact rows; do not correct a mismatch with one-off `h-*`
+classes. The compact input and text-button controls both use the `h-7` target.
+Use the default field and `Button size="md"` only when the row is intentionally
+regular density, and verify their rendered alignment before shipping.

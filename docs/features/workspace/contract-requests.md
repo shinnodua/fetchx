@@ -55,9 +55,9 @@ BigInt values are serialized before storing in response state.
 
 ## WRITE execution
 
-WRITE calls require a connected wallet. If no wallet is connected, `ActiveRequestWorkspace` shows a connect action and `useRunContractRequest` can open the connect modal before throwing a wallet-not-connected error.
+WRITE calls require a connected wallet. The workspace shows wallet connection, network state, and account management beside the transaction Send action rather than in the global header. If no wallet is connected, the request action bar offers **Connect wallet**. Connected users use one compact wallet trigger, which opens a dialog with the active account, network, and management actions. `useRunContractRequest` can still open the connect modal before throwing a wallet-not-connected error as a final execution safeguard.
 
-Before writing, `ensureSelectedWalletNetwork` checks the connected wallet chain. If the selected network differs, it calls `switchChainAsync`. If the chain is not configured, execution stops with a configured-network error.
+Before writing, the action bar signals a mismatched or unsupported wallet network and offers the chain selector. `ensureSelectedWalletNetwork` still checks the connected wallet chain when Send is pressed. If the selected network differs, it calls `switchChainAsync`. If the chain is not configured, execution stops with a configured-network error.
 
 Execution path:
 

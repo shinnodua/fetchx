@@ -1,4 +1,10 @@
 import { describe, expect, test } from 'bun:test';
+import {
+  createGitHubBranch as createBranch,
+  createGitHubPullRequest as createPullRequest,
+  findOpenGitHubPullRequest as findOpenPullRequest,
+  listGitHubBranches as listBranches,
+} from '../githubBranchPullRequestService';
 import { hasGitHubAppInstallation } from '../githubInstallationService';
 import {
   compareGitHubCommits,
@@ -360,6 +366,115 @@ describe('githubWorkspaceService', () => {
       expect(compare.aheadBy).toBe(3);
       expect(compare.behindBy).toBe(0);
       expect(compare.status).toBe('ahead');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test('lists branches alphabetically', async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input) => {
+      expect(String(input)).toContain(
+        '/repos/fetchx/my-repo/branches?per_page=100',
+      );
+      return new Response(
+        JSON.stringify([
+          { name: 'main', commit: { sha: 'main-sha' } },
+          { name: 'feature/request', commit: { sha: 'feature-sha' } },
+        ]),
+      );
+    }) as typeof fetch;
+    try {
+      await expect(listBranches('token', 'fetchx/my-repo')).resolves.toEqual([
+        { name: 'feature/request', commitSha: 'feature-sha' },
+        { name: 'main', commitSha: 'main-sha' },
+      ]);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test('creates a branch from a source commit', async () => {
+    const originalFetch = globalThis.fetch;
+    let body = '';
+    globalThis.fetch = (async (input, init) => {
+      expect(String(input)).toContain('/repos/fetchx/my-repo/git/refs');
+      body = String(init?.body);
+      return new Response(
+        JSON.stringify({
+          ref: 'refs/heads/feature/request',
+          object: { sha: 'feature-sha' },
+        }),
+        { status: 201 },
+      );
+    }) as typeof fetch;
+    try {
+      await expect(
+        createBranch('token', 'fetchx/my-repo', 'feature/request', 'main-sha'),
+      ).resolves.toEqual({ name: 'feature/request', commitSha: 'feature-sha' });
+      expect(JSON.parse(body)).toEqual({
+        ref: 'refs/heads/feature/request',
+        sha: 'main-sha',
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test('returns an existing pull request before creating another', async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input) => {
+      expect(String(input)).toContain('head=fetchx%3Afeature%2Frequest');
+      return new Response(
+        JSON.stringify([
+          {
+            number: 18,
+            html_url: 'https://github.com/fetchx/my-repo/pull/18',
+            title: 'Request updates',
+          },
+        ]),
+      );
+    }) as typeof fetch;
+    try {
+      await expect(
+        findOpenPullRequest('token', 'fetchx/my-repo', 'feature/request'),
+      ).resolves.toEqual({
+        number: 18,
+        url: 'https://github.com/fetchx/my-repo/pull/18',
+        title: 'Request updates',
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test('creates a pull request with the selected base and head', async () => {
+    const originalFetch = globalThis.fetch;
+    let body = '';
+    globalThis.fetch = (async (_input, init) => {
+      body = String(init?.body);
+      return new Response(
+        JSON.stringify({
+          number: 19,
+          html_url: 'https://github.com/fetchx/my-repo/pull/19',
+          title: 'Request updates',
+        }),
+        { status: 201 },
+      );
+    }) as typeof fetch;
+    try {
+      await createPullRequest('token', 'fetchx/my-repo', {
+        base: 'main',
+        head: 'feature/request',
+        title: 'Request updates',
+        body: 'Ready for review.',
+      });
+      expect(JSON.parse(body)).toEqual({
+        base: 'main',
+        head: 'feature/request',
+        title: 'Request updates',
+        body: 'Ready for review.',
+      });
     } finally {
       globalThis.fetch = originalFetch;
     }

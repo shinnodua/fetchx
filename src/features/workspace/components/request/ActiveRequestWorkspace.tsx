@@ -1,4 +1,3 @@
-import { useConnectModal } from '@rainbow-me/rainbowkit';
 import type React from 'react';
 import { useAccount } from 'wagmi';
 import { Button, Input, Select } from '../../../../components';
@@ -15,6 +14,7 @@ import { EnvironmentAwareInput } from '../environment/EnvironmentAwareField';
 import { ResponsePane } from './response/ResponsePane';
 import { RequestSettings } from './settings/RequestSettings';
 import { RpcSelectField } from './settings/RpcSelectField';
+import { TransactionWalletControl } from './wallet/TransactionWalletControl';
 
 interface ActiveRequestWorkspaceProps {
   activeRequest: RequestItem;
@@ -51,7 +51,8 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
   const customRpcs = useRpcStore((state) => state.customRpcs);
   const selectedRpcId = getSelectedRpcId(activeRequest, customRpcs);
   const { isConnected } = useAccount();
-  const { openConnectModal } = useConnectModal();
+  const requiresWallet =
+    activeRequest.type === 'WRITE' || activeRequest.type === 'SEND';
 
   return (
     <div className="flex min-h-0 min-w-0 flex-grow flex-col space-y-3 p-4">
@@ -158,33 +159,27 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
           </div>
         )}
 
-        <Button
-          variant={
-            activeRequest.type === 'WRITE' || activeRequest.type === 'SEND'
-              ? 'primary'
-              : 'secondary'
-          }
-          className="h-10 cursor-pointer px-6"
-          onClick={
-            (activeRequest.type === 'WRITE' || activeRequest.type === 'SEND') &&
-            !isConnected
-              ? () => openConnectModal?.()
-              : () => {
-                  trackEvent({
-                    screen: 'workspace',
-                    action: 'send_request',
-                    method: activeRequest.type,
-                  });
-                  onRunRequest();
-                }
-          }
-          isLoading={isLoading}
-        >
-          {(activeRequest.type === 'WRITE' || activeRequest.type === 'SEND') &&
-          !isConnected
-            ? 'Connect Wallet'
-            : 'Send'}
-        </Button>
+        {requiresWallet && (
+          <TransactionWalletControl requestNetwork={activeRequest.network} />
+        )}
+
+        {(!requiresWallet || isConnected) && (
+          <Button
+            variant={requiresWallet ? 'primary' : 'secondary'}
+            className="h-10 cursor-pointer px-6"
+            onClick={() => {
+              trackEvent({
+                screen: 'workspace',
+                action: 'send_request',
+                method: activeRequest.type,
+              });
+              onRunRequest();
+            }}
+            isLoading={isLoading}
+          >
+            Send
+          </Button>
+        )}
       </div>
 
       <div className="flex min-h-0 flex-grow flex-col gap-4 lg:flex-row">

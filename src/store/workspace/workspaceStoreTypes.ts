@@ -8,6 +8,7 @@ import type { TabReorderPlacement } from './tabOrder';
 export interface GitHubWorkspaceConnection {
   repository: string;
   branch: string;
+  defaultBranch?: string;
   connectionId?: string;
   connectionMode?: 'connect' | 'create';
   credentialKey?: string;

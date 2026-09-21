@@ -16,10 +16,15 @@ import {
 import { isDesktopApp } from '../../../../services/platform';
 import { useWorkspaceStore } from '../../../../store';
 import { cn } from '../../../../utils/cn';
+import { useGitHubBranchManager } from '../../hooks/useGitHubBranchManager';
+import { useGitHubPullRequest } from '../../hooks/useGitHubPullRequest';
 import { useWorkspaceRemoteSync } from '../../hooks/useWorkspaceRemoteSync';
 import { getWorkspaceChangeCount } from '../../utils/workspaceSyncState';
 import { ConnectGitHubWorkspaceDialog } from './ConnectGitHubWorkspaceDialog';
 import { DesktopRequiredDialog } from './DesktopRequiredDialog';
+import { GitHubBranchDialog } from './GitHubBranchDialog';
+import { GitHubPullRequestDialog } from './GitHubPullRequestDialog';
+import { GitHubWorkspaceActions } from './GitHubWorkspaceActions';
 import { ManageWorkspacesDialog } from './ManageWorkspacesDialog';
 import { WorkspaceConflictDialog } from './WorkspaceConflictDialog';
 
@@ -33,6 +38,8 @@ export const WorkspaceSelector: React.FC = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isManageOpen, setIsManageOpen] = useState(false);
+  const [isBranchOpen, setIsBranchOpen] = useState(false);
+  const [isPullRequestOpen, setIsPullRequestOpen] = useState(false);
   const [dialogError, setDialogError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -57,6 +64,18 @@ export const WorkspaceSelector: React.FC = () => {
       setDialogError(error);
       setIsDialogOpen(true);
     },
+  });
+  const showCredentialError = (error: string) => {
+    setDialogError(error);
+    setIsDialogOpen(true);
+  };
+  const branchManager = useGitHubBranchManager({
+    onError: showCredentialError,
+    onRequestToken: () => setIsDialogOpen(true),
+  });
+  const pullRequest = useGitHubPullRequest({
+    onError: showCredentialError,
+    onRequestToken: () => setIsDialogOpen(true),
   });
 
   if (!isDesktopApp()) {
@@ -235,98 +254,20 @@ export const WorkspaceSelector: React.FC = () => {
         })}
         <DropdownMenuSeparator />
         {activeWorkspace?.kind === 'github' && activeWorkspace.github && (
-          <>
-            <DropdownMenuItem
-              onClick={() => {
-                if (isWorking) return;
-                void handleSync('pull');
-              }}
-              className={cn(
-                'flex items-center justify-between gap-3 font-medium text-foreground/85',
-                isWorking && 'pointer-events-none opacity-60',
-                syncingDirection === 'pull' &&
-                  'bg-primary-500/10 text-primary-600 opacity-100 dark:text-primary-400',
-              )}
-            >
-              <span className="flex min-w-0 items-center gap-2 truncate">
-                {syncingDirection === 'pull' && (
-                  <SpinnerIcon
-                    title="Pulling"
-                    className="h-3.5 w-3.5 shrink-0 animate-spin text-primary-500"
-                  />
-                )}
-                <span className="truncate">
-                  {syncingDirection === 'pull'
-                    ? `Pulling from GitHub (${activeWorkspace.github.branch})…`
-                    : `Pull from GitHub (${activeWorkspace.github.branch})`}
-                </span>
-              </span>
-              <span
-                className={cn(
-                  'shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-medium tabular-nums',
-                  syncingDirection === 'pull'
-                    ? 'animate-pulse bg-primary-500/20 font-semibold text-primary-600 dark:text-primary-400'
-                    : unpulledCommitsCount && unpulledCommitsCount > 0
-                      ? 'bg-primary-500/15 font-semibold text-primary-500'
-                      : 'bg-foreground/5 text-foreground/50',
-                )}
-              >
-                {syncingDirection === 'pull'
-                  ? 'Pulling…'
-                  : unpulledCommitsCount === null
-                    ? '…'
-                    : `${unpulledCommitsCount} ${unpulledCommitsCount === 1 ? 'commit' : 'commits'}`}
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                if (isWorking) return;
-                void handleSync('push');
-              }}
-              className={cn(
-                'flex items-center justify-between gap-3 font-medium text-foreground/85',
-                isWorking && 'pointer-events-none opacity-60',
-                syncingDirection === 'push' &&
-                  'bg-primary-500/10 text-primary-600 opacity-100 dark:text-primary-400',
-              )}
-            >
-              <span className="flex min-w-0 items-center gap-2 truncate">
-                {syncingDirection === 'push' && (
-                  <SpinnerIcon
-                    title="Pushing"
-                    className="h-3.5 w-3.5 shrink-0 animate-spin text-primary-500"
-                  />
-                )}
-                <span className="truncate">
-                  {syncingDirection === 'push'
-                    ? `Pushing to GitHub (${activeWorkspace.github.branch})…`
-                    : `Push to GitHub (${activeWorkspace.github.branch})`}
-                </span>
-              </span>
-              <span
-                className={cn(
-                  'shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-medium tabular-nums',
-                  syncingDirection === 'push'
-                    ? 'animate-pulse bg-primary-500/20 font-semibold text-primary-600 dark:text-primary-400'
-                    : unpushedCommitsCount > 0
-                      ? 'bg-primary-500/15 font-semibold text-primary-600 dark:text-primary-400'
-                      : 'bg-foreground/5 text-foreground/50',
-                )}
-                title={
-                  syncingDirection === 'push'
-                    ? 'Pushing changes to GitHub'
-                    : unpushedCommitsCount > 0
-                      ? '1 uncommitted local change to push'
-                      : 'All changes pushed'
-                }
-              >
-                {syncingDirection === 'push'
-                  ? 'Pushing…'
-                  : `${unpushedCommitsCount} ${unpushedCommitsCount === 1 ? 'commit' : 'commits'}`}
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </>
+          <GitHubWorkspaceActions
+            activeWorkspace={activeWorkspace}
+            isWorking={
+              isWorking || branchManager.isWorking || pullRequest.isWorking
+            }
+            onOpenBranchDialog={() => setIsBranchOpen(true)}
+            onOpenPullRequestDialog={() => setIsPullRequestOpen(true)}
+            onSync={(direction) => {
+              if (!isWorking) void handleSync(direction);
+            }}
+            syncingDirection={syncingDirection}
+            unpulledCommitsCount={unpulledCommitsCount}
+            unpushedCommitsCount={unpushedCommitsCount}
+          />
         )}
         <DropdownMenuItem
           onClick={() => {
@@ -368,6 +309,30 @@ export const WorkspaceSelector: React.FC = () => {
         isOpen={isManageOpen}
         onClose={() => setIsManageOpen(false)}
       />
+
+      {activeWorkspace?.kind === 'github' && activeWorkspace.github && (
+        <>
+          <GitHubBranchDialog
+            currentBranch={activeWorkspace.github.branch}
+            isDirty={branchManager.isDirty}
+            isOpen={isBranchOpen}
+            isWorking={branchManager.isWorking}
+            onClose={() => setIsBranchOpen(false)}
+            onCreate={branchManager.createBranch}
+            onLoad={branchManager.loadBranches}
+            onSwitch={branchManager.switchBranch}
+          />
+          <GitHubPullRequestDialog
+            currentBranch={activeWorkspace.github.branch}
+            defaultBranch={pullRequest.defaultBranch}
+            hasUnpushedChanges={pullRequest.hasUnpushedChanges}
+            isOpen={isPullRequestOpen}
+            isWorking={pullRequest.isWorking}
+            onClose={() => setIsPullRequestOpen(false)}
+            onCreate={pullRequest.createPullRequest}
+          />
+        </>
+      )}
 
       <WorkspaceConflictDialog
         key={conflict?.remoteCommitSha ?? 'no-conflict'}

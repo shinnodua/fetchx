@@ -10,7 +10,12 @@ export interface InputProps extends Omit<HTMLMotionProps<'input'>, 'ref'> {
   rightIcon?: React.ReactNode;
   highlightedContent?: React.ReactNode;
   highlightedContentClassName?: string;
+  density?: 'sm' | 'md';
 }
+
+export const getInputSizeClasses = (
+  density: NonNullable<InputProps['density']>,
+) => (density === 'sm' ? 'h-7' : 'h-[38px]');
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
@@ -23,6 +28,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       highlightedContent,
       highlightedContentClassName,
       id,
+      density = 'md',
       ...props
     },
     ref,
@@ -65,7 +71,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             whileFocus={highlightedContent ? undefined : { scale: 1.01 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             className={cn(
-              'flex h-[38px] w-full rounded-xl border border-foreground/10 bg-background/50 px-3 py-1.5 text-xs text-foreground shadow-sm backdrop-blur-sm transition-all file:border-0 file:bg-transparent file:text-xs file:font-medium placeholder:text-foreground/40',
+              'flex w-full rounded-xl border border-foreground/10 bg-background/50 px-3 py-1.5 text-xs text-foreground shadow-sm backdrop-blur-sm transition-all file:border-0 file:bg-transparent file:text-xs file:font-medium placeholder:text-foreground/40',
+              getInputSizeClasses(density),
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50 focus-visible:border-primary-500',
               'hover:border-foreground/20',
               'disabled:cursor-not-allowed disabled:opacity-50',

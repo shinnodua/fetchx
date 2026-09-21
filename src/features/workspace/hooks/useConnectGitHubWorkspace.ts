@@ -103,6 +103,7 @@ export const useConnectGitHubWorkspace = (initialError?: string | null) => {
           {
             repository: created.fullName,
             branch,
+            defaultBranch: created.defaultBranch,
             connectionId,
             connectionMode: mode,
             credentialKey,
@@ -142,6 +143,7 @@ export const useConnectGitHubWorkspace = (initialError?: string | null) => {
           setWorkspaceGitHubSyncInfo(existingWorkspace.id, {
             repository: repository.trim(),
             branch,
+            defaultBranch: branch,
             connectionId,
             connectionMode: mode,
             credentialKey,
@@ -157,6 +159,7 @@ export const useConnectGitHubWorkspace = (initialError?: string | null) => {
             {
               repository: repository.trim(),
               branch,
+              defaultBranch: branch,
               connectionId,
               connectionMode: mode,
               credentialKey,
