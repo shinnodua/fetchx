@@ -100,6 +100,25 @@ fn parses_repositories_from_a_github_app_installation() {
 }
 
 #[test]
+fn matches_a_github_app_installation_to_its_owner() {
+    let installation = serde_json::from_str::<repositories::GitHubInstallation>(
+        r#"{"id":1,"app_slug":"fetchx-create","account":{"login":"FetchX-Org"}}"#,
+    )
+    .expect("GitHub App installation should parse");
+
+    assert!(repositories::matches_installation(
+        &installation,
+        "fetchx-create",
+        "fetchx-org"
+    ));
+    assert!(!repositories::matches_installation(
+        &installation,
+        "fetchx-sync",
+        "fetchx-org"
+    ));
+}
+
+#[test]
 fn cleans_bearer_prefix_from_tokens() {
     assert_eq!(
         repositories::clean_token("Bearer ghu_test123"),

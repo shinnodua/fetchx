@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import {
   GITHUB_CREDENTIAL_ACCESS_NOTICE,
+  shouldShowGitHubCreateAppInstallationNotice,
   shouldShowGitHubCredentialAccessNotice,
 } from '../GitHubTokenAuthSection';
 
@@ -17,5 +18,10 @@ describe('GitHubTokenAuthSection', () => {
   test('hides the notice after the stored credential is available', () => {
     expect(shouldShowGitHubCredentialAccessNotice(false)).toBe(true);
     expect(shouldShowGitHubCredentialAccessNotice(true)).toBe(false);
+  });
+
+  test('shows the separate installation step only while creating repositories', () => {
+    expect(shouldShowGitHubCreateAppInstallationNotice('create')).toBe(true);
+    expect(shouldShowGitHubCreateAppInstallationNotice('connect')).toBe(false);
   });
 });

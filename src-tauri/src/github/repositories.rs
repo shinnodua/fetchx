@@ -54,8 +54,27 @@ struct GitHubInstallationsResponse {
 }
 
 #[derive(Deserialize)]
-struct GitHubInstallation {
+pub(super) struct GitHubInstallation {
     id: u64,
+    app_slug: Option<String>,
+    account: Option<GitHubInstallationAccount>,
+}
+
+#[derive(Deserialize)]
+struct GitHubInstallationAccount {
+    login: String,
+}
+
+pub(super) fn matches_installation(
+    installation: &GitHubInstallation,
+    app_slug: &str,
+    owner: &str,
+) -> bool {
+    installation.app_slug.as_deref() == Some(app_slug.trim())
+        && installation
+            .account
+            .as_ref()
+            .is_some_and(|account| account.login.eq_ignore_ascii_case(owner.trim()))
 }
 
 #[derive(Deserialize)]
@@ -147,6 +166,31 @@ pub(crate) async fn get_github_account(token: String) -> Result<GitHubAccount, S
         id: account.id.to_string(),
         login: account.login,
     })
+}
+
+#[tauri::command]
+pub(crate) async fn has_github_app_installation(
+    token: String,
+    app_slug: String,
+    owner: String,
+) -> Result<bool, String> {
+    let token = clean_token(&token);
+    validate_access_token(token)?;
+    let response = github_request(&Client::new(), token, "/user/installations?per_page=100")
+        .send()
+        .await
+        .map_err(|error| format!("Could not reach GitHub: {error}"))?;
+    if !response.status().is_success() {
+        return Err(github_error(response).await);
+    }
+    let installations = response
+        .json::<GitHubInstallationsResponse>()
+        .await
+        .map_err(|_| "GitHub returned an invalid installation list.".to_string())?;
+    Ok(installations
+        .installations
+        .iter()
+        .any(|installation| matches_installation(installation, &app_slug, &owner)))
 }
 
 async fn list_app_installation_repositories(

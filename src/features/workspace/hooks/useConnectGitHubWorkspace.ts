@@ -7,6 +7,7 @@ import {
 } from '../../../services/github';
 import { useWorkspaceStore } from '../../../store';
 import type { CollectionItem } from '../types';
+import { createEmptyGitHubWorkspaceCollections } from '../utils/newGitHubWorkspace';
 import {
   getGitHubActionError,
   getGitHubRepositoryCreationError,
@@ -29,7 +30,6 @@ interface ConnectWorkspaceParams {
 export const useConnectGitHubWorkspace = (initialError?: string | null) => {
   const { toast } = useToast();
   const {
-    collections,
     createGitHubWorkspace,
     setWorkspaceCollections,
     setWorkspaceGitHubSyncInfo,
@@ -86,6 +86,7 @@ export const useConnectGitHubWorkspace = (initialError?: string | null) => {
     setError(null);
     try {
       if (mode === 'create') {
+        const emptyCollections = createEmptyGitHubWorkspaceCollections();
         const created = await createGitHubRepository(token.trim(), {
           owner: organization.trim() || undefined,
           name: repository.trim(),
@@ -95,7 +96,7 @@ export const useConnectGitHubWorkspace = (initialError?: string | null) => {
           token.trim(),
           created.fullName,
           branch,
-          collections,
+          emptyCollections,
         );
         createGitHubWorkspace(
           targetWorkspaceName,
@@ -107,7 +108,7 @@ export const useConnectGitHubWorkspace = (initialError?: string | null) => {
             credentialKey,
             lastSyncedCommitSha: pushed.commitSha,
           },
-          JSON.parse(JSON.stringify(collections)),
+          emptyCollections,
         );
       } else {
         let collectionsToUse: CollectionItem[] = [];

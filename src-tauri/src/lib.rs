@@ -31,7 +31,8 @@ pub fn run() {
             github::device_auth::complete_github_device_authorization,
             github::device_auth::refresh_github_token,
             github::repositories::list_github_repositories,
-            github::repositories::get_github_account
+            github::repositories::get_github_account,
+            github::repositories::has_github_app_installation
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

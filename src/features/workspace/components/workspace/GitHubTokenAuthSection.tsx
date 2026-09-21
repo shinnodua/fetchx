@@ -1,6 +1,10 @@
 import type React from 'react';
 import { Alert, Button, Input } from '../../../../components';
-import { getGitHubTokenTypeLabel } from '../../../../services/github';
+import {
+  getGitHubAppInstallationUrl,
+  getGitHubTokenTypeLabel,
+} from '../../../../services/github';
+import { openExternalUrl } from '../../../../services/platform';
 import { GitHubDeviceAuthCard } from './GitHubDeviceAuthCard';
 
 export const GITHUB_CREDENTIAL_ACCESS_NOTICE = {
@@ -13,9 +17,14 @@ export const shouldShowGitHubCredentialAccessNotice = (
   isGitHubConnected: boolean,
 ) => !isGitHubConnected;
 
+export const shouldShowGitHubCreateAppInstallationNotice = (
+  mode: 'connect' | 'create',
+) => mode === 'create';
+
 interface GitHubTokenAuthSectionProps {
   token: string;
   isGitHubConnected: boolean;
+  createAppInstallationStatus: 'checking' | 'installed' | 'missing' | null;
   mode: 'connect' | 'create';
   userCode?: string;
   authorizationStatus: string;
@@ -32,6 +41,7 @@ interface GitHubTokenAuthSectionProps {
 export const GitHubTokenAuthSection: React.FC<GitHubTokenAuthSectionProps> = ({
   token,
   isGitHubConnected,
+  createAppInstallationStatus,
   mode,
   userCode,
   authorizationStatus,
@@ -49,6 +59,34 @@ export const GitHubTokenAuthSection: React.FC<GitHubTokenAuthSectionProps> = ({
       {shouldShowGitHubCredentialAccessNotice(isGitHubConnected) && (
         <Alert title={GITHUB_CREDENTIAL_ACCESS_NOTICE.title}>
           {GITHUB_CREDENTIAL_ACCESS_NOTICE.description}
+        </Alert>
+      )}
+      {shouldShowGitHubCreateAppInstallationNotice(mode) && (
+        <Alert title="Create App installation required">
+          <span>
+            GitHub authorization and installation are separate. Install the
+            Create App on the personal account or organization that will own the
+            repository, then connect the account below.{' '}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-auto p-0 align-baseline text-xs underline"
+            onClick={() =>
+              void openExternalUrl(getGitHubAppInstallationUrl('create'))
+            }
+          >
+            Install or review access ↗
+          </Button>
+          {createAppInstallationStatus && (
+            <p className="mt-1 text-xs">
+              {createAppInstallationStatus === 'checking'
+                ? 'Checking installation…'
+                : createAppInstallationStatus === 'installed'
+                  ? 'Installation verified for this repository owner.'
+                  : 'The Create App is not installed for this repository owner.'}
+            </p>
+          )}
         </Alert>
       )}
       <div className="flex items-end gap-2">

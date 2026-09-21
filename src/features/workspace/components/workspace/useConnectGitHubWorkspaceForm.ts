@@ -20,22 +20,19 @@ import {
   readStoredGitHubConnectionCredential,
   type SetupMode,
 } from './connectGitHubWorkspaceUtils';
+import { useCreateGitHubAppInstallationStatus } from './useCreateGitHubAppInstallationStatus';
 import { useGitHubWorkspaceFields } from './useGitHubWorkspaceFields';
 import { useReloadGitHubRepositoriesOnFocus } from './useReloadGitHubRepositoriesOnFocus';
-
-export type { SetupMode };
-
-interface UseConnectGitHubWorkspaceFormParams {
-  isOpen: boolean;
-  onClose: () => void;
-  initialError?: string | null;
-}
 
 export function useConnectGitHubWorkspaceForm({
   isOpen,
   onClose,
   initialError,
-}: UseConnectGitHubWorkspaceFormParams) {
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  initialError?: string | null;
+}) {
   const {
     activeWorkspaceId,
     githubConnections,
@@ -52,7 +49,6 @@ export function useConnectGitHubWorkspaceForm({
   const [repositories, setRepositories] = useState<GitHubRepository[]>([]);
   const [isLoadingRepositories, setIsLoadingRepositories] = useState(false);
   const [hasLoadedRepositories, setHasLoadedRepositories] = useState(false);
-
   const { isWorking, error, setError, connectWorkspace } =
     useConnectGitHubWorkspace(initialError);
   const {
@@ -69,12 +65,10 @@ export function useConnectGitHubWorkspaceForm({
     updateRepository,
     selectRepository: selectRepo,
   } = useGitHubWorkspaceFields({ activeWorkspace, isOpen, initialError });
-
   const selectRepository = useCallback(
     (fullName: string) => selectRepo(fullName, repositories),
     [repositories, selectRepo],
   );
-
   const activeConnection = connections[mode];
   const token = activeConnection.token;
   const isGitHubConnected = activeConnection.isGitHubConnected;
@@ -84,7 +78,13 @@ export function useConnectGitHubWorkspaceForm({
   const selectedConnection = availableConnections.find(
     (connection) => connection.id === selectedConnectionId,
   );
-
+  const createAppInstallationStatus = useCreateGitHubAppInstallationStatus({
+    isOpen,
+    mode,
+    organization,
+    connection: selectedConnection,
+    token,
+  });
   const createConnection = useCallback(
     async (
       accessToken: string,
@@ -104,7 +104,6 @@ export function useConnectGitHubWorkspaceForm({
     },
     [githubConnections, mode, upsertGitHubConnection],
   );
-
   const loadRepositories = useCallback(
     async (
       accessToken: string,
@@ -363,6 +362,7 @@ export function useConnectGitHubWorkspaceForm({
     setSelectedConnectionId,
     token,
     isGitHubConnected,
+    createAppInstallationStatus,
     availableConnections,
     workspaceName,
     setWorkspaceName,

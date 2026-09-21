@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { hasGitHubAppInstallation } from '../githubInstallationService';
 import {
   compareGitHubCommits,
   createGitHubRepository,
@@ -9,6 +10,32 @@ import {
 } from '../githubWorkspaceService';
 
 describe('githubWorkspaceService', () => {
+  test('checks whether the expected GitHub App is installed for an owner', async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async () =>
+      new Response(
+        JSON.stringify({
+          installations: [
+            {
+              app_slug: 'fetchx-create',
+              account: { login: 'FetchX-Org' },
+            },
+          ],
+        }),
+      )) as typeof fetch;
+
+    try {
+      await expect(
+        hasGitHubAppInstallation('token', 'fetchx-create', 'fetchx-org'),
+      ).resolves.toBe(true);
+      await expect(
+        hasGitHubAppInstallation('token', 'fetchx-sync', 'fetchx-org'),
+      ).resolves.toBe(false);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   test('reads the authenticated GitHub account for a connection', async () => {
     const originalFetch = globalThis.fetch;
     globalThis.fetch = (async (input) => {

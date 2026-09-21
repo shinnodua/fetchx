@@ -37,7 +37,7 @@ export const getGitHubRepositoryCreationError = (error: unknown): string => {
   if (
     message.toLowerCase().includes('resource not accessible by integration')
   ) {
-    return 'GitHub denied repository creation. Reconnect the Create repository GitHub App after granting it Administration: Read and write, or use a personal access token with repository administration access.';
+    return 'GitHub denied access. Install the Create repository GitHub App on the personal account or organization that will own the repository and confirm Administration: Read and write, or use a personal access token with repository administration access.';
   }
   return message;
 };

@@ -20,6 +20,7 @@ export const ConnectGitHubWorkspaceDialog: React.FC<
     setSelectedConnectionId,
     token,
     isGitHubConnected,
+    createAppInstallationStatus,
     availableConnections,
     workspaceName,
     setWorkspaceName,
@@ -149,6 +150,7 @@ export const ConnectGitHubWorkspaceDialog: React.FC<
           <GitHubTokenAuthSection
             token={token}
             isGitHubConnected={isGitHubConnected}
+            createAppInstallationStatus={createAppInstallationStatus}
             mode={mode}
             userCode={userCode}
             authorizationStatus={authorizationStatus}
