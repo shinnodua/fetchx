@@ -24,9 +24,10 @@ updates if the key is lost.
 
 ## Cloudflare setup
 
-Follow `infrastructure/desktop-updates/README.md` to create the R2 bucket,
-attach `downloads.fetchx.dev`, and deploy the update Worker at
-`updates.fetchx.dev`.
+Create the `fetchx-desktop-releases` R2 bucket and attach `downloads.fetchx.dev`
+as its public custom domain. Desktop updates and downloads are served directly
+from `https://downloads.fetchx.dev/channels/stable.json`, eliminating the need
+for a separate update Worker.
 
 Create a Cloudflare API token restricted to object read/write for the desktop
 release bucket, then add these GitHub Actions secrets:
@@ -112,11 +113,6 @@ Use `--artifact-dir <path>` with either command to override the artifact
 directory, and `--notes "Release notes"` with the publish command. Set
 `R2_BUCKET` only when publishing to a bucket other than
 `fetchx-desktop-releases`.
-
-Update app updates service
-```bash
-bun desktop:updates:deploy
-```
 
 ### Publish through GitHub Actions
 

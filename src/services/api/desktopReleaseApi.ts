@@ -1,12 +1,21 @@
-import { API_BASE_URLS, buildDesktopUpdatesApiUrl } from './config';
+import { API_BASE_URLS, buildDesktopDownloadsApiUrl } from './config';
 import { getApiErrorMessage } from './errors';
 import { apiRequest } from './httpClient';
 
 export type DesktopDownloadPlatform = 'mac' | 'windows';
 
-interface DesktopUpdateResponse {
+interface PlatformRelease {
+  sha256?: unknown;
+  signature?: unknown;
   url?: unknown;
   download_url?: unknown;
+}
+
+interface DesktopReleaseManifest {
+  version?: unknown;
+  notes?: unknown;
+  pub_date?: unknown;
+  platforms?: Record<string, PlatformRelease>;
 }
 
 interface NavigatorUserAgentData {
@@ -22,12 +31,10 @@ export async function getDesktopDownloadUrl(
   platform: DesktopDownloadPlatform,
 ): Promise<string> {
   const target = await getDownloadTarget(platform);
-  const updateUrl = buildDesktopUpdatesApiUrl(
-    `v1/update/${target.target}/${target.arch}/0.0.0`,
-  );
+  const manifestUrl = buildDesktopDownloadsApiUrl('channels/stable.json');
 
   const response = await apiRequest(
-    { url: updateUrl, method: 'GET' },
+    { url: manifestUrl, method: 'GET' },
     { proxyOnBrowserBlock: true },
   );
   if (response.status < 200 || response.status >= 300) {
@@ -37,15 +44,33 @@ export async function getDesktopDownloadUrl(
     );
   }
 
-  const data = response.data as DesktopUpdateResponse;
-  const targetUrl =
-    typeof data.download_url === 'string' ? data.download_url : data.url;
-
+  const manifest = response.data as DesktopReleaseManifest;
   if (
-    typeof data !== 'object' ||
-    data === null ||
-    typeof targetUrl !== 'string'
+    typeof manifest !== 'object' ||
+    manifest === null ||
+    typeof manifest.platforms !== 'object' ||
+    manifest.platforms === null
   ) {
+    throw new Error('Desktop release service returned an invalid response.');
+  }
+
+  const platformKey = `${target.target}-${target.arch}`;
+  const platformEntry =
+    manifest.platforms[platformKey] ??
+    (target.target === 'darwin'
+      ? manifest.platforms['darwin-aarch64']
+      : undefined);
+
+  if (!platformEntry || typeof platformEntry !== 'object') {
+    throw new Error(`Desktop release not found for ${platformKey}.`);
+  }
+
+  const targetUrl =
+    typeof platformEntry.download_url === 'string'
+      ? platformEntry.download_url
+      : platformEntry.url;
+
+  if (typeof targetUrl !== 'string') {
     throw new Error('Desktop release service returned an invalid response.');
   }
 

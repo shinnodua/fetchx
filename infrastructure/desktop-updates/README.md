@@ -1,18 +1,20 @@
-# Fetchx desktop update service
+# Fetchx desktop update service (Legacy / Deprecated)
 
-This Worker serves Tauri 2 update metadata while release artifacts remain in
-the `fetchx-desktop-releases` R2 bucket.
+> [!NOTE]
+> **Superseded**: Tauri 2 updater and web download lookups now directly consume
+> `https://downloads.fetchx.dev/channels/stable.json` served by R2. This Worker
+> is no longer needed in the release and update pipeline.
 
-## Cloudflare resources
+This Worker previously served dynamic Tauri 2 update metadata from
+`channels/stable.json` stored in the `fetchx-desktop-releases` R2 bucket.
+
+## Cloudflare resources (Historical)
 
 1. Create the `fetchx-desktop-releases` R2 bucket.
 2. Connect `downloads.fetchx.dev` as its public custom domain.
-3. Deploy this Worker with `bun run desktop:updates:deploy`.
-4. Confirm `https://updates.fetchx.dev/health` returns `{ "status": "ok" }`.
-
-The bucket stores immutable artifacts under `desktop/stable/<version>/` and
-the active release manifest at `channels/stable.json`. Publish the manifest
-only after every artifact has uploaded successfully.
+3. The bucket stores immutable artifacts under `desktop/stable/<version>/` and
+   the active release manifest at `channels/stable.json`. Publish the manifest
+   only after every artifact has uploaded successfully.
 
 ## Update trust model
 

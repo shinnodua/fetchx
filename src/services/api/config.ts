@@ -4,7 +4,6 @@ export const API_BASE_URLS = {
     import.meta.env.VITE_API_URL_CALL3,
   ),
   desktopDownloads: 'https://downloads.fetchx.dev',
-  desktopUpdates: 'https://updates.fetchx.dev',
 } as const;
 
 export function buildApiUrl(baseUrl: string, path = '') {
@@ -23,10 +22,6 @@ export function buildFetchxApiUrl(path = '') {
 
 export function buildDesktopDownloadsApiUrl(path = '') {
   return buildApiUrl(API_BASE_URLS.desktopDownloads, path);
-}
-
-export function buildDesktopUpdatesApiUrl(path = '') {
-  return buildApiUrl(API_BASE_URLS.desktopUpdates, path);
 }
 
 export function isFetchxApiConfigured() {

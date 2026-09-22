@@ -87,4 +87,3 @@ described in [DESKTOP_RELEASE.md](./DESKTOP_RELEASE.md).
 - `bun run desktop:build`: Build local native installers.
 - `bun run desktop:release`: Validate signing configuration and build a signed release.
 - `bun run desktop:version <patch|minor|major|x.y.z>`: Align the desktop release version across its release files.
-- `bun run desktop:updates:deploy`: Deploy the Cloudflare update Worker.

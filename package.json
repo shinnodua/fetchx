@@ -21,9 +21,7 @@
     "desktop:local:build": "bun run scripts/desktop-local-release.ts build",
     "desktop:local:build:macos": "bun run scripts/desktop-local-release.ts build-macos",
     "desktop:local:build:windows": "bun run scripts/desktop-local-release.ts build-windows",
-    "desktop:local:publish": "bun run scripts/desktop-local-release.ts publish",
-    "desktop:updates:dev": "wrangler dev --config infrastructure/desktop-updates/wrangler.jsonc",
-    "desktop:updates:deploy": "wrangler deploy --config infrastructure/desktop-updates/wrangler.jsonc"
+    "desktop:local:publish": "bun run scripts/desktop-local-release.ts publish"
   },
   "dependencies": {
     "@heroui/react": "3.1.0",
