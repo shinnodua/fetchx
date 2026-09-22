@@ -8,6 +8,7 @@ import {
 } from '../../../services/platform';
 import { useWorkspaceStore } from '../../../store';
 import { getWorkspaceHasUnsavedChanges } from '../../workspace/utils/requestDirty';
+import { formatUpdateDescription } from '../utils/updateDate';
 
 type UpdateStatus = 'idle' | 'checking' | 'available' | 'downloading';
 
@@ -99,9 +100,7 @@ export function DesktopUpdateManager() {
         isOpen={dialogOpen}
         onClose={() => status !== 'downloading' && setDialogOpen(false)}
         title={update ? `Fetchx ${update.version} is available` : 'App update'}
-        description={
-          update?.publishedAt ? `Published ${update.publishedAt}` : undefined
-        }
+        description={formatUpdateDescription(update?.publishedAt)}
         hideCloseButton={status === 'downloading'}
       >
         <div className="space-y-5">
