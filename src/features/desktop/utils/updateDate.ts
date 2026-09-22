@@ -2,7 +2,7 @@ export function formatPublishedDate(
   publishedAt?: string,
   locale?: string,
 ): string | undefined {
-  if (!publishedAt || !publishedAt.trim()) return undefined;
+  if (!publishedAt?.trim()) return undefined;
 
   const date = new Date(publishedAt);
   if (Number.isNaN(date.getTime())) {

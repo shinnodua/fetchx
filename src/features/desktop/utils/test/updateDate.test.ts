@@ -1,8 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import {
-  formatPublishedDate,
-  formatUpdateDescription,
-} from '../updateDate';
+import { formatPublishedDate, formatUpdateDescription } from '../updateDate';
 
 describe('updateDate utils', () => {
   test('formats valid ISO date string to user-readable local date and time', () => {
