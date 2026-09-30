@@ -76,4 +76,15 @@ describe('platform utilities', () => {
       discoverModels: 'discover_ai_agent_models',
     });
   });
+
+  test('rejects executeNativeHttpRequest when running in web app shell', async () => {
+    const { executeNativeHttpRequest } = await import('../platform');
+    expect(
+      executeNativeHttpRequest({
+        url: 'https://api.pilauncher.org/v1/public/servers/community',
+      }),
+    ).rejects.toThrow(
+      'Native HTTP requests are only available in the desktop app.',
+    );
+  });
 });

@@ -1,5 +1,7 @@
 import { useCorsStore } from '../../store';
+import { isDesktopApp } from '../platform';
 import { API_BASE_URLS, isFetchxApiConfigured } from './config';
+import { executeNativeRequest } from './nativeClient';
 import { callCorsProxy } from './proxyClient';
 import type { ApiRequest, ApiResponse } from './types';
 
@@ -9,9 +11,12 @@ export interface ApiClientOptions {
   confirmProxyForSensitiveRequest?: (
     risk: SensitiveProxyRisk,
   ) => boolean | Promise<boolean>;
+  executeDirectRequest?: (
+    request: NormalizedApiRequest,
+  ) => Promise<ApiResponse>;
 }
 
-interface NormalizedApiRequest extends ApiRequest {
+export interface NormalizedApiRequest extends ApiRequest {
   method: string;
   headers: Record<string, string>;
 }
@@ -188,6 +193,7 @@ export async function apiRequest(
 
   // Check if we should bypass direct request because origin is known to be blocked by CORS
   if (
+    !isDesktopApp() &&
     options.proxyOnBrowserBlock &&
     isFetchxApiConfigured() &&
     origin &&
@@ -199,7 +205,9 @@ export async function apiRequest(
   }
 
   try {
-    const directResponse = await directApiRequest(normalizedRequest);
+    const directRequestExecutor =
+      options.executeDirectRequest ?? directApiRequest;
+    const directResponse = await directRequestExecutor(normalizedRequest);
     if (
       !options.proxyOnForbiddenResponse ||
       isFetchxOrigin ||
@@ -250,6 +258,10 @@ export function buildUrlWithQueryParams(
 }
 
 async function directApiRequest(request: NormalizedApiRequest) {
+  if (isDesktopApp()) {
+    return await executeNativeRequest(request);
+  }
+
   const fetchOptions: RequestInit = {
     method: request.method,
     headers: request.headers,

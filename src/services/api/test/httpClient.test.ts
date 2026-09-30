@@ -30,4 +30,24 @@ describe('HTTP client utilities', () => {
       'The Fetchx CORS proxy is not configured. Set VITE_API_URL_FETCHX to the API origin that serves /proxy.',
     );
   });
+
+  test('delegates direct execution through custom direct request executor', async () => {
+    const { apiRequest } = await import('../httpClient');
+    const mockExecutor = async () => ({
+      status: 200,
+      statusText: 'OK',
+      headers: { 'content-type': 'application/json' },
+      data: { result: 'native-success' },
+      proxied: false,
+    });
+
+    const response = await apiRequest(
+      { url: 'https://api.pilauncher.org/v1/public/servers/community' },
+      { executeDirectRequest: mockExecutor },
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.proxied).toBe(false);
+    expect(response.data).toEqual({ result: 'native-success' });
+  });
 });

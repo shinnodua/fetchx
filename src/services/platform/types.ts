@@ -42,3 +42,17 @@ export interface GitHubAuthToken {
   tokenType?: string;
   scope?: string;
 }
+
+export interface NativeHttpRequestPayload {
+  url: string;
+  method?: string;
+  headers?: Record<string, string>;
+  body?: string;
+}
+
+export interface NativeHttpResponsePayload {
+  status: number;
+  statusText: string;
+  headers: Record<string, string>;
+  body: string;
+}

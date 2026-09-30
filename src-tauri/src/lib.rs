@@ -1,5 +1,6 @@
 mod ai_agents;
 mod github;
+mod http;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -32,7 +33,8 @@ pub fn run() {
             github::device_auth::refresh_github_token,
             github::repositories::list_github_repositories,
             github::repositories::get_github_account,
-            github::repositories::has_github_app_installation
+            github::repositories::has_github_app_installation,
+            http::execute_native_http_request
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

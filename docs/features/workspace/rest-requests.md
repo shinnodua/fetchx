@@ -62,9 +62,10 @@ useRequestRunner.handleRunRequest
 
 ## Direct-first transport
 
-REST requests are direct-first. The browser attempts to call the target URL directly before any proxy is used.
+REST requests are direct-first:
 
-The Fetchx proxy fallback is only enabled with `proxyOnBrowserBlock: true`, and only when the caught browser error is explicitly classified as CORS/access-control related by `isBrowserFetchBlocked`.
+- **Desktop app**: When running inside the desktop shell (`isDesktopApp()`), requests execute natively through the Tauri Rust backend via `reqwest` (`execute_native_http_request`). Native execution does not send webview browser origin headers, eliminates browser CORS restrictions entirely, and connects directly to endpoints without needing proxy fallbacks.
+- **Web app**: When running in the browser, direct `window.fetch()` is attempted first. The Fetchx proxy fallback is only enabled with `proxyOnBrowserBlock: true`, and only when the caught browser error is explicitly classified as CORS/access-control related by `isBrowserFetchBlocked`.
 
 Do not route all REST traffic through the proxy by default.
 

@@ -3,5 +3,6 @@ export * from './config';
 export * from './contractExplorerApi';
 export * from './desktopReleaseApi';
 export * from './httpClient';
+export * from './nativeClient';
 export * from './restApi';
 export * from './types';

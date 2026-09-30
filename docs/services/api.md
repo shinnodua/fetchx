@@ -6,6 +6,7 @@ API services live under `src/services/api/` and own fetch-based side effects.
 
 - `config.ts`: API base URLs, Fetchx API configuration checks, URL builders.
 - `httpClient.ts`: normalized fetch client, response parsing, CORS proxy fallback, sensitive proxy confirmation.
+- `nativeClient.ts`: native desktop HTTP execution bridge, request body serialization, and response parsing.
 - `proxyClient.ts`: Fetchx proxy API request.
 - `rpcTransport.ts`: CORS-aware fetch adapter for Viem JSON-RPC transports.
 - `restApi.ts`: workspace REST request execution.
@@ -34,6 +35,10 @@ API services live under `src/services/api/` and own fetch-based side effects.
 - `proxied` response metadata.
 
 Direct responses are parsed as JSON when content type includes `application/json`; otherwise they are parsed as text.
+
+## Native desktop execution
+
+In desktop environments (`isDesktopApp()`), `directApiRequest` routes through `executeNativeRequest` in `nativeClient.ts`, which invokes the Tauri backend command `execute_native_http_request` using Rust's `reqwest` client. This bypasses webview origin restrictions, eliminates CORS issues on desktop, and communicates directly with target servers without routing through web CORS proxies.
 
 ## Proxy fallback
 

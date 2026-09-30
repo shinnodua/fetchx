@@ -4,6 +4,8 @@ import type {
   GitHubAuthToken,
   LocalAiAgent,
   LocalAiAgentModel,
+  NativeHttpRequestPayload,
+  NativeHttpResponsePayload,
   OpenTextFileOptions,
   SaveTextFileOptions,
 } from './types';
@@ -234,5 +236,20 @@ export async function discoverLocalAiAgentModels(
   const { invoke } = await import('@tauri-apps/api/core');
   return invoke<LocalAiAgentModel[]>(localAiAgentCommandNames.discoverModels, {
     agentId,
+  });
+}
+
+export async function executeNativeHttpRequest(
+  request: NativeHttpRequestPayload,
+): Promise<NativeHttpResponsePayload> {
+  if (!isDesktopApp()) {
+    throw new Error(
+      'Native HTTP requests are only available in the desktop app.',
+    );
+  }
+
+  const { invoke } = await import('@tauri-apps/api/core');
+  return invoke<NativeHttpResponsePayload>('execute_native_http_request', {
+    request,
   });
 }
