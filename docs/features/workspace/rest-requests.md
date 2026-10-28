@@ -56,9 +56,11 @@ useRequestRunner.handleRunRequest
 
 `executeRestApiCall` builds the final URL with query parameters and prepares request body/header state:
 
-- raw mode sends `body` as-is;
-- `x-www-form-urlencoded` builds a `URLSearchParams` body and sets `content-type`;
-- `form-data` builds a `FormData` body and leaves content type to the browser.
+- raw mode sends `body` as-is. POST, PUT, and PATCH requests automatically use `Content-Type: application/json` for valid JSON, or `text/plain;charset=UTF-8` for other raw text (including empty strings). This also applies when `bodyType` is omitted. An absent raw body receives no default content type;
+- `x-www-form-urlencoded` builds a `URLSearchParams` body and defaults to `application/x-www-form-urlencoded`;
+- `form-data` builds a `FormData` body and leaves the multipart content type and boundary to the transport (browser or native serializer);
+- form modes produce an empty form when no rows exist, rather than sending stale raw body text;
+- explicit Content-Type headers are checked case-insensitively and preserved during REST preparation. For raw XML or other custom media types, supply the desired header explicitly. Native multipart serialization supplies its generated boundary in the outgoing content type.
 
 ## Direct-first transport
 
