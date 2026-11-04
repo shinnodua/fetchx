@@ -143,6 +143,39 @@ export const createRequestActions = (
       };
     }),
 
+  moveRequest: (reqId: string, targetCollectionId: string) =>
+    set((state) => {
+      const source = state.collections.find((collection) =>
+        collection.requests.some((request) => request.id === reqId),
+      );
+      const target = state.collections.find(
+        (collection) => collection.id === targetCollectionId,
+      );
+      const request = source?.requests.find((item) => item.id === reqId);
+      if (!source || !target || !request || source.id === target.id) return {};
+
+      return {
+        collections: state.collections.map((collection) => {
+          if (collection.id === source.id) {
+            return {
+              ...collection,
+              requests: collection.requests.filter((item) => item.id !== reqId),
+            };
+          }
+          if (collection.id === target.id) {
+            return {
+              ...collection,
+              requests: [...collection.requests, request],
+            };
+          }
+          return collection;
+        }),
+        collapsedCollectionIds: state.collapsedCollectionIds.filter(
+          (id) => id !== target.id,
+        ),
+      };
+    }),
+
   deleteRequest: (reqId: string) =>
     set((state) => {
       const updatedCollections = state.collections.map((collection) => ({

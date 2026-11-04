@@ -90,6 +90,7 @@ export interface WorkspaceState {
   addCustomRequest: (request: Partial<RequestItem>) => void;
   renameRequest: (reqId: string, name: string) => void;
   duplicateRequest: (reqId: string) => void;
+  moveRequest: (reqId: string, targetCollectionId: string) => void;
   deleteRequest: (reqId: string) => void;
 
   openTab: (reqId: string) => void;
