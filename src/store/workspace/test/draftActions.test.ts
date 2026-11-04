@@ -54,6 +54,7 @@ const createTestWorkspaceState = (): WorkspaceState => ({
   addCustomRequest: () => {},
   renameRequest: () => {},
   duplicateRequest: () => {},
+  moveRequest: () => {},
   deleteRequest: () => {},
   openTab: () => {},
   closeTab: () => {},

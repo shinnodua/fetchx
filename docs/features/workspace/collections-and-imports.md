@@ -39,8 +39,13 @@ collection. As a row is dragged, an insertion line shows whether it will land
 before or after the hovered row and the list immediately previews that new
 position. Drag collection rows to reorder collections, or drag a request within
 the same collection to reorder that collection's requests.
-Collection request lists start collapsed in the dialog and can be expanded with
-their chevron control.
+Collection request lists start collapsed in the dialog. Click anywhere on a
+collection row (including its chevron) to expand or collapse its requests.
+Focused rows also toggle with Enter or Space. Dragging a row changes its order
+without toggling its request list. Collection rows have no hover/press scaling or
+focus ring. Request lists animate open and closed, and disable that animation
+when reduced motion is preferred. Collapsed lists cannot receive focus or pointer
+input. Drag feedback begins after the pointer moves beyond the click threshold.
 The dialog only saves the staged order after **Save order** is selected; the
 persisted workspace state restores that order after restart.
 
@@ -146,3 +151,17 @@ GET api.example.com/users
 ```
 
 If the generated name is too long, it falls back to method plus hostname. If URL parsing fails, it uses `Imported Request`.
+
+## Moving requests between collections
+
+Open a saved request's three-dot menu (or right-click the request), choose
+**Move to collection**, then select a destination in the current workspace.
+The current collection is excluded. If there is no other collection, the menu
+prompts the user to create one. Use **Back** to leave without moving.
+
+The request is appended to the destination, which expands automatically. Its ID,
+name, saved responses, open tab, and unsaved draft edits are preserved. Moving
+changes only collection membership; unsaved edits still require **Save**.
+Requests with matching names keep their names and remain distinct by ID.
+The move is persisted through the workspace store and participates in GitHub
+workspace change tracking. Reorder continues to operate within a collection.

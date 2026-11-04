@@ -9,8 +9,10 @@ import {
   reorderCollections,
   reorderRequests,
 } from '../../utils/collectionOrder';
+import { createPointerClickGuard } from '../../utils/pointerClickGuard';
 import { ManagementDialog } from '../shared/ManagementDialog';
 import { CollectionDragOverlay } from './CollectionDragOverlay';
+import { CollectionExpansion } from './CollectionExpansion';
 
 export type DragTarget =
   | { type: 'collection'; collectionId: string }
@@ -77,6 +79,7 @@ export const CollectionReorderDialog = ({
   onSave,
 }: CollectionReorderDialogProps) => {
   const [orderedCollections, setOrderedCollections] = useState(collections);
+  const [isPointerDragging, setIsPointerDragging] = useState(false);
   const [draggedTarget, setDraggedTarget] = useState<DragTarget | null>(null);
   const [dragInsertion, setDragInsertion] = useState<DragInsertion | null>(
     null,
@@ -88,12 +91,14 @@ export const CollectionReorderDialog = ({
   const [expandedCollectionIds, setExpandedCollectionIds] = useState<string[]>(
     [],
   );
+  const clickGuardRef = useRef(createPointerClickGuard());
   const pointerIdRef = useRef<number | null>(null);
   const lastPreviewKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
     setOrderedCollections(collections);
+    setIsPointerDragging(false);
     setDraggedTarget(null);
     setDragInsertion(null);
     setPointerPosition(null);
@@ -104,6 +109,7 @@ export const CollectionReorderDialog = ({
 
   const resetPointerDrag = useCallback(() => {
     pointerIdRef.current = null;
+    setIsPointerDragging(false);
     setDraggedTarget(null);
     setDragInsertion(null);
     setPointerPosition(null);
@@ -148,9 +154,10 @@ export const CollectionReorderDialog = ({
 
   const startPointerDrag = (
     target: DragTarget,
-    event: React.PointerEvent<HTMLDivElement>,
+    event: React.PointerEvent<HTMLElement>,
   ) => {
-    if ((event.target as HTMLElement).closest('button')) return;
+    if (event.button !== 0) return;
+    clickGuardRef.current.start(event.clientX, event.clientY);
     event.preventDefault();
     pointerIdRef.current = event.pointerId;
     lastPreviewKeyRef.current = null;
@@ -164,6 +171,8 @@ export const CollectionReorderDialog = ({
 
     const handlePointerMove = (event: PointerEvent) => {
       if (event.pointerId !== pointerIdRef.current) return;
+      if (!clickGuardRef.current.move(event.clientX, event.clientY)) return;
+      setIsPointerDragging(true);
       const insertion = getPointerDropInsertion(event.clientX, event.clientY);
       setPointerPosition({ x: event.clientX, y: event.clientY });
       if (!insertion || !canDrop(draggedTarget, insertion.target)) {
@@ -183,14 +192,21 @@ export const CollectionReorderDialog = ({
 
     const handlePointerUp = (event: PointerEvent) => {
       if (event.pointerId !== pointerIdRef.current) return;
+      clickGuardRef.current.move(event.clientX, event.clientY);
+      resetPointerDrag();
+    };
+    const handlePointerCancel = () => {
+      clickGuardRef.current.cancel();
       resetPointerDrag();
     };
 
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerCancel);
     return () => {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerCancel);
     };
   }, [applyDrop, draggedTarget, resetPointerDrag]);
 
@@ -218,7 +234,7 @@ export const CollectionReorderDialog = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Manage Collections"
-      description="Drag collections or a request within its collection. The list previews its new position as you move."
+      description="Click a collection to expand or collapse it. Drag collections or a request within its collection. The list previews its new position as you move."
     >
       <div className="flex-1 space-y-2 overflow-y-auto pr-1">
         {orderedCollections.map((collection) => {
@@ -228,7 +244,18 @@ export const CollectionReorderDialog = ({
               key={collection.id}
               className="rounded-xl border border-foreground/10 bg-foreground/[0.02] p-2 transition-all duration-200 ease-out"
             >
-              <div
+              <Button
+                type="button"
+                variant="ghost"
+                aria-expanded={isExpanded}
+                whileHover={{}}
+                whileTap={{}}
+                whileFocus={{}}
+                onClick={() => {
+                  if (!clickGuardRef.current.consumeClick()) {
+                    toggleCollectionExpanded(collection.id);
+                  }
+                }}
                 data-reorder-target
                 data-reorder-type="collection"
                 data-collection-id={collection.id}
@@ -238,10 +265,11 @@ export const CollectionReorderDialog = ({
                     event,
                   )
                 }
-                className={`relative flex cursor-grab select-none items-center gap-2 rounded-lg border px-2.5 py-2 text-sm font-semibold transition-[transform,opacity,background-color,border-color] duration-200 ease-out active:cursor-grabbing ${
+                className={`focus:ring-0! focus:ring-offset-0! relative h-auto w-full justify-start cursor-grab select-none items-center gap-2 rounded-lg border px-2.5 py-2 text-sm font-semibold transition-[transform,opacity,background-color,border-color] duration-200 ease-out active:cursor-grabbing ${
+                  isPointerDragging &&
                   draggedTarget?.type === 'collection' &&
                   draggedTarget.collectionId === collection.id
-                    ? 'scale-[0.99] opacity-40'
+                    ? 'opacity-40'
                     : ''
                 } ${
                   isInsertionTarget(
@@ -274,28 +302,16 @@ export const CollectionReorderDialog = ({
                   {collection.requests.length}{' '}
                   {collection.requests.length === 1 ? 'request' : 'requests'}
                 </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    toggleCollectionExpanded(collection.id);
-                  }}
-                  className="h-6 w-6 shrink-0 rounded-md p-0 text-foreground/55 hover:text-foreground"
+                <ChevronDownIcon
                   title={isExpanded ? 'Collapse requests' : 'Expand requests'}
-                >
-                  <ChevronDownIcon
-                    title={isExpanded ? 'Collapse requests' : 'Expand requests'}
-                    className={`h-3.5 w-3.5 shrink-0 transition-transform ${
-                      isExpanded ? '' : '-rotate-90'
-                    }`}
-                    strokeWidth={2.5}
-                  />
-                </Button>
-              </div>
+                  className={`h-3.5 w-3.5 shrink-0 transition-transform ${
+                    isExpanded ? '' : '-rotate-90'
+                  }`}
+                  strokeWidth={2.5}
+                />
+              </Button>
 
-              {isExpanded && (
+              <CollectionExpansion expanded={isExpanded}>
                 <div className="mt-1.5 space-y-1 border-l border-foreground/10 pl-3">
                   {collection.requests.length === 0 ? (
                     <p className="py-1 text-xs text-foreground/40">
@@ -352,7 +368,7 @@ export const CollectionReorderDialog = ({
                     })
                   )}
                 </div>
-              )}
+              </CollectionExpansion>
             </div>
           );
         })}
@@ -376,7 +392,7 @@ export const CollectionReorderDialog = ({
       <CollectionDragOverlay
         collections={orderedCollections}
         pointerPosition={pointerPosition}
-        target={draggedTarget}
+        target={isPointerDragging ? draggedTarget : null}
       />
     </ManagementDialog>
   );

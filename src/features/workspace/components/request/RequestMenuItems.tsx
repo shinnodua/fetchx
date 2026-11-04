@@ -18,6 +18,7 @@ import {
   copyResponse,
 } from '../../utils/requestExport';
 import type { RenameTarget } from '../collection/collectionPanelTypes';
+import { RequestMoveMenuItems } from './RequestMoveMenuItems';
 
 interface RequestMenuItemsProps {
   req: { id: string; name: string };
@@ -36,6 +37,7 @@ export const RequestMenuItems: React.FC<RequestMenuItemsProps> = ({
   openRenameDialog,
   handleDeleteRequest,
 }) => {
+  const [showMoveOptions, setShowMoveOptions] = useState(false);
   const [showCopyOptions, setShowCopyOptions] = useState(false);
   const { collections, drafts, duplicateRequest } = useWorkspaceStore();
   const { toast } = useToast();
@@ -113,6 +115,16 @@ export const RequestMenuItems: React.FC<RequestMenuItemsProps> = ({
     onClose();
   };
 
+  if (showMoveOptions) {
+    return (
+      <RequestMoveMenuItems
+        requestId={req.id}
+        onBack={() => setShowMoveOptions(false)}
+        onClose={onClose}
+      />
+    );
+  }
+
   if (showCopyOptions) {
     return (
       <>
@@ -189,6 +201,19 @@ export const RequestMenuItems: React.FC<RequestMenuItemsProps> = ({
         }}
       >
         Duplicate
+      </DropdownMenuItem>
+      <DropdownMenuItem
+        onClick={(event) => {
+          event.stopPropagation();
+          setShowMoveOptions(true);
+        }}
+        className="flex items-center justify-between"
+      >
+        <span>Move to collection</span>
+        <ChevronRightIcon
+          title="Move submenu"
+          className="h-3.5 w-3.5 shrink-0 text-foreground/45"
+        />
       </DropdownMenuItem>
       <DropdownMenuItem
         onClick={(event) => {
