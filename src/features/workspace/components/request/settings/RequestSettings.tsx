@@ -32,7 +32,7 @@ export const RequestSettings: React.FC<RequestSettingsProps> = ({
   const isRestRequest = isRestMethod(activeRequest.type);
 
   return (
-    <div className="w-full lg:w-1/2 flex-1 flex flex-col min-h-0 overflow-hidden border border-foreground/10 rounded-2xl bg-white/5 dark:bg-black/5">
+    <div className="w-full min-w-0 flex-1 flex flex-col min-h-0 overflow-hidden border border-foreground/10 rounded-2xl bg-white/5 dark:bg-black/5">
       {isRestRequest ? (
         <RestRequestSettings activeRequest={activeRequest} />
       ) : (

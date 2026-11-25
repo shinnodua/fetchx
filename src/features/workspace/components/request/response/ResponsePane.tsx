@@ -98,13 +98,13 @@ export const ResponsePane: React.FC = () => {
   };
 
   return (
-    <div className="w-full lg:w-1/2 flex-1 flex flex-col min-h-0 overflow-hidden border border-foreground/10 rounded-2xl bg-white/5 dark:bg-black/5">
-      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-foreground/10 bg-background/80 px-3 py-1 backdrop-blur">
+    <div className="w-full min-w-0 flex-1 flex flex-col min-h-0 overflow-hidden border border-foreground/10 rounded-2xl bg-white/5 dark:bg-black/5">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-foreground/10 bg-background/80 px-3 py-1 backdrop-blur">
         <h3 className="text-sm font-semibold text-foreground/50 uppercase tracking-wider">
           Response & Logs
         </h3>
         {activeRequest.response && (
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
             <Badge
               variant={
                 activeRequest.response.status === 'Success' ||
