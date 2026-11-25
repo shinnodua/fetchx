@@ -55,3 +55,7 @@ Workspace requests should store references such as selected network, custom RPC 
 ## CORS store
 
 The CORS store remembers origins that have already produced an explicit browser CORS/access-control block. The HTTP client can then skip repeating a known blocked direct request and go straight to the proxy path, while still applying sensitive proxy confirmation.
+
+## Request panel layout
+
+The isolated useRequestPanelLayoutStore remembers one personal request/response ratio using the exception-safe requestPanelPreferences adapter. The localStorage key is fetchx-request-panel-ratio. It is independent of request dirty state, exports and GitHub synchronization. Only completed user adjustments persist; constraints and live drag previews do not. Storage failures retain in-memory state. See [resizable panels](../features/workspace/resizable-panels.md).

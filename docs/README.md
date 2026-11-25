@@ -4,6 +4,8 @@ This folder documents the product features and the shared implementation boundar
 
 ## Feature docs
 
+- [Resizable panels](./features/workspace/resizable-panels.md): drag or use the keyboard to adjust Request settings and Response & Logs, with a shared local preference.
+
 - [Workspace](./features/workspace/README.md): request builder, collections, environments, ABI loading, request execution, saved responses, imports, and persistence.
 - [GitHub workspaces](./features/workspace/github-workspaces.md): versioned repository storage for collection files.
 - [GitHub workspaces](./features/workspace/github-workspaces.md): versioned repository storage for collection files.

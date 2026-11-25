@@ -11,6 +11,7 @@ import {
 import type { CollectionItem, RequestItem } from '../../types';
 import { getSelectedRpcId } from '../../utils/rpcOptions';
 import { EnvironmentAwareInput } from '../environment/EnvironmentAwareField';
+import { RequestResponseSplit } from './RequestResponseSplit';
 import { ResponsePane } from './response/ResponsePane';
 import { RequestSettings } from './settings/RequestSettings';
 import { RpcSelectField } from './settings/RpcSelectField';
@@ -182,13 +183,15 @@ export const ActiveRequestWorkspace: React.FC<ActiveRequestWorkspaceProps> = ({
         )}
       </div>
 
-      <div className="flex min-h-0 flex-grow flex-col gap-4 lg:flex-row">
-        <RequestSettings
-          onSimulateRequest={onSimulateRequest}
-          isLoading={isLoading}
-        />
-        <ResponsePane />
-      </div>
+      <RequestResponseSplit
+        request={
+          <RequestSettings
+            onSimulateRequest={onSimulateRequest}
+            isLoading={isLoading}
+          />
+        }
+        response={<ResponsePane />}
+      />
     </div>
   );
 };
