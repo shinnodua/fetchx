@@ -57,7 +57,7 @@ jobs:
         run: |
           MATRIX_JSON="[]"
           if [ "$build_mac" = true ]; then
-            MATRIX_JSON=$(echo "$MATRIX_JSON" | jq -c '. + [{"runner":"macos-14","target":"aarch64-apple-darwin","platform":"darwin-aarch64","bundles":"app,dmg"}]')
+            MATRIX_JSON=$(echo "$MATRIX_JSON" | jq -c '. + [{"runner":"macos-15","target":"aarch64-apple-darwin","platform":"darwin-aarch64","bundles":"app,dmg"}]')
           fi
           if [ "$build_win" = true ]; then
             MATRIX_JSON=$(echo "$MATRIX_JSON" | jq -c '. + [{"runner":"windows-latest","target":"x86_64-pc-windows-msvc","platform":"windows-x86_64","bundles":"nsis"}]')
